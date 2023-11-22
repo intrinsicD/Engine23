@@ -1,0 +1,146 @@
+//
+// Created by alex on 22.11.23.
+//
+
+#ifndef ENGINE23_COMPONENTS_H
+#define ENGINE23_COMPONENTS_H
+
+#include <vector>
+#include <memory>
+#include <queue>
+#include <unordered_map>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
+#include <string>
+#include "entt/fwd.hpp"
+
+namespace Bcg {
+    struct Command;
+    struct CommandBuffer : public std::vector<std::shared_ptr<Command>> {
+        using std::vector<std::shared_ptr<Command>>::vector;
+    };
+
+    struct CommandBufferCurrent : public CommandBuffer {
+        using CommandBuffer::CommandBuffer;
+    };
+
+    struct CommandBufferNext : public CommandBuffer {
+        using CommandBuffer::CommandBuffer;
+    };
+
+    struct CommandBufferSuccessCounter {
+        size_t total_success_count = 0;
+        size_t total_num_commands = 0;
+    };
+
+    struct Time {
+        struct Unit{
+            using nano = std::nano;
+            using micro = std::micro;
+            using milli = std::milli;
+            using seconds = std::ratio<1>;
+            using minutes = std::ratio<60>;
+            using hours = std::ratio<3600>;
+        };
+
+        struct Point{
+            static Point Now(){
+                return {std::chrono::high_resolution_clock::now()};
+            }
+
+            template<typename Duration = Unit::milli>
+            double duration(const Point &other) const {
+                return std::chrono::duration<double, Duration>(value - other.value).count();
+            }
+
+            template<typename Duration = Unit::milli>
+            std::string unit_string() const {
+                return DurationTypeToString<Duration>::value();
+            }
+
+            std::chrono::time_point<std::chrono::high_resolution_clock> value;
+        private:
+            template<typename T>
+            struct DurationTypeToString;
+
+            template<>
+            struct DurationTypeToString<Unit::nano> {
+                static std::string value() { return " ns"; }
+            };
+
+            template<>
+            struct DurationTypeToString<Unit::micro> {
+                static std::string value() { return " µs"; }
+            };
+
+            template<>
+            struct DurationTypeToString<Unit::milli> {
+                static std::string value() { return " ms"; }
+            };
+
+            template<>
+            struct DurationTypeToString<Unit::seconds> {
+                static std::string value() { return "  s"; }
+            };
+
+            template<>
+            struct DurationTypeToString<Unit::minutes> {
+                static std::string value() { return "min"; }
+            };
+
+            template<>
+            struct DurationTypeToString<Unit::hours> {
+                static std::string value() { return "  h"; }
+            };
+        };
+
+        Point engine_constructed;
+        Point engine_started;
+
+        struct Mainloop {
+            Point started;
+            double avg = 0;
+            double current = 0;
+            size_t counter = 0;
+            int fps = 0;
+            int avg_fps = 0;
+        } mainloop;
+    };
+
+    struct WorkerPool {
+        std::vector<std::thread> workers;
+        std::queue<std::shared_ptr<Command>> tasks;
+
+        std::mutex queueMutex;
+        std::condition_variable condition;
+        bool stop = true;
+    };
+
+    class Entity {
+    public:
+        Entity(entt::registry *registry, entt::entity id) : registry(registry), id(id) {}
+
+        virtual ~Entity() = default;
+
+        entt::registry *registry;
+        entt::entity id;
+    };
+
+    struct Window {
+        Window(int width, int height, std::string title) : width(width), height(height), title(std::move(title)) {}
+
+        int width;
+        int height;
+
+        std::string title;
+    };
+
+    template<typename Key, typename Value>
+    struct Cache : public std::unordered_map<Key, Value> {
+        using std::unordered_map<Key, Value>::unordered_map;
+    };
+}
+
+#endif //ENGINE23_COMPONENTS_H
