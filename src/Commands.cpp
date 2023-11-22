@@ -84,7 +84,7 @@ namespace Bcg {
     }
 
     int UpdateStateCommand::execute() {
-        auto &state = get_state();
+        auto &state = Engine::State();
         auto view = state.view<System *>();
         size_t count = 0;
         for (auto id: view) {

@@ -16,22 +16,25 @@ namespace Bcg {
 
         virtual void run();
 
-        static Engine *get_instance();
+        //Main way to have access to the engine
+        static Engine *Instance();
+
+        //Main way to have access to the engines state
+        static auto &State() {
+            return Engine::Instance()->state;
+        }
+
+        //Main way to have access to the engines state context
+        static auto &Context() {
+            return State().ctx();
+        }
 
         entt::registry state;
         entt::dispatcher dispatcher;
         bool is_running = false;
     };
 
-    //Main way to have access to the engines state
-    static auto &get_state() {
-        return Engine::get_instance()->state;
-    }
 
-    //Main way to have access to the engines state context
-    static auto &get_state_ctx() {
-        return get_state().ctx();
-    }
 }
 
 

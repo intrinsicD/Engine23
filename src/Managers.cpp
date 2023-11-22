@@ -57,7 +57,7 @@ namespace Bcg {
     }
 
     void CommandBufferManager::enable_counter() {
-        counter = get_state().try_get<CommandBufferSuccessCounter>(id);
+        counter = Engine::State().try_get<CommandBufferSuccessCounter>(id);
     }
 
     void CommandBufferManager::disable_counter() {
@@ -232,12 +232,12 @@ namespace Bcg {
 
     void WindowManager::create_window(int width, int height, std::string title) {
         if (!window) {
-            window = &get_state().emplace<Window>(id, width, height, std::move(title));
+            window = &Engine::State().emplace<Window>(id, width, height, std::move(title));
         }
     }
 
     void WindowManager::destroy_window() {
-        get_state().remove<Window>(id);
+        Engine::State().remove<Window>(id);
         window = nullptr;
     }
 

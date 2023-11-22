@@ -3,19 +3,18 @@
 //
 
 #include "Factories.h"
-#include "Components.h"
 
 namespace Bcg {
 
     //------------------------------------------------------------------------------------------------------------------
 
     CommandBufferManager *ManagerFactory::create_or_get_command_buffer_manager() {
-        auto *manager = get_state_ctx().find<CommandBufferManager>();
+        auto *manager = Engine::Context().find<CommandBufferManager>();
         if (!manager) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
             CommandBufferManager command_buffer_manager;
-            auto &state = get_state();
+            auto &state = Engine::State();
             command_buffer_manager.id = state.create();
             command_buffer_manager.current_buffer = &state.emplace<CommandBufferCurrent>(
                     command_buffer_manager.id);
@@ -31,7 +30,7 @@ namespace Bcg {
             command_buffer_manager.sptr_cleanup = std::make_shared<CleanupCommand>(cleanup);
             command_buffer_manager.counter = &state.emplace<CommandBufferSuccessCounter>(
                     command_buffer_manager.id);
-            return &get_state_ctx().emplace<CommandBufferManager>(command_buffer_manager);
+            return &Engine::Context().emplace<CommandBufferManager>(command_buffer_manager);
         } else {
             return manager;
         }
@@ -40,12 +39,12 @@ namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
 
     TimeManager *ManagerFactory::create_or_get_time_manager() {
-        auto *manager = get_state_ctx().find<TimeManager>();
+        auto *manager = Engine::Context().find<TimeManager>();
         if (!manager) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
             TimeManager time_manager;
-            auto &state = get_state();
+            auto &state = Engine::State();
             time_manager.id = state.create();
             time_manager.time = &state.emplace<Time>(time_manager.id);
             time_manager.time->engine_started = Time::Point::Now();
@@ -56,12 +55,12 @@ namespace Bcg {
     }
 
     WorkerPoolManager *ManagerFactory::create_or_get_worker_pool_manager() {
-        auto *manager = get_state_ctx().find<WorkerPoolManager>();
+        auto *manager = Engine::Context().find<WorkerPoolManager>();
         if (!manager) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
             WorkerPoolManager worker_pool_manager;
-            auto &state = get_state();
+            auto &state = Engine::State();
             worker_pool_manager.id = state.create();
             worker_pool_manager.worker_pool = &state.emplace<WorkerPool>(worker_pool_manager.id);
             return &state.ctx().emplace<WorkerPoolManager>(worker_pool_manager);
@@ -74,12 +73,12 @@ namespace Bcg {
     }
 
     WindowManager *ManagerFactory::create_or_get_window_manager() {
-        auto *manager = get_state_ctx().find<WindowManager>();
+        auto *manager = Engine::Context().find<WindowManager>();
         if (!manager) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
             WindowManager window_manager;
-            auto &state = get_state();
+            auto &state = Engine::State();
             window_manager.id = state.create();
             window_manager.window = &state.emplace<Window>(window_manager.id, 800, 600, "Viewer");
             return &state.ctx().emplace<WindowManager>(window_manager);
@@ -91,11 +90,11 @@ namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
 
     RenderSystem *SystemFactory::create_or_get_render_system() {
-        auto *system = get_state_ctx().find<RenderSystem>();
+        auto *system = Engine::Context().find<RenderSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &renderer = state.ctx().emplace<RenderSystem>();
             renderer.id = state.create();
             state.emplace<System *>(renderer.id, &renderer);
@@ -106,11 +105,11 @@ namespace Bcg {
     }
 
     PhysicsSystem *SystemFactory::create_or_get_physics_system() {
-        auto *system = get_state_ctx().find<PhysicsSystem>();
+        auto *system = Engine::Context().find<PhysicsSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &physics = state.ctx().emplace<PhysicsSystem>();
             physics.id = state.create();
             state.emplace<System *>(physics.id, &physics);
@@ -121,11 +120,11 @@ namespace Bcg {
     }
 
     AnimationSystem *SystemFactory::create_or_get_animation_system() {
-        auto *system = get_state_ctx().find<AnimationSystem>();
+        auto *system = Engine::Context().find<AnimationSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &animation = state.ctx().emplace<AnimationSystem>();
             animation.id = state.create();
             state.emplace<System *>(animation.id, &animation);
@@ -136,11 +135,11 @@ namespace Bcg {
     }
 
     AudioSystem *SystemFactory::create_or_get_audio_system() {
-        auto *system = get_state_ctx().find<AudioSystem>();
+        auto *system = Engine::Context().find<AudioSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &audio = state.ctx().emplace<AudioSystem>();
             audio.id = state.create();
             state.emplace<System *>(audio.id, &audio);
@@ -151,11 +150,11 @@ namespace Bcg {
     }
 
     InputSystem *SystemFactory::create_or_get_input_system() {
-        auto *system = get_state_ctx().find<InputSystem>();
+        auto *system = Engine::Context().find<InputSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &input = state.ctx().emplace<InputSystem>();
             input.id = state.create();
             state.emplace<System *>(input.id, &input);
@@ -166,11 +165,11 @@ namespace Bcg {
     }
 
     ScriptingSystem *SystemFactory::create_or_get_scripting_system() {
-        auto *system = get_state_ctx().find<ScriptingSystem>();
+        auto *system = Engine::Context().find<ScriptingSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &scripting = state.ctx().emplace<ScriptingSystem>();
             scripting.id = state.create();
             state.emplace<System *>(scripting.id, &scripting);
@@ -181,11 +180,11 @@ namespace Bcg {
     }
 
     NetworkSystem *SystemFactory::create_or_get_network_system() {
-        auto *system = get_state_ctx().find<NetworkSystem>();
+        auto *system = Engine::Context().find<NetworkSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &network = state.ctx().emplace<NetworkSystem>();
             network.id = state.create();
             state.emplace<System *>(network.id, &network);
@@ -196,11 +195,11 @@ namespace Bcg {
     }
 
     GuiSystem *SystemFactory::create_or_get_gui_system() {
-        auto *system = get_state_ctx().find<GuiSystem>();
+        auto *system = Engine::Context().find<GuiSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &gui = state.ctx().emplace<GuiSystem>();
             gui.id = state.create();
             state.emplace<System *>(gui.id, &gui);
@@ -211,11 +210,11 @@ namespace Bcg {
     }
 
     PluginSystem *SystemFactory::create_or_get_plugin_system() {
-        auto *system = get_state_ctx().find<PluginSystem>();
+        auto *system = Engine::Context().find<PluginSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &plugin = state.ctx().emplace<PluginSystem>();
             plugin.id = state.create();
             state.emplace<System *>(plugin.id, &plugin);
@@ -226,11 +225,11 @@ namespace Bcg {
     }
 
     WindowSystem *SystemFactory::create_or_get_window_system() {
-        auto *system = get_state_ctx().find<WindowSystem>();
+        auto *system = Engine::Context().find<WindowSystem>();
         if (!system) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            auto &state = get_state();
+            auto &state = Engine::State();
             auto &window = state.ctx().emplace<WindowSystem>();
             window.id = state.create();
             state.emplace<System *>(window.id, &window);

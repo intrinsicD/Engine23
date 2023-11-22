@@ -40,8 +40,7 @@ namespace Bcg{
         ManagerFactory::create_or_get_time_manager();
         ManagerFactory::create_or_get_command_buffer_manager();
         ManagerFactory::create_or_get_worker_pool_manager();
-
-
+        ManagerFactory::create_or_get_window_manager();
     }
 
     Engine::~Engine() {
@@ -49,14 +48,14 @@ namespace Bcg{
     }
 
     //Main way to have access to the engine
-    Engine *Engine::get_instance() {
+    Engine *Engine::Instance() {
         return entt::locator<Engine *>::value();
     }
 
     void Engine::run() {
         is_running = true;
         //startup engine
-        get_state_ctx().get<StartupCommand>().execute();
+        Context().get<StartupCommand>().execute();
         auto *time_manager = ManagerFactory::create_or_get_time_manager();
         auto *command_buffer_manager = ManagerFactory::create_or_get_command_buffer_manager();
         ManagerFactory::create_or_get_worker_pool_manager();
@@ -91,6 +90,6 @@ namespace Bcg{
             time_manager->end_loop();
         }
         //shutdown engine
-        get_state_ctx().get<ShutdownCommand>().execute();
+        Context().get<ShutdownCommand>().execute();
     }
 }
