@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "Commands.h"
 #include "Factories.h"
+#include "Platform.h"
 
 #include <iostream>
 
@@ -25,6 +26,7 @@ namespace Bcg{
         entt::locator<Engine *>::emplace<Engine *>(this);
         state.ctx().emplace<StartupCommand>();
         state.ctx().emplace<ShutdownCommand>();
+        state.ctx().emplace<Platform>();
 
         SystemFactory::create_or_get_window_system();
         SystemFactory::create_or_get_render_system();
@@ -47,11 +49,6 @@ namespace Bcg{
         entt::locator<Engine *>::reset();
     }
 
-    //Main way to have access to the engine
-    Engine *Engine::Instance() {
-        return entt::locator<Engine *>::value();
-    }
-
     void Engine::run() {
         is_running = true;
         //startup engine
@@ -59,6 +56,8 @@ namespace Bcg{
         auto *time_manager = ManagerFactory::create_or_get_time_manager();
         auto *command_buffer_manager = ManagerFactory::create_or_get_command_buffer_manager();
         ManagerFactory::create_or_get_worker_pool_manager();
+        auto *window_manager = ManagerFactory::create_or_get_window_manager();
+        window_manager->create_window(800, 600, "Engine23");
 
         ParallelCommands parallel_commands("Engine Mainloop");
         TaskCommand task_a("Task A", []() {
@@ -85,9 +84,12 @@ namespace Bcg{
         command_buffer_manager->push_command_to_process_user_commands(
                 std::make_shared<ParallelCommands>(parallel_commands));
         while (is_running) {
-            time_manager->start_loop();
+            time_manager->begin_frame();
+            window_manager->begin_frame();
             command_buffer_manager->update();
-            time_manager->end_loop();
+            window_manager->end_frame();
+            time_manager->end_frame();
+/*            is_running = false;*/
         }
         //shutdown engine
         Context().get<ShutdownCommand>().execute();

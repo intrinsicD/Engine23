@@ -3,6 +3,7 @@
 //
 
 #include "Factories.h"
+#include "WindowManagerGLFW.h"
 
 namespace Bcg {
 
@@ -77,11 +78,10 @@ namespace Bcg {
         if (!manager) {
             static std::mutex creationMutex;
             std::lock_guard<std::mutex> lock(creationMutex);
-            WindowManager window_manager;
+            WindowManagerGLFW window_manager;
             auto &state = Engine::State();
             window_manager.id = state.create();
-            window_manager.window = &state.emplace<Window>(window_manager.id, 800, 600, "Viewer");
-            return &state.ctx().emplace<WindowManager>(window_manager);
+            return &state.ctx().emplace<WindowManagerGLFW>(window_manager);
         } else {
             return manager;
         }

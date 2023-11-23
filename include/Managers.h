@@ -13,6 +13,7 @@
 
 namespace Bcg {
     class ManagerFactory;
+
     class Manager {
     public:
         //Is an Engine component, it lives inside the Engine's state (registry)
@@ -62,6 +63,10 @@ namespace Bcg {
 
         void push_command_to_command_buffer(std::shared_ptr<Command> command) const;
 
+        void push_command_to_startup(std::shared_ptr<Command> command) const;
+
+        void push_command_to_shutdown(std::shared_ptr<Command> command) const;
+
         CommandBufferCurrent *current_buffer = nullptr;
         CommandBufferNext *next_buffer = nullptr;
         CommandBufferSuccessCounter *counter = nullptr;
@@ -71,6 +76,7 @@ namespace Bcg {
         std::shared_ptr<CleanupCommand> sptr_cleanup;
     protected:
         friend ManagerFactory;
+
         CommandBufferManager();
     };
 
@@ -78,9 +84,9 @@ namespace Bcg {
     public:
         ~TimeManager() override = default;
 
-        void start_loop() const;
+        void begin_frame() const;
 
-        void end_loop() const;
+        void end_frame() const;
 
         Time *time = nullptr;
     protected:
@@ -141,15 +147,19 @@ namespace Bcg {
     public:
         ~WindowManager() override = default;
 
-        void create_window(int width, int height, std::string title);
+        virtual void create_window(int width, int height, std::string title);
 
-        void destroy_window();
+        virtual void destroy_window();
 
-        void resize_window(int width, int height) const;
+        virtual void resize_window(int width, int height) const;
 
-        void set_window_title(std::string title) const;
+        virtual void set_window_title(std::string title) const;
 
-        double get_aspect_ratio() const;
+        virtual double get_aspect_ratio() const;
+
+        virtual void begin_frame() const = 0;
+
+        virtual void end_frame() const = 0;
 
         Window *window = nullptr;
     protected:

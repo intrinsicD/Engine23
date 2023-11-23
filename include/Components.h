@@ -35,6 +35,9 @@ namespace Bcg {
         size_t total_num_commands = 0;
     };
 
+    template<typename T>
+    struct DurationTypeToString;
+
     struct Time {
         struct Unit{
             using nano = std::nano;
@@ -61,39 +64,6 @@ namespace Bcg {
             }
 
             std::chrono::time_point<std::chrono::high_resolution_clock> value;
-        private:
-            template<typename T>
-            struct DurationTypeToString;
-
-            template<>
-            struct DurationTypeToString<Unit::nano> {
-                static std::string value() { return " ns"; }
-            };
-
-            template<>
-            struct DurationTypeToString<Unit::micro> {
-                static std::string value() { return " µs"; }
-            };
-
-            template<>
-            struct DurationTypeToString<Unit::milli> {
-                static std::string value() { return " ms"; }
-            };
-
-            template<>
-            struct DurationTypeToString<Unit::seconds> {
-                static std::string value() { return "  s"; }
-            };
-
-            template<>
-            struct DurationTypeToString<Unit::minutes> {
-                static std::string value() { return "min"; }
-            };
-
-            template<>
-            struct DurationTypeToString<Unit::hours> {
-                static std::string value() { return "  h"; }
-            };
         };
 
         Point engine_constructed;
@@ -107,6 +77,36 @@ namespace Bcg {
             int fps = 0;
             int avg_fps = 0;
         } mainloop;
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::nano> {
+        static std::string value() { return " ns"; }
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::micro> {
+        static std::string value() { return " µs"; }
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::milli> {
+        static std::string value() { return " ms"; }
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::seconds> {
+        static std::string value() { return "  s"; }
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::minutes> {
+        static std::string value() { return "min"; }
+    };
+
+    template<>
+    struct DurationTypeToString<Time::Unit::hours> {
+        static std::string value() { return "  h"; }
     };
 
     struct WorkerPool {
@@ -135,6 +135,7 @@ namespace Bcg {
         int height;
 
         std::string title;
+        void *handle = nullptr;
     };
 
     template<typename Key, typename Value>

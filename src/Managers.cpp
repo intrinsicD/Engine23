@@ -93,16 +93,26 @@ namespace Bcg {
         next_buffer->emplace_back(std::move(command));
     }
 
+    void CommandBufferManager::push_command_to_startup(std::shared_ptr<Command> command) const {
+        auto &startup = Engine::Context().get<StartupCommand>();
+        startup.add_command_sptr(std::move(command));
+    }
+
+    void CommandBufferManager::push_command_to_shutdown(std::shared_ptr<Command> command) const {
+        auto &shutdown = Engine::Context().get<ShutdownCommand>();
+        shutdown.add_command_sptr(std::move(command));
+    }
+
     //------------------------------------------------------------------------------------------------------------------
 
 
     TimeManager::TimeManager() : Manager("Time") {}
 
-    void TimeManager::start_loop() const {
+    void TimeManager::begin_frame() const {
         time->mainloop.started = Time::Point::Now();
     }
 
-    void TimeManager::end_loop() const {
+    void TimeManager::end_frame() const {
         time->mainloop.current = Time::Point::Now().duration<Time::Unit::seconds>(time->mainloop.started);
         time->mainloop.avg =
                 time->mainloop.avg * static_cast<double>(time->mainloop.counter) + time->mainloop.current;
@@ -139,7 +149,16 @@ namespace Bcg {
         }
     }
 
-    WorkerPoolManager::WorkerPoolManager() : Manager("WorkerPool") {}
+    WorkerPoolManager::WorkerPoolManager() : Manager("WorkerPool") {
+        if (!worker_pool) {
+            auto *command_buffer_manager = ManagerFactory::create_or_get_command_buffer_manager();
+            command_buffer_manager->push_command_to_shutdown(std::make_shared<TaskCommand>("Shutdown Workers", []() {
+                auto *manager = Engine::Context().find<WorkerPoolManager>();
+                manager->stop();
+                return 1;
+            }));
+        }
+    }
 
     size_t WorkerPoolManager::max_num_threads() {
         return std::thread::hardware_concurrency();

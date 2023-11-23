@@ -17,7 +17,9 @@ namespace Bcg {
         virtual void run();
 
         //Main way to have access to the engine
-        static Engine *Instance();
+        static Engine *Instance() {
+            return entt::locator<Engine *>::value();
+        }
 
         //Main way to have access to the engines state
         static auto &State() {
