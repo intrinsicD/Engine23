@@ -16,10 +16,6 @@ namespace Bcg {
         return 1;
     }
 
-    [[nodiscard]] std::string Command::to_string() const {
-        return name;
-    }
-
     //------------------------------------------------------------------------------------------------------------------
 
     CompositeCommand::CompositeCommand(std::string name) : Command(std::move(name)) {}
@@ -90,7 +86,6 @@ namespace Bcg {
         for (auto id: view) {
             auto &system = state.get<System *>(id);
             std::cout << count++ << " " << name << " " << system->name << "\n";
-            system->update();
         }
         return CompositeCommand::execute();
     }

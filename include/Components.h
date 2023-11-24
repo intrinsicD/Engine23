@@ -17,9 +17,14 @@
 #include "entt/fwd.hpp"
 
 namespace Bcg {
+    struct Frame{};
     struct Command;
     struct CommandBuffer : public std::vector<std::shared_ptr<Command>> {
         using std::vector<std::shared_ptr<Command>>::vector;
+    };
+
+    struct CommandBuffers : public std::vector<CommandBuffer> {
+        using std::vector<CommandBuffer>::vector;
     };
 
     struct CommandBufferCurrent : public CommandBuffer {
@@ -30,9 +35,20 @@ namespace Bcg {
         using CommandBuffer::CommandBuffer;
     };
 
+    struct CommandDoubleBuffers{
+        CommandBuffers current;
+        CommandBuffers next;
+    };
+
     struct CommandBufferSuccessCounter {
         size_t total_success_count = 0;
         size_t total_num_commands = 0;
+    };
+
+
+
+    struct Priority{
+        int value = 0;
     };
 
     template<typename T>

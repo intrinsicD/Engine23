@@ -38,6 +38,8 @@ namespace Bcg {
 
         ~SystemFactory() override = default;
 
+        static CommandBufferSystem *create_or_get_command_buffer_system();
+
         static RenderSystem *create_or_get_render_system();
 
         static PhysicsSystem *create_or_get_physics_system();

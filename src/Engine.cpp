@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-namespace Bcg{
+namespace Bcg {
     Engine::Engine() {
         //The engine is a singleton
         //Has an entt::registry as state to store and represent the current state of the engine or application
@@ -24,25 +24,8 @@ namespace Bcg{
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
-        state.ctx().emplace<StartupCommand>();
-        state.ctx().emplace<ShutdownCommand>();
-        state.ctx().emplace<Platform>();
 
-        SystemFactory::create_or_get_window_system();
-        SystemFactory::create_or_get_render_system();
-        SystemFactory::create_or_get_physics_system();
-        SystemFactory::create_or_get_animation_system();
-        SystemFactory::create_or_get_audio_system();
-        SystemFactory::create_or_get_input_system();
-        SystemFactory::create_or_get_scripting_system();
-        SystemFactory::create_or_get_network_system();
-        SystemFactory::create_or_get_gui_system();
-        SystemFactory::create_or_get_plugin_system();
 
-        ManagerFactory::create_or_get_time_manager();
-        ManagerFactory::create_or_get_command_buffer_manager();
-        ManagerFactory::create_or_get_worker_pool_manager();
-        ManagerFactory::create_or_get_window_manager();
     }
 
     Engine::~Engine() {
@@ -51,47 +34,58 @@ namespace Bcg{
 
     void Engine::run() {
         is_running = true;
+        //The primary workflow is this:
+        //1. notify all systems of an event
+        //2. systems can add commands to the command buffer
+        //3. execute the command buffer
+        //4. repeat
+
+        //initialize command buffers
+        auto &command_buffers = state.ctx().emplace<CommandDoubleBuffers>();
+        auto *command_buffers_current = &command_buffers.current;
+        auto *command_buffers_next = &command_buffers.next;
+
         //startup engine
-        Context().get<StartupCommand>().execute();
-        auto *time_manager = ManagerFactory::create_or_get_time_manager();
-        auto *command_buffer_manager = ManagerFactory::create_or_get_command_buffer_manager();
-        ManagerFactory::create_or_get_worker_pool_manager();
-        auto *window_manager = ManagerFactory::create_or_get_window_manager();
-        window_manager->create_window(800, 600, "Engine23");
+        dispatcher.trigger<Events::Startup<Engine>>();
 
-        ParallelCommands parallel_commands("Engine Mainloop");
-        TaskCommand task_a("Task A", []() {
-            std::cout << "Task A\n";
-            return 1;
-        });
-        TaskCommand task_b("Task B", []() {
-            std::cout << "Task B\n";
-            return 1;
-        });
-        TaskCommand task_c("Task C", []() {
-            std::cout << "Task C\n";
-            return 1;
-        });
-        TaskCommand task_d("Task D", []() {
-            std::cout << "Task D\n";
-            return 1;
-        });
-        parallel_commands.add_command_sptr(std::make_shared<TaskCommand>(task_a));
-        parallel_commands.add_command_sptr(std::make_shared<TaskCommand>(task_b));
-        parallel_commands.add_command_sptr(std::make_shared<TaskCommand>(task_c));
-        parallel_commands.add_command_sptr(std::make_shared<TaskCommand>(task_d));
-
-        command_buffer_manager->push_command_to_process_user_commands(
-                std::make_shared<ParallelCommands>(parallel_commands));
-        while (is_running) {
-            time_manager->begin_frame();
-            window_manager->begin_frame();
-            command_buffer_manager->update();
-            window_manager->end_frame();
-            time_manager->end_frame();
-/*            is_running = false;*/
+        //execute command buffers for startup
+        for (auto &command_buffer: *command_buffers_current) {
+            for (auto &command: command_buffer) {
+                command->execute();
+            }
         }
+        command_buffers_current->clear();
+        std::swap(command_buffers_current, command_buffers_next);
+
+        while (is_running) {
+            //begin frame to signal everyone interested
+            dispatcher.trigger<Events::Begin<Frame>>();
+
+            //execute command buffers for this frame
+            for (auto &command_buffer: *command_buffers_current) {
+                for (auto &command: command_buffer) {
+                    command->execute();
+                }
+            }
+            //clear current command buffer and swap with next command buffer
+            command_buffers_current->clear();
+
+            //swap current command buffers with next command buffers
+            std::swap(command_buffers_current, command_buffers_next);
+
+            //begin frame to signal everyone interested
+            dispatcher.trigger<Events::End<Frame>>();
+        }
+
+        command_buffers_current->clear();
         //shutdown engine
-        Context().get<ShutdownCommand>().execute();
+        dispatcher.trigger<Events::Shutdown<Engine>>();
+
+        //execute command buffers for shutdown
+        for (auto &command_buffer: *command_buffers_current) {
+            for (auto &command: command_buffer) {
+                command->execute();
+            }
+        }
     }
 }

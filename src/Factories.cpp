@@ -89,6 +89,21 @@ namespace Bcg {
 
     //------------------------------------------------------------------------------------------------------------------
 
+    CommandBufferSystem *SystemFactory::create_or_get_command_buffer_system() {
+        auto *system = Engine::Context().find<CommandBufferSystem>();
+        if (!system) {
+            static std::mutex creationMutex;
+            std::lock_guard<std::mutex> lock(creationMutex);
+            auto &state = Engine::State();
+            auto &command_buffers = state.ctx().emplace<CommandBufferSystem>();
+            renderer.id = state.create();
+            state.emplace<System *>(renderer.id, &renderer);
+            return &renderer;
+        } else {
+            return system;
+        }
+    }
+
     RenderSystem *SystemFactory::create_or_get_render_system() {
         auto *system = Engine::Context().find<RenderSystem>();
         if (!system) {
