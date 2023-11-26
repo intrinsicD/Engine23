@@ -96,9 +96,9 @@ namespace Bcg {
             std::lock_guard<std::mutex> lock(creationMutex);
             auto &state = Engine::State();
             auto &command_buffers = state.ctx().emplace<CommandBufferSystem>();
-            renderer.id = state.create();
-            state.emplace<System *>(renderer.id, &renderer);
-            return &renderer;
+            command_buffers.id = state.create();
+            state.emplace<System *>(command_buffers.id, &command_buffers);
+            return &command_buffers;
         } else {
             return system;
         }

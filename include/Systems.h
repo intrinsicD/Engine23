@@ -11,6 +11,8 @@
 #include "entt/fwd.hpp"
 
 namespace Bcg {
+    struct Frame;
+
     class System {
     public:
         //Is an Engine component, it lives inside the Engine's state (registry)
@@ -24,6 +26,7 @@ namespace Bcg {
         explicit System(std::string name);
 
         virtual ~System() = default;
+
     public:
         std::string name;
         entt::entity id;
@@ -65,6 +68,21 @@ namespace Bcg {
 
         ~PluginSystem() override = default;
     };
+
+    namespace SystemWindow {
+        //TODO think about this approach... stateless, so no cluttering of the state by unneccessary components
+        void add_system(Engine *engine);
+
+        void remove_system(Engine *engine);
+
+        void on_startup_engine(const Events::Startup<Engine> &event);
+
+        void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+
+        void on_begin_frame(const Events::Begin<Frame> &event);
+
+        void on_end_frame(const Events::End<Frame> &event);
+    }
 
     class WindowSystem : public System {
     public:

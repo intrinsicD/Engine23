@@ -21,8 +21,6 @@ namespace Bcg {
 
         [[nodiscard]] virtual size_t num_commands() const;
 
-        [[nodiscard]] virtual std::string to_string() const;
-
         std::string name;
     };
 

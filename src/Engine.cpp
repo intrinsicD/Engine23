@@ -6,6 +6,7 @@
 #include "Commands.h"
 #include "Factories.h"
 #include "Platform.h"
+#include "GLFW/glfw3.h"
 
 #include <iostream>
 
@@ -29,6 +30,7 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
+        glfwInit();
         entt::locator<Engine *>::reset();
     }
 
