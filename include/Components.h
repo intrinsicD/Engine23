@@ -17,14 +17,60 @@
 #include "entt/fwd.hpp"
 
 namespace Bcg {
-    struct Frame{};
+    struct StartupWindowConfig {
+        std::string title = "Viewer";
+        int width = 800;
+        int height = 600;
+    };
+    struct WindowConfig {
+        std::string title = "Viewer";
+        int width = 800;
+        int height = 600;
+        double aspect_ratio = 4.0 / 3.0;
+        float background_color[4] = {0.1f, 0.3f, 0.6f, 1.0f};
+    };
+    struct OpenGLConfig {
+        int major_hint = 4;
+        int minor_hint = 6;
+        int major;
+        int minor;
+        bool core = true;
+        bool forward_compatibility = true;
+        bool debug = true;
+        std::string vendor;
+        std::string renderer;
+        std::string version;
+        std::string glsl_version;
+    };
+    struct Input {
+        struct Mouse {
+            struct Position {
+                double x = 0;
+                double y = 0;
+            };
+            struct Button {
+                bool left = false;
+                bool right = false;
+                bool middle = false;
+            };
+            struct Scroll {
+                double x = 0;
+                double y = 0;
+            };
+            Position position;
+            Scroll scroll;
+            Button button;
+        } mouse;
+        struct Keyboard {
+            std::vector<bool> keys;
+        } keyboard;
+    };
+
+    struct Frame {
+    };
     struct Command;
     struct CommandBuffer : public std::vector<std::shared_ptr<Command>> {
         using std::vector<std::shared_ptr<Command>>::vector;
-    };
-
-    struct CommandBuffers : public std::vector<CommandBuffer> {
-        using std::vector<CommandBuffer>::vector;
     };
 
     struct CommandBufferCurrent : public CommandBuffer {
@@ -35,19 +81,12 @@ namespace Bcg {
         using CommandBuffer::CommandBuffer;
     };
 
-    struct CommandDoubleBuffers{
-        CommandBuffers current;
-        CommandBuffers next;
-    };
-
     struct CommandBufferSuccessCounter {
         size_t total_success_count = 0;
         size_t total_num_commands = 0;
     };
 
-
-
-    struct Priority{
+    struct Priority {
         int value = 0;
     };
 
@@ -55,7 +94,7 @@ namespace Bcg {
     struct DurationTypeToString;
 
     struct Time {
-        struct Unit{
+        struct Unit {
             using nano = std::nano;
             using micro = std::micro;
             using milli = std::milli;
@@ -64,8 +103,8 @@ namespace Bcg {
             using hours = std::ratio<3600>;
         };
 
-        struct Point{
-            static Point Now(){
+        struct Point {
+            static Point Now() {
                 return {std::chrono::high_resolution_clock::now()};
             }
 
@@ -82,14 +121,17 @@ namespace Bcg {
             std::chrono::time_point<std::chrono::high_resolution_clock> value;
         };
 
-        Point engine_constructed;
-        Point engine_started;
+        Point engine_run_start;
+        Point engine_run_end;
+        Point engine_constructor_start;
+        Point engine_constructor_end;
 
         struct Mainloop {
-            Point started;
-            double avg = 0;
-            double current = 0;
-            size_t counter = 0;
+            Point current;
+            Point last;
+            double avg_duration = 0;
+            double duration = 0;
+            size_t iter_counter = 0;
             int fps = 0;
             int avg_fps = 0;
         } mainloop;
@@ -142,16 +184,6 @@ namespace Bcg {
 
         entt::registry *registry;
         entt::entity id;
-    };
-
-    struct Window {
-        Window(int width, int height, std::string title) : width(width), height(height), title(std::move(title)) {}
-
-        int width;
-        int height;
-
-        std::string title;
-        void *handle = nullptr;
     };
 
     template<typename Key, typename Value>

@@ -9,7 +9,7 @@
 #include <memory>
 #include <functional>
 
-#include "Components.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
     struct Command {
@@ -36,7 +36,7 @@ namespace Bcg {
         [[nodiscard]] size_t num_commands() const override;
 
     protected:
-        CommandBuffer commands;
+        std::vector<std::shared_ptr<Command>> commands;
     };
 
     struct TaskCommand : public Command {
@@ -94,6 +94,50 @@ namespace Bcg {
 
         ~CleanupCommand() override = default;
     };
+
+    namespace Log{
+        struct Info : public  Command{
+            explicit Info(std::string message);
+
+            ~Info() override = default;
+
+            int execute() override;
+
+            std::string message;
+            double time_stamp;
+        };
+        struct Warn: public Command{
+            explicit Warn(std::string message);
+
+            ~Warn() override = default;
+
+            int execute() override;
+
+            std::string message;
+            double time_stamp;
+        };
+        struct Error: public Command{
+            explicit Error(std::string message);
+
+            ~Error() override = default;
+
+            int execute() override;
+
+            std::string message;
+            double time_stamp;
+        };
+
+        struct TODO: public Command{
+            explicit TODO(std::string message);
+
+            ~TODO() override = default;
+
+            int execute() override;
+
+            std::string message;
+            double time_stamp;
+        };
+    }
 }
 
 #endif //ENGINE23_COMMANDS_H

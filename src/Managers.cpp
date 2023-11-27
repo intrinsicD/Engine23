@@ -106,24 +106,6 @@ namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
 
 
-    TimeManager::TimeManager() : Manager("Time") {}
-
-    void TimeManager::begin_frame() const {
-        time->mainloop.started = Time::Point::Now();
-    }
-
-    void TimeManager::end_frame() const {
-        time->mainloop.current = Time::Point::Now().duration<Time::Unit::seconds>(time->mainloop.started);
-        time->mainloop.avg =
-                time->mainloop.avg * static_cast<double>(time->mainloop.counter) + time->mainloop.current;
-        time->mainloop.avg /= static_cast<double>(++time->mainloop.counter);
-        time->mainloop.fps = static_cast<int>(1.0 / time->mainloop.current);
-        time->mainloop.avg_fps = static_cast<int>(1.0 / time->mainloop.avg);
-    }
-
-    //------------------------------------------------------------------------------------------------------------------
-
-
     void WorkerPoolManager::push_task(std::shared_ptr<Command> &task) const {
         {
             std::unique_lock<std::mutex> lock(worker_pool->queueMutex);
@@ -247,33 +229,4 @@ namespace Bcg {
     }
 
     //------------------------------------------------------------------------------------------------------------------
-
-
-    void WindowManager::create_window(int width, int height, std::string title) {
-        if (!window) {
-            window = &Engine::State().emplace<Window>(id, width, height, std::move(title));
-        }
-    }
-
-    void WindowManager::destroy_window() {
-        Engine::State().remove<Window>(id);
-        window = nullptr;
-    }
-
-    void WindowManager::resize_window(int width, int height) const {
-        window->width = width;
-        window->height = height;
-    }
-
-    void WindowManager::set_window_title(std::string title) const {
-        window->title = std::move(title);
-    }
-
-    double WindowManager::get_aspect_ratio() const {
-        return static_cast<double>(window->width) / static_cast<double>(window->height);
-    }
-
-    WindowManager::WindowManager() : Manager("Window") {}
-
-
 }

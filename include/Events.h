@@ -27,6 +27,11 @@ namespace Bcg::Events{
     };
 
     template<typename T>
+    struct Notify{
+
+    };
+
+    template<typename T>
     struct End{
 
     };

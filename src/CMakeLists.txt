@@ -3,6 +3,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         Commands.cpp
         Managers.cpp
         Plugins.cpp
-        Systems.cpp
+        SystemLogger.cpp
+        SystemUserInput.cpp
+        SystemGui.cpp
         Factories.cpp
         main.cpp)

@@ -9,8 +9,6 @@ elseif (UNIX AND NOT APPLE)
     add_subdirectory(vulkan)
 endif ()
 
-add_subdirectory(glfw)
-
 enable_language(CUDA)
 
 if (CMAKE_CUDA_COMPILER)

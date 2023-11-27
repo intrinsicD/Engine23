@@ -4,4 +4,4 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(glfw)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC glfw/include)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw )
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw)

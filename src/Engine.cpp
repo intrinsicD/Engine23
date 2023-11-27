@@ -6,7 +6,7 @@
 #include "Commands.h"
 #include "Factories.h"
 #include "Platform.h"
-#include "GLFW/glfw3.h"
+#include "Systems.h"
 
 #include <iostream>
 
@@ -25,16 +25,43 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
+        auto &time = Engine::Context().emplace<Time>();
+        time.engine_constructor_start = Time::Point::Now();
 
+        Engine::Context().emplace<CommandBufferCurrent>();
+        Engine::Context().emplace<CommandBufferNext>();
 
+        System::Logger::add_system();
+        System::Renderer::add_system();
+        System::Window::add_system();
+        System::Gui::add_system();
+        System::UserInput::add_system();
+
+        time.engine_constructor_end = Time::Point::Now();
+        Log::Info("Engine: Constructor took " + std::to_string(time.engine_constructor_end.duration<Time::Unit::seconds>(time.engine_constructor_start)) + " seconds");
     }
 
     Engine::~Engine() {
-        glfwInit();
+        System::UserInput::remove_system();
+        System::Window::remove_system();
+        System::Logger::remove_system();
+
+        CommandBuffer *command_buffer_current = &state.ctx().get<CommandBufferCurrent>();
+        CommandBuffer *command_buffer_next = &state.ctx().get<CommandBufferNext>();
+        //execute command buffers for shutdown
+        for (auto &command: *command_buffer_current) {
+            command->execute();
+        }
+        for (auto &command: *command_buffer_next) {
+            command->execute();
+        }
+
         entt::locator<Engine *>::reset();
     }
 
     void Engine::run() {
+        auto &time = Engine::Context().get<Time>();
+        time.engine_run_start = Time::Point::Now();
         is_running = true;
         //The primary workflow is this:
         //1. notify all systems of an event
@@ -42,52 +69,51 @@ namespace Bcg {
         //3. execute the command buffer
         //4. repeat
 
-        //initialize command buffers
-        auto &command_buffers = state.ctx().emplace<CommandDoubleBuffers>();
-        auto *command_buffers_current = &command_buffers.current;
-        auto *command_buffers_next = &command_buffers.next;
-
         //startup engine
+        Log::Info("Engine: Startup...");
         dispatcher.trigger<Events::Startup<Engine>>();
 
         //execute command buffers for startup
-        for (auto &command_buffer: *command_buffers_current) {
-            for (auto &command: command_buffer) {
-                command->execute();
-            }
-        }
-        command_buffers_current->clear();
-        std::swap(command_buffers_current, command_buffers_next);
+        CommandBuffer *command_buffer_current = &state.ctx().get<CommandBufferCurrent>();
+        CommandBuffer *command_buffer_next = &state.ctx().get<CommandBufferNext>();
 
+        for (auto &command: *command_buffer_current) {
+            command->execute();
+        }
+
+        command_buffer_current->clear();
+        std::swap(command_buffer_current, command_buffer_next);
+
+        Log::Info("Engine: Run...");
+        time.mainloop.current = Time::Point::Now();
         while (is_running) {
+            time.mainloop.last = time.mainloop.current;
+            time.mainloop.current = Time::Point::Now();
+            time.mainloop.duration = time.mainloop.current.duration<Time::Unit::seconds>(time.mainloop.last);
+            time.mainloop.avg_duration = time.mainloop.avg_duration * time.mainloop.iter_counter + time.mainloop.duration;
+            time.mainloop.avg_duration /= ++time.mainloop.iter_counter;
+
             //begin frame to signal everyone interested
             dispatcher.trigger<Events::Begin<Frame>>();
 
             //execute command buffers for this frame
-            for (auto &command_buffer: *command_buffers_current) {
-                for (auto &command: command_buffer) {
-                    command->execute();
-                }
+            for (auto &command: *command_buffer_current) {
+                command->execute();
             }
-            //clear current command buffer and swap with next command buffer
-            command_buffers_current->clear();
 
-            //swap current command buffers with next command buffers
-            std::swap(command_buffers_current, command_buffers_next);
+            command_buffer_current->clear();
+            std::swap(command_buffer_current, command_buffer_next);
 
             //begin frame to signal everyone interested
             dispatcher.trigger<Events::End<Frame>>();
         }
 
-        command_buffers_current->clear();
-        //shutdown engine
-        dispatcher.trigger<Events::Shutdown<Engine>>();
+        command_buffer_current->clear();
+        command_buffer_next->clear();
 
-        //execute command buffers for shutdown
-        for (auto &command_buffer: *command_buffers_current) {
-            for (auto &command: command_buffer) {
-                command->execute();
-            }
-        }
+        //shutdown engine
+        Log::Info("Engine: Shutdown...");
+        dispatcher.trigger<Events::Shutdown<Engine>>();
+        time.engine_run_end = Time::Point::Now();
     }
 }

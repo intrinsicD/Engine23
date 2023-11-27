@@ -1,6 +1,9 @@
 [submodule "ext/entt"]
 	path = ext/entt
 	url = https://github.com/skypjack/entt.git
-[submodule "backend/glfw/ext/glfw"]
-	path = backend/glfw/ext/glfw
+[submodule "ext/glfw/ext/glfw"]
+	path = ext/glfw/ext/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "ext/imgui"]
+	path = ext/imgui
+	url = https://github.com/ocornut/imgui.git

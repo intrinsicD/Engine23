@@ -80,21 +80,6 @@ namespace Bcg {
         CommandBufferManager();
     };
 
-    class TimeManager : public Manager {
-    public:
-        ~TimeManager() override = default;
-
-        void begin_frame() const;
-
-        void end_frame() const;
-
-        Time *time = nullptr;
-    protected:
-        TimeManager();
-
-        friend ManagerFactory;
-    };
-
     class WorkerPoolManager : public Manager {
     public:
         ~WorkerPoolManager() override = default;
@@ -143,30 +128,6 @@ namespace Bcg {
         friend ManagerFactory;
     };
 
-    class WindowManager : public Manager {
-    public:
-        ~WindowManager() override = default;
-
-        virtual void create_window(int width, int height, std::string title);
-
-        virtual void destroy_window();
-
-        virtual void resize_window(int width, int height) const;
-
-        virtual void set_window_title(std::string title) const;
-
-        virtual double get_aspect_ratio() const;
-
-        virtual void begin_frame() const = 0;
-
-        virtual void end_frame() const = 0;
-
-        Window *window = nullptr;
-    protected:
-        WindowManager();
-
-        friend ManagerFactory;
-    };
 }
 
 #endif //ENGINE23_MANAGERS_H
