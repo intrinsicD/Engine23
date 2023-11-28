@@ -13,10 +13,6 @@ namespace Bcg::System::Logger{
 
     void remove_system();
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
-
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
-
     void set_log_level(LogLevel level);
 }
 

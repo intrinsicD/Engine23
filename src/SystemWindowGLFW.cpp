@@ -9,7 +9,7 @@
 #include "Components.h"
 #include "SystemDearImGui.h"
 
-namespace Bcg::System::Window::Glfw{
+namespace Bcg::System::Window::Glfw {
     void add_system() {
         auto *engine = Engine::Instance();
 
@@ -138,11 +138,8 @@ namespace Bcg::System::Window::Glfw{
         glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
             auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
             auto &input = engine->state.ctx().get<Input>();
-            if (action == GLFW_PRESS) {
-                input.keyboard.keys[key] = true;
-            } else if (action == GLFW_RELEASE) {
-                input.keyboard.keys[key] = false;
-            }
+            if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
+            input.keyboard.keys[key] = action == GLFW_PRESS;
         });
 
         Gui::add_to_window(window);
@@ -159,7 +156,7 @@ namespace Bcg::System::Window::Glfw{
         glfwDestroyWindow(glfwGetCurrentContext());
     }
 
-    void swap_and_poll_events(){
+    void swap_and_poll_events() {
         glfwSwapBuffers(glfwGetCurrentContext());
         glfwPollEvents();
     }

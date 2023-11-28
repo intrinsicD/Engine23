@@ -13,9 +13,7 @@ namespace Bcg::System::UserInput{
 
     void remove_system();
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
-
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+    void on_begin_frame(const Events::Begin<Frame> &event);
 }
 
 #endif //ENGINE23_SYSTEMUSERINPUT_H
