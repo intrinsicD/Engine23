@@ -5,6 +5,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         Plugins.cpp
         SystemLogger.cpp
         SystemUserInput.cpp
-        SystemGui.cpp
+        SystemDearImGui.cpp
+        SystemWindowGLFW.cpp
+        SystemVulkan.cpp
         Factories.cpp
         main.cpp)

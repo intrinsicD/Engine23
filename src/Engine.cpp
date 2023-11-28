@@ -7,6 +7,11 @@
 #include "Factories.h"
 #include "Platform.h"
 #include "Systems.h"
+#include "GLFW/glfw3.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "vulkan/vulkan.h"
 
 #include <iostream>
 
@@ -28,12 +33,13 @@ namespace Bcg {
         auto &time = Engine::Context().emplace<Time>();
         time.engine_constructor_start = Time::Point::Now();
 
-        Engine::Context().emplace<CommandBufferCurrent>();
-        Engine::Context().emplace<CommandBufferNext>();
+        auto *current = &Engine::Context().emplace<CommandBufferCurrent>();
+        auto *next = &Engine::Context().emplace<CommandBufferNext>();
+        Engine::Context().emplace<CommandDoubleBuffer>(current, next);
 
         System::Logger::add_system();
         System::Renderer::add_system();
-        System::Window::add_system();
+        System::Window::Glfw::add_system();
         System::Gui::add_system();
         System::UserInput::add_system();
 
@@ -43,7 +49,7 @@ namespace Bcg {
 
     Engine::~Engine() {
         System::UserInput::remove_system();
-        System::Window::remove_system();
+        System::Window::Glfw::remove_system();
         System::Logger::remove_system();
 
         CommandBuffer *command_buffer_current = &state.ctx().get<CommandBufferCurrent>();
@@ -74,15 +80,14 @@ namespace Bcg {
         dispatcher.trigger<Events::Startup<Engine>>();
 
         //execute command buffers for startup
-        CommandBuffer *command_buffer_current = &state.ctx().get<CommandBufferCurrent>();
-        CommandBuffer *command_buffer_next = &state.ctx().get<CommandBufferNext>();
+        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
 
-        for (auto &command: *command_buffer_current) {
+        for (auto &command: *double_buffer.current) {
             command->execute();
         }
 
-        command_buffer_current->clear();
-        std::swap(command_buffer_current, command_buffer_next);
+        double_buffer.current->clear();
+        double_buffer.current->swap(*double_buffer.next);
 
         Log::Info("Engine: Run...");
         time.mainloop.current = Time::Point::Now();
@@ -97,19 +102,21 @@ namespace Bcg {
             dispatcher.trigger<Events::Begin<Frame>>();
 
             //execute command buffers for this frame
-            for (auto &command: *command_buffer_current) {
+            for (auto &command: *double_buffer.current) {
                 command->execute();
             }
 
-            command_buffer_current->clear();
-            std::swap(command_buffer_current, command_buffer_next);
+            double_buffer.current->clear();
+            double_buffer.current->swap(*double_buffer.next);
 
             //begin frame to signal everyone interested
             dispatcher.trigger<Events::End<Frame>>();
+
+            System::Window::Glfw::swap_and_poll_events();
         }
 
-        command_buffer_current->clear();
-        command_buffer_next->clear();
+        double_buffer.current->clear();
+        double_buffer.next->clear();
 
         //shutdown engine
         Log::Info("Engine: Shutdown...");

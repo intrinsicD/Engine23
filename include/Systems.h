@@ -6,9 +6,9 @@
 #define ENGINE23_SYSTEMS_H
 
 #include "SystemLogger.h"
-#include "SystemWindow.h"
+#include "SystemWindowGLFW.h"
 #include "SystemUserInput.h"
 #include "SystemRenderer.h"
-#include "SystemGui.h"
+#include "SystemDearImGui.h"
 
 #endif //ENGINE23_SYSTEMS_H

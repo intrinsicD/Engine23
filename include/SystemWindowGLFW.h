@@ -2,13 +2,13 @@
 // Created by alex on 27.11.23.
 //
 
-#ifndef ENGINE23_SYSTEMGUI_H
-#define ENGINE23_SYSTEMGUI_H
+#ifndef ENGINE23_SYSTEMWINDOWGLFW_H
+#define ENGINE23_SYSTEMWINDOWGLFW_H
 
 #include "Events.h"
 #include "EngineFwd.h"
 
-namespace Bcg::System::Gui {
+namespace Bcg::System::Window::Glfw {
     void add_system();
 
     void remove_system();
@@ -17,11 +17,7 @@ namespace Bcg::System::Gui {
 
     void on_shutdown_engine(const Events::Shutdown<Engine> &event);
 
-    void on_begin_frame(const Events::Begin<Frame> &event);
-
-    void on_end_frame(const Events::End<Frame> &event);
-
-    void add_to_window(void *window);
+    void swap_and_poll_events();
 }
 
-#endif //ENGINE23_SYSTEMGUI_H
+#endif //ENGINE23_SYSTEMWINDOWGLFW_H

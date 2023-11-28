@@ -26,6 +26,7 @@ namespace Bcg {
         std::string title = "Viewer";
         int width = 800;
         int height = 600;
+        double dpi = 1.0;
         double aspect_ratio = 4.0 / 3.0;
         float background_color[4] = {0.1f, 0.3f, 0.6f, 1.0f};
     };
@@ -79,6 +80,11 @@ namespace Bcg {
 
     struct CommandBufferNext : public CommandBuffer {
         using CommandBuffer::CommandBuffer;
+    };
+
+    struct CommandDoubleBuffer{
+        CommandBufferCurrent *current;
+        CommandBufferNext *next;
     };
 
     struct CommandBufferSuccessCounter {

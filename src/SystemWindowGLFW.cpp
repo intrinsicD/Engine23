@@ -2,40 +2,72 @@
 // Created by alex on 27.11.23.
 //
 
-#include "SystemWindow.h"
+#include "SystemWindowGLFW.h"
 #include "Engine.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
 #include "Components.h"
-#include "SystemGui.h"
+#include "SystemDearImGui.h"
 
-namespace Bcg::System::Window {
+namespace Bcg::System::Window::Glfw{
     void add_system() {
         auto *engine = Engine::Instance();
+
+        glfwSetErrorCallback([](int error, const char *description) {
+            Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).execute();
+        });
 
         if (!glfwInit()) {
             Log::Error("SystemWindow: Failed to initialize GLFW");
             return;
-        } else {
-            Log::Info("SystemWindow: GLFW initialized");
-            glfwSetErrorCallback([](int error, const char *description) {
-                Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).execute();
-            });
         }
 
-        engine->dispatcher.sink<Events::Startup<Engine>>().connect<System::Window::on_startup_engine>();
-        engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::Startup<Engine>>().connect<System::Window::Glfw::on_startup_engine>();
+        engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::Glfw::on_shutdown_engine>();
 
         Log::Info("SystemWindow: Added");
     }
 
     void remove_system() {
         auto *engine = Engine::Instance();
-        engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<System::Window::on_startup_engine>();
-        engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<System::Window::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<System::Window::Glfw::on_startup_engine>();
+        engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<System::Window::Glfw::on_shutdown_engine>();
         Log::Info("SystemWindow: Removed");
 
         glfwTerminate();
+    }
+
+    double GetDpiScale() {
+        // Get the primary monitor
+        GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+        if (!monitor) {
+            return 1.0; // Default scale factor
+        }
+
+        // Get monitor physical size
+        int widthMM, heightMM;
+        glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+        if (widthMM == 0 || heightMM == 0) {
+            return 1.0; // Default scale factor
+        }
+
+        // Get monitor resolution
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        if (!mode) {
+            return 1.0; // Default scale factor
+        }
+        int widthPx = mode->width;
+        int heightPx = mode->height;
+
+        // Calculate DPI
+        double dpiX = static_cast<float>(widthPx) / (static_cast<float>(widthMM) / 25.4);
+        double dpiY = static_cast<float>(heightPx) / (static_cast<float>(heightMM) / 25.4);
+
+        // Average and normalize DPI to get scale factor
+        // Here, 96 is the standard DPI value.
+        double dpiScale = (dpiX + dpiY) / 2.0 / 96.0;
+
+        return dpiScale;
     }
 
     void on_startup_engine(const Events::Startup<Engine> &event) {
@@ -47,8 +79,6 @@ namespace Bcg::System::Window {
             Engine::Instance()->state.ctx().emplace<WindowConfig>();
         }
         auto *engine = Engine::Instance();
-        engine->dispatcher.sink<Events::Begin<Frame>>().connect<System::Window::on_begin_frame>();
-        engine->dispatcher.sink<Events::End<Frame>>().connect<System::Window::on_end_frame>();
 
         auto *startup_window_config = engine->state.ctx().find<StartupWindowConfig>();
         auto &window_config = engine->state.ctx().get<WindowConfig>();
@@ -61,6 +91,10 @@ namespace Bcg::System::Window {
             window_config.width = 800;
             window_config.height = 600;
         }
+
+        window_config.dpi = GetDpiScale();
+        Log::Info("SystemWindow: Detected DPI: " + std::to_string(window_config.dpi));
+
 
         auto *window = glfwCreateWindow(window_config.width, window_config.height, window_config.title.c_str(),
                                         nullptr, nullptr);
@@ -122,18 +156,10 @@ namespace Bcg::System::Window {
             Log::Info("SystemWindow: Stopped");
             Engine::Instance()->state.ctx().erase<WindowConfig>();
         }
-        auto *engine = Engine::Instance();
-        engine->dispatcher.sink<Events::Begin<Frame>>().disconnect<System::Window::on_begin_frame>();
-        engine->dispatcher.sink<Events::End<Frame>>().disconnect<System::Window::on_end_frame>();
-
         glfwDestroyWindow(glfwGetCurrentContext());
     }
 
-    void on_begin_frame(const Events::Begin<Frame> &event) {
-
-    }
-
-    void on_end_frame(const Events::End<Frame> &event) {
+    void swap_and_poll_events(){
         glfwSwapBuffers(glfwGetCurrentContext());
         glfwPollEvents();
     }

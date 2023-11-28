@@ -49,6 +49,12 @@ namespace Bcg {
         std::function<int()> task;
     };
 
+    struct GuiCommand : public TaskCommand {
+        GuiCommand(std::string name, std::function<int()> task);
+
+        ~GuiCommand() override = default;
+    };
+
     struct ParallelCommands : public CompositeCommand {
         explicit ParallelCommands(std::string name);
 
@@ -95,8 +101,8 @@ namespace Bcg {
         ~CleanupCommand() override = default;
     };
 
-    namespace Log{
-        struct Info : public  Command{
+    namespace Log {
+        struct Info : public Command {
             explicit Info(std::string message);
 
             ~Info() override = default;
@@ -106,7 +112,8 @@ namespace Bcg {
             std::string message;
             double time_stamp;
         };
-        struct Warn: public Command{
+
+        struct Warn : public Command {
             explicit Warn(std::string message);
 
             ~Warn() override = default;
@@ -116,7 +123,8 @@ namespace Bcg {
             std::string message;
             double time_stamp;
         };
-        struct Error: public Command{
+
+        struct Error : public Command {
             explicit Error(std::string message);
 
             ~Error() override = default;
@@ -127,7 +135,7 @@ namespace Bcg {
             double time_stamp;
         };
 
-        struct TODO: public Command{
+        struct TODO : public Command {
             explicit TODO(std::string message);
 
             ~TODO() override = default;
