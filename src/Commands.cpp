@@ -7,10 +7,11 @@
 #include "Factories.h"
 
 #include <iostream>
+#include <memory>
+
 
 namespace Bcg {
     Command::Command(std::string name) : name(std::move(name)) {}
-
 
     [[nodiscard]] size_t Command::num_commands() const {
         return 1;
@@ -103,63 +104,53 @@ namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
 
     namespace Log {
-        struct Message : public Command {
-            explicit Message(std::string type, std::string color, std::string message, double time_stamp) : Command(
-                    "[" + type + "] " + color + message + "\033[0m" + " [" + std::to_string(time_stamp) + "] ") {}
+        Message::Message(std::string type, std::string color, std::string message, double time_stamp) : Command(
+                "[" + type + "] " + color + message + "\033[0m" + " [" + std::to_string(time_stamp) + "] ") {}
 
-            ~Message() override = default;
+        Message::Message(std::string name) : Command(std::move(name)) {}
 
-            int execute() override {
-                std::cout << name << std::endl;
-                return 1;
-            }
-        };
+        void Message::enqueue() {
+           Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(std::make_shared<Message>(name));
+        }
 
-        Info::Info(std::string message) : Command("Info"), message(message), time_stamp(
-                Time::Point::Now().duration<Time::Unit::seconds>(
-                        Engine::State().ctx().get<Time>().engine_constructor_start)) {
+        int Message::execute() {
+            std::cout << name << std::endl;
+            return 1;
+        }
+
+        Info::Info(std::string message) : Message("Info", "\033[1;32m", message,
+                                                  Time::Point::Now().duration<Time::Unit::seconds>(
+                                                          Engine::State().ctx().get<Time>().engine_constructor_start)) {}
+
+        void Info::enqueue() {
             if (Engine::State().ctx().get<LogLevel>() < LogLevel::Info) return;
-            Engine::State().ctx().get<CommandBufferNext>().emplace_back(
-                    std::make_shared<Message>(name, "\033[1;32m", message, time_stamp));
+            Message::enqueue();
         }
 
-        int Info::execute() {
-            return Message(name, "\033[1;32m", message, time_stamp).execute();
-        }
+        Warn::Warn(std::string message) : Message("Warn", "\033[1;33m", message,
+                                                  Time::Point::Now().duration<Time::Unit::seconds>(
+                                                          Engine::State().ctx().get<Time>().engine_constructor_start)) {}
 
-        Warn::Warn(std::string message) : Command("Warn"), message(message), time_stamp(
-                Time::Point::Now().duration<Time::Unit::seconds>(
-                        Engine::State().ctx().get<Time>().engine_constructor_start)) {
+        void Warn::enqueue() {
             if (Engine::State().ctx().get<LogLevel>() < LogLevel::Warn) return;
-            Engine::State().ctx().get<CommandBufferNext>().emplace_back(
-                    std::make_shared<Message>(name, "\033[1;33m", message, time_stamp));
+            Message::enqueue();
         }
 
-        int Warn::execute() {
-            return Message(name, "\033[1;33m", message, time_stamp).execute();
-        }
+        Error::Error(std::string message) : Message("Error", "\033[1;31m", message,
+                                                    Time::Point::Now().duration<Time::Unit::seconds>(
+                                                            Engine::State().ctx().get<Time>().engine_constructor_start)) {}
 
-        Error::Error(std::string message) : Command("Error"), message(message), time_stamp(
-                Time::Point::Now().duration<Time::Unit::seconds>(
-                        Engine::State().ctx().get<Time>().engine_constructor_start)) {
+        void Error::enqueue() {
             if (Engine::State().ctx().get<LogLevel>() < LogLevel::Error) return;
-            Engine::State().ctx().get<CommandBufferNext>().emplace_back(
-                    std::make_shared<Message>(name, "\033[1;31m", message, time_stamp));
+            Message::enqueue();
         }
 
-        int Error::execute() {
-            return Message(name, "\033[1;31m", message, time_stamp).execute();
-        }
+        TODO::TODO(std::string message) : Message("\033[1;31m TODO \033[0m", "\033[1;33m", message,
+                                                  Time::Point::Now().duration<Time::Unit::seconds>(
+                                                          Engine::State().ctx().get<Time>().engine_constructor_start)) {}
 
-        TODO::TODO(std::string message) : Command("TODO"), message(message), time_stamp(
-                Time::Point::Now().duration<Time::Unit::seconds>(
-                        Engine::State().ctx().get<Time>().engine_constructor_start)) {
-            Engine::State().ctx().get<CommandBufferNext>().emplace_back(
-                    std::make_shared<Message>("\033[1;31m" + name + "\033[0m", "\033[1;33m", message, time_stamp));
-        }
-
-        int TODO::execute() {
-            return Message("\033[1;31m" + name + "\033[0m", "\033[1;33m", message, time_stamp).execute();
+        void TODO::enqueue() {
+            Message::enqueue();
         }
     }
 

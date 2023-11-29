@@ -4,16 +4,8 @@
 
 #include "Engine.h"
 #include "Commands.h"
-#include "Factories.h"
-#include "Platform.h"
+#include "Components.h"
 #include "Systems.h"
-#include "GLFW/glfw3.h"
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-#include "vulkan/vulkan.h"
-
-#include <iostream>
 
 namespace Bcg {
     Engine::Engine() {
@@ -30,12 +22,16 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
-        auto &time = Engine::Context().emplace<Time>();
-        time.engine_constructor_start = Time::Point::Now();
+
 
         auto *current = &Engine::Context().emplace<CommandBufferCurrent>();
         auto *next = &Engine::Context().emplace<CommandBufferNext>();
         Engine::Context().emplace<CommandDoubleBuffer>(current, next);
+
+        System::Timer::add_system();
+
+        auto &time = Engine::Context().get<Time>();
+        time.engine_constructor_start = Time::Point::Now();
 
         System::Logger::add_system();
         System::Renderer::add_system();
@@ -44,7 +40,9 @@ namespace Bcg {
         System::UserInput::add_system();
 
         time.engine_constructor_end = Time::Point::Now();
-        Log::Info("Engine: Constructor took " + std::to_string(time.engine_constructor_end.duration<Time::Unit::seconds>(time.engine_constructor_start)) + " seconds");
+        Log::Info("Engine: Constructor took " + std::to_string(
+                time.engine_constructor_end.duration<Time::Unit::seconds>(time.engine_constructor_start)) +
+                  " seconds").enqueue();
     }
 
     Engine::~Engine() {
@@ -76,7 +74,7 @@ namespace Bcg {
         //4. repeat
 
         //startup engine
-        Log::Info("Engine: Startup...");
+        Log::Info("Engine: Startup...").enqueue();
         dispatcher.trigger<Events::Startup<Engine>>();
 
         //execute command buffers for startup
@@ -89,14 +87,34 @@ namespace Bcg {
         double_buffer.current->clear();
         double_buffer.current->swap(*double_buffer.next);
 
-        Log::Info("Engine: Run...");
+        Log::Info("Engine: Run...").enqueue();
         time.mainloop.current = Time::Point::Now();
+        time.simulationloop.avg_duration = time.simulationloop.min_step_size;
+
         while (is_running) {
-            time.mainloop.last = time.mainloop.current;
-            time.mainloop.current = Time::Point::Now();
-            time.mainloop.duration = time.mainloop.current.duration<Time::Unit::seconds>(time.mainloop.last);
-            time.mainloop.avg_duration = time.mainloop.avg_duration * time.mainloop.iter_counter + time.mainloop.duration;
-            time.mainloop.avg_duration /= ++time.mainloop.iter_counter;
+            time.simulationloop.iter_counter = 0;
+            time.simulationloop.accumulator += time.mainloop.duration;
+            while (time.simulationloop.accumulator > time.simulationloop.min_step_size) {
+                time.simulationloop.start = Time::Point::Now();
+                dispatcher.trigger<Events::Update<Engine>>();
+                //execute command buffers for this frame
+
+                for (auto &command: *double_buffer.current) {
+                    command->execute();
+                }
+
+                double_buffer.current->clear();
+                double_buffer.current->swap(*double_buffer.next);
+
+                time.simulationloop.duration = Time::Point::Now().duration<Time::Unit::seconds>(
+                        time.simulationloop.start);
+                time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
+                                                   time.simulationloop.duration;
+                time.simulationloop.avg_duration /= ++time.simulationloop.iter_counter;
+
+                time.simulationloop.accumulator -= std::max(time.simulationloop.duration,
+                                                            time.simulationloop.min_step_size);
+            }
 
             //begin frame to signal everyone interested
             dispatcher.trigger<Events::Begin<Frame>>();
@@ -113,13 +131,14 @@ namespace Bcg {
             dispatcher.trigger<Events::End<Frame>>();
 
             System::Window::Glfw::swap_and_poll_events();
+            System::Timer::update_system();
         }
 
         double_buffer.current->clear();
         double_buffer.next->clear();
 
         //shutdown engine
-        Log::Info("Engine: Shutdown...");
+        Log::Info("Engine: Shutdown...").enqueue();
         dispatcher.trigger<Events::Shutdown<Engine>>();
         time.engine_run_end = Time::Point::Now();
     }

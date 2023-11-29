@@ -89,6 +89,6 @@ namespace Bcg::System::Gui {
 #ifndef __APPLE__
         ImGui_ImplOpenGL3_Init();
 #endif
-        Log::Info("SystemGui: Create DearImGui context");
+        Log::Info("SystemGui: Create DearImGui context").enqueue();
     }
 }

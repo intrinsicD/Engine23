@@ -10,5 +10,6 @@
 #include "SystemUserInput.h"
 #include "SystemRenderer.h"
 #include "SystemDearImGui.h"
+#include "SystemTimer.h"
 
 #endif //ENGINE23_SYSTEMS_H

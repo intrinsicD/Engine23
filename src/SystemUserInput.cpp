@@ -12,18 +12,18 @@ namespace Bcg::System::UserInput {
     void add_system() {
         if (!Engine::Context().find<Input>()) {
             Engine::Context().emplace<Input>();
-            Log::Info("SystemUserInput: Added Input Component to Context");
+            Log::Info("SystemUserInput: Added Input Component to Context").enqueue();
         }
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Log::Info("SystemUserInput: Added");
+        Log::Info("SystemUserInput: Added").enqueue();
     }
 
     void remove_system() {
         if (Engine::Context().find<Input>()) {
             Engine::Context().erase<Input>();
-            Log::Info("SystemUserInput: Removed Input Component from Context");
+            Log::Info("SystemUserInput: Removed Input Component from Context").enqueue();
         }
-        Log::Info("SystemUserInput: Removed");
+        Log::Info("SystemUserInput: Removed").enqueue();
     }
 
     static bool show_gui = false;
@@ -57,19 +57,17 @@ namespace Bcg::System::UserInput {
 
         if (show_gui) {
             double_buffer.current->emplace_back(std::make_shared<TaskCommand>("GuiWindow", [&]() {
-                auto &input = Engine::Context().get<Input>();
                 if (ImGui::Begin("Input", &show_gui)) {
-                    auto &mouse = input.mouse;
+                    auto &input = Engine::Context().get<Input>();
                     if (ImGui::CollapsingHeader("Mouse")) {
                         ImGui::Indent();
-                        RenderGuiMouse(mouse);
+                        RenderGuiMouse(input.mouse);
                         ImGui::Unindent();
                     }
 
-                    auto &keyboard = input.keyboard;
                     if (ImGui::CollapsingHeader("Keyboard")) {
                         ImGui::Indent();
-                        RenderGuiKeyboard(keyboard);
+                        RenderGuiKeyboard(input.keyboard);
                         ImGui::Unindent();
                     }
                 }

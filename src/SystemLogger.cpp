@@ -11,15 +11,15 @@ namespace Bcg::System::Logger{
         auto *engine = Engine::Instance();
         if(!engine->state.ctx().find<LogLevel>()){
             engine->state.ctx().emplace<LogLevel>();
-            Log::Info("SystemLogger: Added LogLevel::Info to Context");
+            Log::Info("SystemLogger: Added LogLevel::Info to Context").enqueue();
 
             set_log_level(LogLevel::Info);
         }
     }
 
     void remove_system(){
-        Log::Info("SystemLogger: Removed");
-        Log::TODO("SystemLogger: figure our enabling and disabling logging");
+        Log::Info("SystemLogger: Removed").enqueue();
+        Log::TODO("SystemLogger: figure our enabling and disabling logging").enqueue();
     }
 
     void set_log_level(LogLevel level){
@@ -38,6 +38,6 @@ namespace Bcg::System::Logger{
                 level_str = "Error";
                 break;
         }
-        Log::Info("SystemLogger: Set LogLevel to " + level_str);
+        Log::Info("SystemLogger: Set LogLevel to " + level_str).enqueue();
     }
 }

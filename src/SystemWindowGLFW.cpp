@@ -14,25 +14,25 @@ namespace Bcg::System::Window::Glfw {
         auto *engine = Engine::Instance();
 
         glfwSetErrorCallback([](int error, const char *description) {
-            Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).execute();
+            Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).enqueue();
         });
 
         if (!glfwInit()) {
-            Log::Error("SystemWindow: Failed to initialize GLFW");
+            Log::Error("SystemWindow: Failed to initialize GLFW").enqueue();
             return;
         }
 
         engine->dispatcher.sink<Events::Startup<Engine>>().connect<System::Window::Glfw::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::Glfw::on_shutdown_engine>();
 
-        Log::Info("SystemWindow: Added");
+        Log::Info("SystemWindow: Added").enqueue();
     }
 
     void remove_system() {
         auto *engine = Engine::Instance();
         engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<System::Window::Glfw::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<System::Window::Glfw::on_shutdown_engine>();
-        Log::Info("SystemWindow: Removed");
+        Log::Info("SystemWindow: Removed").enqueue();
 
         glfwTerminate();
     }
@@ -72,10 +72,10 @@ namespace Bcg::System::Window::Glfw {
 
     void on_startup_engine(const Events::Startup<Engine> &event) {
         if (Engine::Instance()->state.ctx().find<WindowConfig>()) {
-            Log::Warn("SystemWindow: Already started");
+            Log::Warn("SystemWindow: Already started").enqueue();
             return;
         } else {
-            Log::Info("SystemWindow: Started");
+            Log::Info("SystemWindow: Started").enqueue();
             Engine::Instance()->state.ctx().emplace<WindowConfig>();
         }
         auto *engine = Engine::Instance();
@@ -93,13 +93,14 @@ namespace Bcg::System::Window::Glfw {
         }
 
         window_config.dpi = GetDpiScale();
-        Log::Info("SystemWindow: Detected DPI: " + std::to_string(window_config.dpi));
+        Log::Info("SystemWindow: Detected DPI: " + std::to_string(window_config.dpi)).enqueue();
 
 
         auto *window = glfwCreateWindow(window_config.width, window_config.height, window_config.title.c_str(),
                                         nullptr, nullptr);
         glfwSetWindowUserPointer(window, engine);
         glfwMakeContextCurrent(window);
+        glfwSwapInterval(1);
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow *window) {
             auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
@@ -147,10 +148,10 @@ namespace Bcg::System::Window::Glfw {
 
     void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
         if (!Engine::Instance()->state.ctx().find<WindowConfig>()) {
-            Log::Error("SystemWindow: Not started");
+            Log::Error("SystemWindow: Not started").enqueue();
             return;
         } else {
-            Log::Info("SystemWindow: Stopped");
+            Log::Info("SystemWindow: Stopped").enqueue();
             Engine::Instance()->state.ctx().erase<WindowConfig>();
         }
         glfwDestroyWindow(glfwGetCurrentContext());

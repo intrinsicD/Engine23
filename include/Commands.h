@@ -102,48 +102,49 @@ namespace Bcg {
     };
 
     namespace Log {
-        struct Info : public Command {
+        struct Message : public Command {
+            explicit Message(std::string type, std::string color, std::string message, double time_stamp);
+
+            explicit Message(std::string name);
+
+            ~Message() override = default;
+
+            virtual void enqueue();
+
+            int execute() override;
+
+        };
+
+        struct Info : public Message {
             explicit Info(std::string message);
 
             ~Info() override = default;
 
-            int execute() override;
-
-            std::string message;
-            double time_stamp;
+            void enqueue() override;
         };
 
-        struct Warn : public Command {
+        struct Warn : public Message {
             explicit Warn(std::string message);
 
             ~Warn() override = default;
 
-            int execute() override;
-
-            std::string message;
-            double time_stamp;
+            void enqueue() override;
         };
 
-        struct Error : public Command {
+        struct Error : public Message {
             explicit Error(std::string message);
 
             ~Error() override = default;
 
-            int execute() override;
-
-            std::string message;
-            double time_stamp;
+            void enqueue() override;
         };
 
-        struct TODO : public Command {
+        struct TODO : public Message {
             explicit TODO(std::string message);
 
             ~TODO() override = default;
 
-            int execute() override;
-
-            std::string message;
-            double time_stamp;
+            void enqueue() override;
         };
     }
 }

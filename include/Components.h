@@ -70,8 +70,13 @@ namespace Bcg {
     struct Frame {
     };
     struct Command;
+
     struct CommandBuffer : public std::vector<std::shared_ptr<Command>> {
         using std::vector<std::shared_ptr<Command>>::vector;
+
+        void clear_and_swap() {
+            std::vector<std::shared_ptr<Command>>().swap(*this);
+        }
     };
 
     struct CommandBufferCurrent : public CommandBuffer {
@@ -82,7 +87,7 @@ namespace Bcg {
         using CommandBuffer::CommandBuffer;
     };
 
-    struct CommandDoubleBuffer{
+    struct CommandDoubleBuffer {
         CommandBufferCurrent *current;
         CommandBufferNext *next;
     };
@@ -141,6 +146,15 @@ namespace Bcg {
             int fps = 0;
             int avg_fps = 0;
         } mainloop;
+
+        struct SimulationLoop{
+            Point start;
+            double avg_duration = 0;
+            double duration = 0;
+            size_t iter_counter = 0;
+            double min_step_size = 1.0 / 3000000;
+            double accumulator = 0;
+        }simulationloop;
     };
 
     template<>

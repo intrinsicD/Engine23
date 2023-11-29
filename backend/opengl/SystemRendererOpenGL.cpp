@@ -17,7 +17,7 @@ namespace Bcg::System::Renderer {
     void add_system() {
         auto *opengl_config = Engine::Context().find<OpenGLConfig>();
         if (!opengl_config) {
-/*            Log::Error("SystemRenderer: OpenGLConfig not found");*/
+/*            Log::Error("SystemRenderer: OpenGLConfig not found").enqueue();*/
             opengl_config = &Engine::Context().emplace<OpenGLConfig>();
         }
 
@@ -41,7 +41,7 @@ namespace Bcg::System::Renderer {
         int version = gladLoadGL(glfwGetProcAddress);
 
         if (!version) {
-            Log::Error("Failed to initialize OpenGL context");
+            Log::Error("Failed to initialize OpenGL context").enqueue();
             return;
         }
 
@@ -49,17 +49,17 @@ namespace Bcg::System::Renderer {
         opengl_config.major = GLAD_VERSION_MAJOR(version);;
         opengl_config.minor = GLAD_VERSION_MINOR(version);
         if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
-            Log::Error("SystemRenderer: OpenGL version not supported");
+            Log::Error("SystemRenderer: OpenGL version not supported").enqueue();
             return;
         } else {
             opengl_config.vendor = (const char *) glGetString(GL_VENDOR);
             opengl_config.renderer = (const char *) glGetString(GL_RENDERER);
             opengl_config.version = (const char *) glGetString(GL_VERSION);
             opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-            Log::Info("SystemRenderer: OpenGL vendor: " + opengl_config.vendor);
-            Log::Info("SystemRenderer: OpenGL renderer: " + opengl_config.renderer);
-            Log::Info("SystemRenderer: OpenGL version: " + opengl_config.version);
-            Log::Info("SystemRenderer: OpenGL GLSL version: " + opengl_config.glsl_version);
+            Log::Info("SystemRenderer: OpenGL vendor: " + opengl_config.vendor).enqueue();
+            Log::Info("SystemRenderer: OpenGL renderer: " + opengl_config.renderer).enqueue();
+            Log::Info("SystemRenderer: OpenGL version: " + opengl_config.version).enqueue();
+            Log::Info("SystemRenderer: OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
         }
         auto &bg = Engine::Context().get<WindowConfig>().background_color;
         glClearColor(bg[0], bg[1], bg[2], bg[3]);
