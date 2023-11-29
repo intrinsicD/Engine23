@@ -92,10 +92,12 @@ namespace Bcg {
         time.simulationloop.avg_duration = time.simulationloop.min_step_size;
 
         while (is_running) {
-            time.simulationloop.iter_counter = 0;
-            time.simulationloop.accumulator += time.mainloop.duration;
+            System::Timer::begin_main_loop(time);
+/*            time.simulationloop.iter_counter = 0;
+            time.simulationloop.accumulator += time.mainloop.duration;*/
             while (time.simulationloop.accumulator > time.simulationloop.min_step_size) {
-                time.simulationloop.start = Time::Point::Now();
+                System::Timer::begin_simulation_loop(time);
+
                 dispatcher.trigger<Events::Update<Engine>>();
                 //execute command buffers for this frame
 
@@ -106,14 +108,7 @@ namespace Bcg {
                 double_buffer.current->clear();
                 double_buffer.current->swap(*double_buffer.next);
 
-                time.simulationloop.duration = Time::Point::Now().duration<Time::Unit::seconds>(
-                        time.simulationloop.start);
-                time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
-                                                   time.simulationloop.duration;
-                time.simulationloop.avg_duration /= ++time.simulationloop.iter_counter;
-
-                time.simulationloop.accumulator -= std::max(time.simulationloop.duration,
-                                                            time.simulationloop.min_step_size);
+                System::Timer::end_simulation_loop(time);
             }
 
             //begin frame to signal everyone interested
@@ -131,7 +126,7 @@ namespace Bcg {
             dispatcher.trigger<Events::End<Frame>>();
 
             System::Window::Glfw::swap_and_poll_events();
-            System::Timer::update_system();
+            System::Timer::end_main_loop(time);
         }
 
         double_buffer.current->clear();

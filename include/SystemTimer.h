@@ -13,7 +13,13 @@ namespace Bcg::System::Timer{
 
     void remove_system();
 
-    void update_system();
+    void begin_main_loop(Time &time);
+
+    void end_main_loop(Time &time);
+
+    void begin_simulation_loop(Time &time);
+
+    void end_simulation_loop(Time &time);
 
     void on_startup(const Events::Startup<Engine> &event);
 

@@ -20,8 +20,12 @@ namespace Bcg::System::Timer {
         Engine::Context().erase<Time>();
     }
 
-    void update_system() {
-        auto &time = Engine::Context().emplace<Time>();
+    void begin_main_loop(Time &time){
+        time.simulationloop.iter_counter = 0;
+        time.simulationloop.accumulator += time.mainloop.duration;
+    }
+
+    void end_main_loop(Time &time) {
         time.mainloop.last = time.mainloop.current;
         time.mainloop.current = Time::Point::Now();
         time.mainloop.duration = time.mainloop.current.duration<Time::Unit::seconds>(time.mainloop.last);
@@ -31,9 +35,26 @@ namespace Bcg::System::Timer {
         time.mainloop.avg_fps = 1.0f / time.mainloop.avg_duration;
     }
 
+    void begin_simulation_loop(Time &time){
+        time.simulationloop.start = Time::Point::Now();
+    }
+
+    void end_simulation_loop(Time &time){
+        time.simulationloop.duration = Time::Point::Now().duration<Time::Unit::seconds>(
+                time.simulationloop.start);
+        time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
+                                           time.simulationloop.duration;
+        time.simulationloop.avg_duration /= ++time.simulationloop.iter_counter;
+
+        time.simulationloop.accumulator -= std::max(time.simulationloop.duration,
+                                                    time.simulationloop.min_step_size);
+    }
+
     void on_startup(const Events::Startup<Engine> &event) {
-        auto &time = Engine::Context().emplace<Time>();
+        auto &time = Engine::Context().get<Time>();
+        time.engine_run_start = Time::Point::Now();
         time.mainloop.current = Time::Point::Now();
+        time.simulationloop.avg_duration = time.simulationloop.min_step_size;
     }
 
     static bool show_gui = true;
