@@ -8,6 +8,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         SystemDearImGui.cpp
         SystemWindowGLFW.cpp
         SystemTimer.cpp
+        SystemParallelProcessing.cpp
         SystemVulkan.cpp
         Factories.cpp
         main.cpp)

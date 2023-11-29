@@ -142,6 +142,14 @@ namespace Bcg::System::Window::Glfw {
             if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
             input.keyboard.keys[key] = action == GLFW_PRESS;
         });
+        glfwSetDropCallback(window, [](GLFWwindow *window, int count, const char **paths) {
+            auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            auto &input = engine->state.ctx().get<Input>();
+            input.drop.paths.clear();
+            for (int i = 0; i < count; ++i) {
+                input.drop.paths.emplace_back(paths[i]);
+            }
+        });
 
         Gui::add_to_window(window);
     }

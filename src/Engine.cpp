@@ -38,6 +38,7 @@ namespace Bcg {
         System::Window::Glfw::add_system();
         System::Gui::add_system();
         System::UserInput::add_system();
+        System::ParallelProcessing::add_system();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info("Engine: Constructor took " + std::to_string(
@@ -46,6 +47,7 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
+        System::ParallelProcessing::remove_system();
         System::UserInput::remove_system();
         System::Window::Glfw::remove_system();
         System::Logger::remove_system();
@@ -99,14 +101,6 @@ namespace Bcg {
                 System::Timer::begin_simulation_loop(time);
 
                 dispatcher.trigger<Events::Update<Engine>>();
-                //execute command buffers for this frame
-
-                for (auto &command: *double_buffer.current) {
-                    command->execute();
-                }
-
-                double_buffer.current->clear();
-                double_buffer.current->swap(*double_buffer.next);
 
                 System::Timer::end_simulation_loop(time);
             }

@@ -12,25 +12,9 @@
 
 
 namespace Bcg::System::Gui {
-
-    static bool show_demo_imgui = true;
-    static entt::entity entity_menu;
-
     void add_system() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&on_shutdown_engine>();
-
-        entity_menu = Engine::State().create();
-
-        Engine::State().emplace<std::shared_ptr<GuiCommand>>(entity_menu,
-                                                             std::make_shared<GuiCommand>("RenderMenu", [&]() {
-                                                                 if (ImGui::BeginMenu("Menu")) {
-                                                                     ImGui::MenuItem("Show Demo Window", nullptr,
-                                                                                     &show_demo_imgui);
-                                                                     ImGui::EndMenu();
-                                                                 }
-                                                                 return 1;
-                                                             }));
     }
 
     void remove_system() {
@@ -52,6 +36,8 @@ namespace Bcg::System::Gui {
         Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
     }
 
+    static bool show_demo_imgui = true;
+
     void on_begin_frame(const Events::Begin<Frame> &event) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -59,10 +45,17 @@ namespace Bcg::System::Gui {
         ImGui::BeginMainMenuBar();
 
         auto &double_buffer = Engine::State().ctx().get<CommandDoubleBuffer>();
-        double_buffer.current->emplace_back(Engine::State().get<std::shared_ptr<GuiCommand>>(entity_menu));
+        double_buffer.enqueue_next(std::make_shared<GuiCommand>("RenderMenu", [&]() {
+            if (ImGui::BeginMenu("Menu")) {
+                ImGui::MenuItem("Show Demo Window", nullptr,
+                                &show_demo_imgui);
+                ImGui::EndMenu();
+            }
+            return 1;
+        }));
 
         if (show_demo_imgui) {
-            double_buffer.current->emplace_back(std::make_shared<TaskCommand>("GuiCommand", [&]() {
+            double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiCommand", [&]() {
                 ImGui::ShowDemoWindow(&show_demo_imgui);
                 return 1;
             }));

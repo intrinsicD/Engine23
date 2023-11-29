@@ -21,11 +21,11 @@ namespace Bcg::System::Timer{
 
     void end_simulation_loop(Time &time);
 
+    void render_gui(Time &time);
+
     void on_startup(const Events::Startup<Engine> &event);
 
     void on_begin_frame(const Events::Begin<Frame> &event);
-
-    void on_end_frame(const Events::End<Frame> &event);
 }
 
 #endif //ENGINE23_SYSTEMTIMER_H

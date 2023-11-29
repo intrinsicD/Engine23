@@ -9,6 +9,7 @@ namespace Bcg{
     class Engine;
     struct Frame;
     struct CommandBuffer;
+    struct Command;
     struct Time;
     enum class LogLevel{
         Error = 0, Warn = 1, Info = 2

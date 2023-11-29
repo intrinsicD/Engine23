@@ -65,6 +65,9 @@ namespace Bcg {
         struct Keyboard {
             std::vector<bool> keys;
         } keyboard;
+        struct Drop{
+            std::vector<std::string> paths;
+        } drop;
     };
 
     struct Frame {
@@ -90,6 +93,18 @@ namespace Bcg {
     struct CommandDoubleBuffer {
         CommandBufferCurrent *current;
         CommandBufferNext *next;
+        std::mutex currentMutex;
+        std::mutex nextMutex;
+
+        void enqueue_current(std::shared_ptr<Command> command) {
+            std::unique_lock<std::mutex> lock(currentMutex);
+            current->emplace_back(std::move(command));
+        }
+
+        void enqueue_next(std::shared_ptr<Command> command) {
+            std::unique_lock<std::mutex> lock(nextMutex);
+            next->emplace_back(std::move(command));
+        }
     };
 
     struct CommandBufferSuccessCounter {
@@ -193,7 +208,7 @@ namespace Bcg {
 
         std::mutex queueMutex;
         std::condition_variable condition;
-        bool stop = true;
+        bool stop = false;
     };
 
     class Entity {

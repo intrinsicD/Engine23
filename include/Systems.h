@@ -11,5 +11,6 @@
 #include "SystemRenderer.h"
 #include "SystemDearImGui.h"
 #include "SystemTimer.h"
+#include "SystemParallelProcessing.h"
 
 #endif //ENGINE23_SYSTEMS_H

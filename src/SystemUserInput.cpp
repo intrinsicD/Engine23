@@ -47,7 +47,7 @@ namespace Bcg::System::UserInput {
 
     void on_begin_frame(const Events::Begin<Frame> &event) {
         auto &double_buffer = Engine::State().ctx().get<CommandDoubleBuffer>();
-        double_buffer.current->emplace_back(std::make_shared<TaskCommand>("GuiMenu", [&]() {
+        double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiMenu", [&]() {
             if (ImGui::BeginMenu("Menu")) {
                 ImGui::MenuItem("Input", nullptr, &show_gui);
                 ImGui::EndMenu();
@@ -56,7 +56,7 @@ namespace Bcg::System::UserInput {
         }));
 
         if (show_gui) {
-            double_buffer.current->emplace_back(std::make_shared<TaskCommand>("GuiWindow", [&]() {
+            double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiWindow", [&]() {
                 if (ImGui::Begin("Input", &show_gui)) {
                     auto &input = Engine::Context().get<Input>();
                     if (ImGui::CollapsingHeader("Mouse")) {

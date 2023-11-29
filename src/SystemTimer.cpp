@@ -13,14 +13,13 @@ namespace Bcg::System::Timer {
         Engine::Context().emplace<Time>();
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
     }
 
     void remove_system() {
         Engine::Context().erase<Time>();
     }
 
-    void begin_main_loop(Time &time){
+    void begin_main_loop(Time &time) {
         time.simulationloop.iter_counter = 0;
         time.simulationloop.accumulator += time.mainloop.duration;
     }
@@ -35,11 +34,11 @@ namespace Bcg::System::Timer {
         time.mainloop.avg_fps = 1.0f / time.mainloop.avg_duration;
     }
 
-    void begin_simulation_loop(Time &time){
+    void begin_simulation_loop(Time &time) {
         time.simulationloop.start = Time::Point::Now();
     }
 
-    void end_simulation_loop(Time &time){
+    void end_simulation_loop(Time &time) {
         time.simulationloop.duration = Time::Point::Now().duration<Time::Unit::seconds>(
                 time.simulationloop.start);
         time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
@@ -59,14 +58,32 @@ namespace Bcg::System::Timer {
 
     static bool show_gui = true;
 
+    void render_gui(Time &time) {
+        ImGui::Text("Mainloop: %f", time.mainloop.duration);
+        ImGui::Text("Avg: %f", time.mainloop.avg_duration);
+        ImGui::Text("FPS: %d", time.mainloop.fps);
+        ImGui::Text("Avg FPS: %d", time.mainloop.avg_fps);
+        ImGui::Text("Iter: %zu", time.mainloop.iter_counter);
+        ImGui::Separator();
+        ImGui::Text("Sim. duration: %f", time.simulationloop.duration);
+        ImGui::Text("Sim. avg duration: %f", time.simulationloop.avg_duration);
+        ImGui::Text("Sim. Iter: %zu", time.simulationloop.iter_counter);
+        auto min_step_size = 1.0 / time.simulationloop.min_step_size;
+        if (ImGui::InputDouble("Sim. min_step_size (Hz):", &min_step_size)) {
+            if (min_step_size > 0 && min_step_size < 3000001) {
+                time.simulationloop.min_step_size = 1.0 / min_step_size;
+            }
+        }
+    }
+
     void on_begin_frame(const Events::Begin<Frame> &event) {
-/*        Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(
+/*        Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
                 std::make_shared<TaskCommand>("UpdateSystemTimer", [&]() {
                     update_system();
                     return 1;
                 }));*/
 
-        Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(
+        Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
                 std::make_shared<TaskCommand>("RenderMenu", [&]() {
                     if (ImGui::BeginMenu("Menu")) {
                         ImGui::MenuItem("Timer", nullptr, &show_gui);
@@ -75,38 +92,15 @@ namespace Bcg::System::Timer {
                     return 1;
                 }));
 
-        if(show_gui){
-            Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(
+        if (show_gui) {
+            Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
                     std::make_shared<TaskCommand>("RenderGui", [&]() {
                         if (ImGui::Begin("Timer", &show_gui)) {
-                            auto &time = Engine::Context().get<Time>();
-                            ImGui::Text("Mainloop: %f", time.mainloop.duration);
-                            ImGui::Text("Avg: %f", time.mainloop.avg_duration);
-                            ImGui::Text("FPS: %d", time.mainloop.fps);
-                            ImGui::Text("Avg FPS: %d", time.mainloop.avg_fps);
-                            ImGui::Text("Iter: %zu", time.mainloop.iter_counter);
-                            ImGui::Separator();
-                            ImGui::Text("Sim. duration: %f", time.simulationloop.duration);
-                            ImGui::Text("Sim. avg duration: %f", time.simulationloop.avg_duration);
-                            ImGui::Text("Sim. Iter: %zu", time.simulationloop.iter_counter);
-                            auto min_step_size = 1.0 / time.simulationloop.min_step_size;
-                            if(ImGui::InputDouble("Sim. min_step_size (Hz):", &min_step_size)){
-                                if(min_step_size > 0 && min_step_size < 3000001){
-                                    time.simulationloop.min_step_size = 1.0 / min_step_size;
-                                }
-                            }
+                            render_gui(Engine::Context().get<Time>());
                         }
                         ImGui::End();
                         return 1;
                     }));
         }
-    }
-
-    void on_end_frame(const Events::End<Frame> &event) {
-/*        Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(
-                std::make_shared<TaskCommand>("UpdateSystemTimer", [&]() {
-                    update_system();
-                    return 1;
-                }));*/
     }
 }

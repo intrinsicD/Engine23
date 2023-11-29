@@ -56,9 +56,9 @@ namespace Bcg {
     ParallelCommands::ParallelCommands(std::string name) : CompositeCommand(std::move(name)) {}
 
     int ParallelCommands::execute() {
-        auto *worker_pool_manager = ManagerFactory::create_or_get_worker_pool_manager();
-        worker_pool_manager->push_tasks(commands);
-        return commands.size();
+        auto size = commands.size();
+        System::ParallelProcessing::enqueue_parallel(commands);
+        return size;
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -110,7 +110,8 @@ namespace Bcg {
         Message::Message(std::string name) : Command(std::move(name)) {}
 
         void Message::enqueue() {
-           Engine::Context().get<CommandDoubleBuffer>().current->emplace_back(std::make_shared<Message>(name));
+            auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
+            double_buffer.enqueue_next(std::make_shared<Message>(name));
         }
 
         int Message::execute() {
