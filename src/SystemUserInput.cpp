@@ -46,7 +46,7 @@ namespace Bcg::System::UserInput {
     }
 
     void on_begin_frame(const Events::Begin<Frame> &event) {
-        auto &double_buffer = Engine::State().ctx().get<CommandDoubleBuffer>();
+        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
         double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiMenu", [&]() {
             if (ImGui::BeginMenu("Menu")) {
                 ImGui::MenuItem("Input", nullptr, &show_gui);

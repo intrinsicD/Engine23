@@ -10,6 +10,11 @@
 #include "SystemDearImGui.h"
 
 namespace Bcg::System::Window::Glfw {
+
+    void on_end_main_loop(const Events::End<MainLoop> &event) {
+        swap_and_poll_events();
+    }
+
     void add_system() {
         auto *engine = Engine::Instance();
 
@@ -24,6 +29,7 @@ namespace Bcg::System::Window::Glfw {
 
         engine->dispatcher.sink<Events::Startup<Engine>>().connect<System::Window::Glfw::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::Glfw::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::End<MainLoop>>().connect<System::Window::Glfw::on_end_main_loop>();
 
         Log::Info("SystemWindow: Added").enqueue();
     }

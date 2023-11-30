@@ -65,7 +65,7 @@ namespace Bcg {
         struct Keyboard {
             std::vector<bool> keys;
         } keyboard;
-        struct Drop{
+        struct Drop {
             std::vector<std::string> paths;
         } drop;
     };
@@ -91,20 +91,38 @@ namespace Bcg {
     };
 
     struct CommandDoubleBuffer {
-        CommandBufferCurrent *current;
-        CommandBufferNext *next;
+        CommandDoubleBuffer(CommandBuffer *current, CommandBuffer *next) : p_current(current), p_next(next) {}
+
+        CommandBuffer *p_current;
+        CommandBuffer *p_next;
         std::mutex currentMutex;
         std::mutex nextMutex;
 
         void enqueue_current(std::shared_ptr<Command> command) {
             std::unique_lock<std::mutex> lock(currentMutex);
-            current->emplace_back(std::move(command));
+            p_current->emplace_back(std::move(command));
         }
 
         void enqueue_next(std::shared_ptr<Command> command) {
             std::unique_lock<std::mutex> lock(nextMutex);
-            next->emplace_back(std::move(command));
+            p_next->emplace_back(std::move(command));
         }
+
+        void clear_and_swap() {
+            std::unique_lock<std::mutex> lock_curr(currentMutex);
+            std::unique_lock<std::mutex> lock_next(nextMutex);
+            p_current->clear_and_swap();
+            std::swap(p_current, p_next);
+        }
+    };
+
+    struct RenderCommandDoubleBuffer : public CommandDoubleBuffer {
+        RenderCommandDoubleBuffer(CommandBuffer *current, CommandBuffer *next) : CommandDoubleBuffer(current, next) {}
+    };
+
+    struct SimulationCommandDoubleBuffer : public CommandDoubleBuffer {
+        SimulationCommandDoubleBuffer(CommandBuffer *current, CommandBuffer *next) : CommandDoubleBuffer(current,
+                                                                                                         next) {}
     };
 
     struct CommandBufferSuccessCounter {
@@ -162,14 +180,14 @@ namespace Bcg {
             int avg_fps = 0;
         } mainloop;
 
-        struct SimulationLoop{
+        struct SimulationLoop {
             Point start;
             double avg_duration = 0;
             double duration = 0;
             size_t iter_counter = 0;
             double min_step_size = 1.0 / 3000000;
             double accumulator = 0;
-        }simulationloop;
+        } simulationloop;
     };
 
     template<>

@@ -8,15 +8,31 @@
 #include "Systems.h"
 
 namespace Bcg {
-
-    void on_update_command_double_buffer(const Events::Update<CommandDoubleBuffer> &event) {
-        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
-        for (auto &command: *double_buffer.current) {
+    void on_update_simulation_command_double_buffer(const Events::Update<SimulationCommandDoubleBuffer> &event) {
+        auto &double_buffer = Engine::Context().get<SimulationCommandDoubleBuffer>();
+        for (auto &command: *double_buffer.p_current) {
             command->execute();
         }
 
-        double_buffer.current->clear();
-        double_buffer.current->swap(*double_buffer.next);
+        double_buffer.clear_and_swap();
+    }
+
+    void on_update_render_command_double_buffer(const Events::Update<RenderCommandDoubleBuffer> &event) {
+        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
+        for (auto &command: *double_buffer.p_current) {
+            command->execute();
+        }
+
+        double_buffer.clear_and_swap();
+    }
+
+    void on_update_command_double_buffer(const Events::Update<CommandDoubleBuffer> &event) {
+        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
+        for (auto &command: *double_buffer.p_current) {
+            command->execute();
+        }
+
+        double_buffer.clear_and_swap();
     }
 
     Engine::Engine() {
@@ -33,12 +49,21 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
+        dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&on_update_simulation_command_double_buffer>();
+        dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&on_update_render_command_double_buffer>();
         dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&on_update_command_double_buffer>();
 
+        auto *command_buffer_current = &state.emplace<CommandBuffer>(state.create());
+        auto *command_buffer_next = &state.emplace<CommandBuffer>(state.create());
+        Engine::Context().emplace<CommandDoubleBuffer>(command_buffer_current, command_buffer_next);
 
-        auto *current = &Engine::Context().emplace<CommandBufferCurrent>();
-        auto *next = &Engine::Context().emplace<CommandBufferNext>();
-        Engine::Context().emplace<CommandDoubleBuffer>(current, next);
+        auto *simulation_command_buffer_current = &state.emplace<CommandBuffer>(state.create());
+        auto *simulation_command_buffer_next = &state.emplace<CommandBuffer>(state.create());
+        Engine::Context().emplace<SimulationCommandDoubleBuffer>(simulation_command_buffer_current, simulation_command_buffer_next);
+
+        auto *render_command_buffer_current = &state.emplace<CommandBuffer>(state.create());
+        auto *render_command_buffer_next = &state.emplace<CommandBuffer>(state.create());
+        Engine::Context().emplace<RenderCommandDoubleBuffer>(render_command_buffer_current, render_command_buffer_next);
 
         System::Timer::add_system();
 
@@ -86,38 +111,28 @@ namespace Bcg {
         Log::Info("Engine: Run...").enqueue();
         time.mainloop.current = Time::Point::Now();
         time.simulationloop.avg_duration = time.simulationloop.min_step_size;
+        time.simulationloop.duration = time.simulationloop.min_step_size;
 
         while (is_running) {
-            System::Timer::begin_main_loop(time);
-
             dispatcher.trigger<Events::Begin<MainLoop>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::Update<Input>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
-            while (time.simulationloop.accumulator > time.simulationloop.min_step_size) {
+
+            while (time.simulationloop.accumulator > time.simulationloop.duration) {
                 dispatcher.trigger<Events::Begin<SimulationLoop>>();
-                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
-                System::Timer::begin_simulation_loop(time);
+
                 dispatcher.trigger<Events::Update<SimulationLoop>>();
-                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
-                System::Timer::end_simulation_loop(time);
+                dispatcher.trigger<Events::Update<SimulationCommandDoubleBuffer>>();
+
                 dispatcher.trigger<Events::End<SimulationLoop>>();
-                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             }
 
             dispatcher.trigger<Events::Begin<Frame>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::Render<Frame>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::Render<Gui>>();
+            dispatcher.trigger<Events::Update<RenderCommandDoubleBuffer>>();
             dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::End<Frame>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::End<MainLoop>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
-
-            System::Window::Glfw::swap_and_poll_events();
-            System::Timer::end_main_loop(time);
         }
 
         //shutdown engine

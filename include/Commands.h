@@ -49,12 +49,6 @@ namespace Bcg {
         std::function<int()> task;
     };
 
-    struct GuiCommand : public TaskCommand {
-        GuiCommand(std::string name, std::function<int()> task);
-
-        ~GuiCommand() override = default;
-    };
-
     struct ParallelCommands : public CompositeCommand {
         explicit ParallelCommands(std::string name);
 

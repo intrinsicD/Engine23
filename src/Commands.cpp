@@ -48,11 +48,6 @@ namespace Bcg {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    GuiCommand::GuiCommand(std::string name, std::function<int()> task) : TaskCommand(std::move(name),
-                                                                                      std::move(task)) {}
-
-    //------------------------------------------------------------------------------------------------------------------
-
     ParallelCommands::ParallelCommands(std::string name) : CompositeCommand(std::move(name)) {}
 
     int ParallelCommands::execute() {

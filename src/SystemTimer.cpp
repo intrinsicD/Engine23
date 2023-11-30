@@ -9,10 +9,32 @@
 #include "imgui.h"
 
 namespace Bcg::System::Timer {
+
+    void on_begin_simulation_loop(const Events::Begin<SimulationLoop> &event) {
+        begin_simulation_loop(Engine::Context().get<Time>());
+    }
+
+    void on_end_simulation_loop(const Events::End<SimulationLoop> &event) {
+        end_simulation_loop(Engine::Context().get<Time>());
+    }
+
+    void on_begin_main_loop(const Events::Begin<MainLoop> &event) {
+        begin_main_loop(Engine::Context().get<Time>());
+    }
+
+    void on_end_main_loop(const Events::End<MainLoop> &event) {
+        end_main_loop(Engine::Context().get<Time>());
+    }
+
+
     void add_system() {
         Engine::Context().emplace<Time>();
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
+        Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().connect<&on_begin_simulation_loop>();
+        Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().connect<&on_end_simulation_loop>();
+        Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().connect<&on_begin_main_loop>();
+        Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
     }
 
     void remove_system() {
@@ -44,11 +66,9 @@ namespace Bcg::System::Timer {
         time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
                                            time.simulationloop.duration;
         time.simulationloop.avg_duration /= ++time.simulationloop.iter_counter;
-        time.simulationloop.min_step_size = std::max(time.simulationloop.duration,
+        time.simulationloop.duration = std::max(time.simulationloop.duration,
                                                      time.simulationloop.min_step_size);
-        time.simulationloop.accumulator -= std::max(time.simulationloop.duration,
-                                                    time.simulationloop.min_step_size);
-
+        time.simulationloop.accumulator -= time.simulationloop.duration;
     }
 
     void on_startup(const Events::Startup<Engine> &event) {
@@ -79,13 +99,7 @@ namespace Bcg::System::Timer {
     }
 
     void on_begin_frame(const Events::Begin<Frame> &event) {
-/*        Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
-                std::make_shared<TaskCommand>("UpdateSystemTimer", [&]() {
-                    update_system();
-                    return 1;
-                }));*/
-
-        Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
+        Engine::Context().get<RenderCommandDoubleBuffer>().enqueue_next(
                 std::make_shared<TaskCommand>("RenderMenu", [&]() {
                     if (ImGui::BeginMenu("Menu")) {
                         ImGui::MenuItem("Timer", nullptr, &show_gui);
@@ -95,7 +109,7 @@ namespace Bcg::System::Timer {
                 }));
 
         if (show_gui) {
-            Engine::Context().get<CommandDoubleBuffer>().enqueue_next(
+            Engine::Context().get<RenderCommandDoubleBuffer>().enqueue_next(
                     std::make_shared<TaskCommand>("RenderGui", [&]() {
                         if (ImGui::Begin("Timer", &show_gui)) {
                             render_gui(Engine::Context().get<Time>());

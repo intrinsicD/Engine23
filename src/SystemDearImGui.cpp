@@ -44,8 +44,8 @@ namespace Bcg::System::Gui {
         ImGui::NewFrame();
         ImGui::BeginMainMenuBar();
 
-        auto &double_buffer = Engine::State().ctx().get<CommandDoubleBuffer>();
-        double_buffer.enqueue_next(std::make_shared<GuiCommand>("RenderMenu", [&]() {
+        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
+        double_buffer.enqueue_next(std::make_shared<TaskCommand>("RenderMenu", [&]() {
             if (ImGui::BeginMenu("Menu")) {
                 ImGui::MenuItem("Show Demo Window", nullptr,
                                 &show_demo_imgui);
@@ -55,7 +55,7 @@ namespace Bcg::System::Gui {
         }));
 
         if (show_demo_imgui) {
-            double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiCommand", [&]() {
+            double_buffer.enqueue_next(std::make_shared<TaskCommand>("ShowDemoWindow", [&]() {
                 ImGui::ShowDemoWindow(&show_demo_imgui);
                 return 1;
             }));
