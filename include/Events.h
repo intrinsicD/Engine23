@@ -22,6 +22,11 @@ namespace Bcg::Events{
     };
 
     template<typename T>
+    struct Render{
+
+    };
+
+    template<typename T>
     struct Begin{
 
     };

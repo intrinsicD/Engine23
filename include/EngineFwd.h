@@ -11,6 +11,9 @@ namespace Bcg{
     struct CommandBuffer;
     struct Command;
     struct Time;
+    struct MainLoop;
+    struct SimulationLoop;
+    struct Gui;
     enum class LogLevel{
         Error = 0, Warn = 1, Info = 2
     };

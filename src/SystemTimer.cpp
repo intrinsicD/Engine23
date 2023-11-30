@@ -44,9 +44,11 @@ namespace Bcg::System::Timer {
         time.simulationloop.avg_duration = time.simulationloop.avg_duration * time.simulationloop.iter_counter +
                                            time.simulationloop.duration;
         time.simulationloop.avg_duration /= ++time.simulationloop.iter_counter;
-
+        time.simulationloop.min_step_size = std::max(time.simulationloop.duration,
+                                                     time.simulationloop.min_step_size);
         time.simulationloop.accumulator -= std::max(time.simulationloop.duration,
                                                     time.simulationloop.min_step_size);
+
     }
 
     void on_startup(const Events::Startup<Engine> &event) {

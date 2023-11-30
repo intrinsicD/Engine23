@@ -8,6 +8,17 @@
 #include "Systems.h"
 
 namespace Bcg {
+
+    void on_update_command_double_buffer(const Events::Update<CommandDoubleBuffer> &event) {
+        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
+        for (auto &command: *double_buffer.current) {
+            command->execute();
+        }
+
+        double_buffer.current->clear();
+        double_buffer.current->swap(*double_buffer.next);
+    }
+
     Engine::Engine() {
         //The engine is a singleton
         //Has an entt::registry as state to store and represent the current state of the engine or application
@@ -22,6 +33,7 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
+        dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&on_update_command_double_buffer>();
 
 
         auto *current = &Engine::Context().emplace<CommandBufferCurrent>();
@@ -51,17 +63,8 @@ namespace Bcg {
         System::UserInput::remove_system();
         System::Window::Glfw::remove_system();
         System::Logger::remove_system();
-
-        CommandBuffer *command_buffer_current = &state.ctx().get<CommandBufferCurrent>();
-        CommandBuffer *command_buffer_next = &state.ctx().get<CommandBufferNext>();
-        //execute command buffers for shutdown
-        for (auto &command: *command_buffer_current) {
-            command->execute();
-        }
-        for (auto &command: *command_buffer_next) {
-            command->execute();
-        }
-
+        dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+        dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         entt::locator<Engine *>::reset();
     }
 
@@ -78,16 +81,7 @@ namespace Bcg {
         //startup engine
         Log::Info("Engine: Startup...").enqueue();
         dispatcher.trigger<Events::Startup<Engine>>();
-
-        //execute command buffers for startup
-        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
-
-        for (auto &command: *double_buffer.current) {
-            command->execute();
-        }
-
-        double_buffer.current->clear();
-        double_buffer.current->swap(*double_buffer.next);
+        dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
         Log::Info("Engine: Run...").enqueue();
         time.mainloop.current = Time::Point::Now();
@@ -95,40 +89,41 @@ namespace Bcg {
 
         while (is_running) {
             System::Timer::begin_main_loop(time);
-/*            time.simulationloop.iter_counter = 0;
-            time.simulationloop.accumulator += time.mainloop.duration;*/
+
+            dispatcher.trigger<Events::Begin<MainLoop>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+            dispatcher.trigger<Events::Update<Input>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             while (time.simulationloop.accumulator > time.simulationloop.min_step_size) {
+                dispatcher.trigger<Events::Begin<SimulationLoop>>();
+                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
                 System::Timer::begin_simulation_loop(time);
-
-                dispatcher.trigger<Events::Update<Engine>>();
-
+                dispatcher.trigger<Events::Update<SimulationLoop>>();
+                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
                 System::Timer::end_simulation_loop(time);
+                dispatcher.trigger<Events::End<SimulationLoop>>();
+                dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             }
 
-            //begin frame to signal everyone interested
             dispatcher.trigger<Events::Begin<Frame>>();
-
-            //execute command buffers for this frame
-            for (auto &command: *double_buffer.current) {
-                command->execute();
-            }
-
-            double_buffer.current->clear();
-            double_buffer.current->swap(*double_buffer.next);
-
-            //begin frame to signal everyone interested
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+            dispatcher.trigger<Events::Render<Frame>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+            dispatcher.trigger<Events::Render<Gui>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
             dispatcher.trigger<Events::End<Frame>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+            dispatcher.trigger<Events::End<MainLoop>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
             System::Window::Glfw::swap_and_poll_events();
             System::Timer::end_main_loop(time);
         }
 
-        double_buffer.current->clear();
-        double_buffer.next->clear();
-
         //shutdown engine
         Log::Info("Engine: Shutdown...").enqueue();
         dispatcher.trigger<Events::Shutdown<Engine>>();
+        dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         time.engine_run_end = Time::Point::Now();
     }
 }
