@@ -8,7 +8,7 @@
 #include "Components.h"
 #include "imgui.h"
 
-namespace Bcg::System::UserInput {
+namespace Bcg::SystemUserInput {
     void pre_init_system() {
         Engine::Context().emplace<Input>();
     }

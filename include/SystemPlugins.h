@@ -5,24 +5,28 @@
 #ifndef ENGINE23_SYSTEMPLUGINS_H
 #define ENGINE23_SYSTEMPLUGINS_H
 
-#include "EngineFwd.h"
-#include "Events.h"
-#include <string>
+#include "System.h"
 
-namespace Bcg::System::Plugins{
-    void pre_init_system();
+namespace Bcg {
+    class SystemPlugins : protected System {
+    public:
+        SystemPlugins();
 
-    void init_system();
+        ~SystemPlugins() override = default;
 
-    void remove_system();
+        Plugin *load(const std::string &filepath);
 
-    void on_startup(Events::Startup<Engine> &event);
+        void unload(void *handle);
 
-    void on_shutdown(Events::Shutdown<Engine> &event);
+    protected:
+        friend Engine;
 
-    Plugin *load(const std::string &filepath);
+        void pre_init_system() override;
 
-    void unload(void *handle);
+        void init_system() override;
+
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMPLUGINS_H

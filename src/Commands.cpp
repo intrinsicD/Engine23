@@ -53,7 +53,7 @@ namespace Bcg {
 
     int ParallelCommands::execute() {
         auto size = commands.size();
-        System::ParallelProcessing::enqueue_parallel(commands);
+        SystemParallelProcessing().enqueue(commands);
         return size;
     }
 
@@ -115,6 +115,14 @@ namespace Bcg {
             return 1;
         }
 
+        Always::Always(std::string message) : Message("Always", "\033[1;32m", message,
+                                                  Time::Point::Now().duration<Time::Unit::seconds>(
+                                                          Engine::State().ctx().get<Time>().engine_constructor_start)) {}
+
+        void Always::enqueue() {
+            Message::enqueue();
+        }
+
         Info::Info(std::string message) : Message("Info", "\033[1;32m", message,
                                                   Time::Point::Now().duration<Time::Unit::seconds>(
                                                           Engine::State().ctx().get<Time>().engine_constructor_start)) {}
@@ -142,7 +150,7 @@ namespace Bcg {
             Message::enqueue();
         }
 
-        TODO::TODO(std::string message) : Message("\033[1;31m TODO \033[0m", "\033[1;33m", message,
+        TODO::TODO(std::string message) : Message("\033[1;31mTODO\033[0m", "\033[1;33m", message,
                                                   Time::Point::Now().duration<Time::Unit::seconds>(
                                                           Engine::State().ctx().get<Time>().engine_constructor_start)) {}
 

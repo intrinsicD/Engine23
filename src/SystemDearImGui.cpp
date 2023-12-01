@@ -4,6 +4,7 @@
 
 #include "SystemDearImGui.h"
 #include "Engine.h"
+#include "Events.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -11,72 +12,80 @@
 #include "Components.h"
 
 
-namespace Bcg::System::Gui {
-    void pre_init_system() {
+namespace Bcg {
+
+    namespace SystemGuiInternal {
+        static bool show_demo_imgui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event) {
+            if (!show_demo_imgui) {
+                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemGuiInternal::on_render_gui>();
+                return;
+            }
+            ImGui::ShowDemoWindow(&show_demo_imgui);
+        }
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+            if (ImGui::BeginMenu("Menu")) {
+                if (ImGui::MenuItem("Show Demo Window", nullptr,
+                                    &show_demo_imgui)) {
+                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemGuiInternal::on_render_gui>();
+                }
+                ImGui::EndMenu();
+            }
+        }
+
+        void on_begin_frame(const Events::Begin<Frame> &event) {
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::BeginMainMenuBar();
+        }
+
+        void on_end_frame(const Events::End<Frame> &event) {
+            ImGui::EndMainMenuBar();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
+
+        void on_startup_engine(const Events::Startup<Engine> &event) {
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemGuiInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
+        }
+
+        void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemGuiInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
+        }
+    }
+
+    SystemGui::SystemGui() : System("SystemGui") {
 
     }
 
-    void init_system() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&on_shutdown_engine>();
-        Log::Info("SystemGui: Initialized").enqueue();
+    void SystemGui::pre_init_system() {
+
     }
 
-    void remove_system() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&on_shutdown_engine>();
+    void SystemGui::init_system() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemGuiInternal::on_startup_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemGuiInternal::on_shutdown_engine>();
+        Log::Info(m_name + ": Initialized").enqueue();
+    }
+
+    void SystemGui::remove_system() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemGuiInternal::on_startup_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemGuiInternal::on_shutdown_engine>();
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        Log::Info("SystemGui: Removed").enqueue();
+        Log::Info(m_name + ": Removed").enqueue();
     }
 
-    void on_startup_engine(const Events::Startup<Engine> &event) {
-        Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
-        Log::Info("SystemGui: Startup").enqueue();
-    }
-
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-        Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
-        Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
-        Log::Info("SystemGui: Shutdown").enqueue();
-    }
-
-    static bool show_demo_imgui = true;
-
-    void on_begin_frame(const Events::Begin<Frame> &event) {
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        ImGui::BeginMainMenuBar();
-
-        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
-        double_buffer.enqueue_next(std::make_shared<TaskCommand>("RenderMenu", [&]() {
-            if (ImGui::BeginMenu("Menu")) {
-                ImGui::MenuItem("Show Demo Window", nullptr,
-                                &show_demo_imgui);
-                ImGui::EndMenu();
-            }
-            return 1;
-        }));
-
-        if (show_demo_imgui) {
-            double_buffer.enqueue_next(std::make_shared<TaskCommand>("ShowDemoWindow", [&]() {
-                ImGui::ShowDemoWindow(&show_demo_imgui);
-                return 1;
-            }));
-        }
-    }
-
-    void on_end_frame(const Events::End<Frame> &event) {
-        ImGui::EndMainMenuBar();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-
-    void add_to_window(void *window) {
+    void SystemGui::add_to_window(void *window) {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         auto &io = ImGui::GetIO();

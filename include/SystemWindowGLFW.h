@@ -8,7 +8,7 @@
 #include "Events.h"
 #include "EngineFwd.h"
 
-namespace Bcg::System::Window::Glfw {
+namespace Bcg::SystemWindow::Glfw {
     void pre_init_system();
 
     void init_system();

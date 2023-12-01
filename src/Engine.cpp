@@ -23,28 +23,28 @@ namespace Bcg {
 
         entt::locator<Engine *>::emplace<Engine *>(this);
 
-        System::Timer::pre_init_system();
-        System::CommandBuffers::pre_init_system();
-        System::Logger::pre_init_system();
-        System::Renderer::pre_init_system();
-        System::Window::Glfw::pre_init_system();
-        System::Gui::pre_init_system();
-        System::UserInput::pre_init_system();
-        System::ParallelProcessing::pre_init_system();
-        System::Plugins::pre_init_system();
+        SystemTimer::pre_init_system();
+        SystemCommandBuffers().pre_init_system();
+        SystemLogger().pre_init_system();
+        SystemRenderer().pre_init_system();
+        SystemWindow::Glfw::pre_init_system();
+        SystemGui().pre_init_system();
+        SystemUserInput::pre_init_system();
+        SystemParallelProcessing().pre_init_system();
+        SystemPlugins().pre_init_system();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
 
-        System::Timer::init_system();
-        System::CommandBuffers::init_system();
-        System::Logger::init_system();
-        System::Renderer::init_system();
-        System::Window::Glfw::init_system();
-        System::Gui::init_system();
-        System::UserInput::init_system();
-        System::ParallelProcessing::init_system();
-        System::Plugins::init_system();
+        SystemTimer::init_system();
+        SystemCommandBuffers().init_system();
+        SystemLogger().init_system();
+        SystemRenderer().init_system();
+        SystemWindow::Glfw::init_system();
+        SystemGui().init_system();
+        SystemUserInput::init_system();
+        SystemParallelProcessing().init_system();
+        SystemPlugins().init_system();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info("Engine: Constructor took " + std::to_string(
@@ -53,16 +53,18 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
-        System::Plugins::remove_system();
-        System::ParallelProcessing::remove_system();
-        System::UserInput::remove_system();
-        System::Window::Glfw::remove_system();
-        System::Logger::remove_system();
+        SystemPlugins().remove_system();
+        SystemParallelProcessing().remove_system();
+        SystemUserInput::remove_system();
+        SystemGui().remove_system();
+        SystemRenderer().remove_system();
+        SystemWindow::Glfw::remove_system();
+        SystemLogger().remove_system();
 
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
-        System::CommandBuffers::remove_system();
+        SystemCommandBuffers().remove_system();
         entt::locator<Engine *>::reset();
     }
 
@@ -101,6 +103,7 @@ namespace Bcg {
 
             dispatcher.trigger<Events::Begin<Frame>>();
             dispatcher.trigger<Events::Render<Frame>>();
+            dispatcher.trigger<Events::Render<GuiMenu>>();
             dispatcher.trigger<Events::Render<Gui>>();
             dispatcher.trigger<Events::Update<RenderCommandDoubleBuffer>>();
             dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();

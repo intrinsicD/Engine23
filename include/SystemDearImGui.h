@@ -5,28 +5,26 @@
 #ifndef ENGINE23_SYSTEMDEARIMGUI_H
 #define ENGINE23_SYSTEMDEARIMGUI_H
 
-#include "Events.h"
-#include "EngineFwd.h"
-#include <string>
-#include <functional>
+#include "System.h"
 
-namespace Bcg::System::Gui {
-    void pre_init_system();
+namespace Bcg {
+    class SystemGui : protected System {
+    public:
+        SystemGui();
 
-    void init_system();
+        ~SystemGui() override = default;
 
-    void remove_system();
+        void add_to_window(void *window);
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
+    protected:
+        friend Engine;
 
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+        void pre_init_system() override;
 
-    void on_begin_frame(const Events::Begin<Frame> &event);
+        void init_system() override;
 
-    void on_end_frame(const Events::End<Frame> &event);
-
-    void add_to_window(void *window);
-
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMDEARIMGUI_H

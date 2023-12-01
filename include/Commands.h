@@ -109,6 +109,14 @@ namespace Bcg {
 
         };
 
+        struct Always : public Message {
+            explicit Always(std::string message);
+
+            ~Always() override = default;
+
+            void enqueue() override;
+        };
+
         struct Info : public Message {
             explicit Info(std::string message);
 

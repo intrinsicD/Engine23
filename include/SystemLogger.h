@@ -5,17 +5,25 @@
 #ifndef ENGINE23_SYSTEMLOGGER_H
 #define ENGINE23_SYSTEMLOGGER_H
 
-#include "Events.h"
-#include "EngineFwd.h"
+#include "System.h"
 
-namespace Bcg::System::Logger{
-    void pre_init_system();
+namespace Bcg {
+    class SystemLogger : protected System {
+    public:
+        SystemLogger();
 
-    void init_system();
+        ~SystemLogger() override = default;
 
-    void remove_system();
+        void set_log_level(LogLevel level);
+    protected:
+        friend Engine;
 
-    void set_log_level(LogLevel level);
+        void pre_init_system() override;
+
+        void init_system() override;
+
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMLOGGER_H

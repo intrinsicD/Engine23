@@ -8,7 +8,7 @@
 #include "Events.h"
 #include "EngineFwd.h"
 
-namespace Bcg::System::UserInput{
+namespace Bcg::SystemUserInput{
     void pre_init_system();
 
     void init_system();

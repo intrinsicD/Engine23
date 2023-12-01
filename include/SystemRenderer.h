@@ -5,23 +5,24 @@
 #ifndef ENGINE23_SYSTEMRENDERER_H
 #define ENGINE23_SYSTEMRENDERER_H
 
-#include "Events.h"
-#include "EngineFwd.h"
+#include "System.h"
 
-namespace Bcg::System::Renderer{
-    void pre_init_system();
+namespace Bcg {
+    class SystemRenderer : public System {
+    public:
+        SystemRenderer();
 
-    void init_system();
+        ~SystemRenderer() override = default;
 
-    void remove_system();
+    protected:
+        friend Engine;
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
+        void pre_init_system() override;
 
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+        void init_system() override;
 
-    void on_begin_frame(const Events::Begin<Frame> &event);
-
-    void on_end_frame(const Events::End<Frame> &event);
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMRENDERER_H

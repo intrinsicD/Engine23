@@ -5,19 +5,24 @@
 #ifndef ENGINE23_SYSTEMCOMMANDBUFFERS_H
 #define ENGINE23_SYSTEMCOMMANDBUFFERS_H
 
-#include "EngineFwd.h"
-#include "Events.h"
+#include "System.h"
 
-namespace Bcg::System::CommandBuffers {
-    void pre_init_system();
+namespace Bcg {
+    class SystemCommandBuffers : protected System{
+    public:
+        SystemCommandBuffers();
 
-    void init_system();
+        ~SystemCommandBuffers() override = default;
 
-    void remove_system();
+    protected:
+        friend Engine;
 
-    void on_startup(Events::Startup<Engine> &event);
+        void pre_init_system() override;
 
-    void on_shutdown(Events::Shutdown<Engine> &event);
+        void init_system() override;
+
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMCOMMANDBUFFERS_H

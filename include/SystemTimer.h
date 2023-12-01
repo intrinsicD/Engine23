@@ -8,7 +8,7 @@
 #include "EngineFwd.h"
 #include "Events.h"
 
-namespace Bcg::System::Timer{
+namespace Bcg::SystemTimer{
     void pre_init_system();
 
     void init_system();

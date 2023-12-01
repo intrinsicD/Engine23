@@ -9,7 +9,7 @@
 #include "Components.h"
 #include "SystemDearImGui.h"
 
-namespace Bcg::System::Window::Glfw {
+namespace Bcg::SystemWindow::Glfw {
 
     void on_end_main_loop(const Events::End<MainLoop> &event) {
         swap_and_poll_events();
@@ -31,17 +31,17 @@ namespace Bcg::System::Window::Glfw {
             return;
         }
 
-        engine->dispatcher.sink<Events::Startup<Engine>>().connect<System::Window::Glfw::on_startup_engine>();
-        engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::Glfw::on_shutdown_engine>();
-        engine->dispatcher.sink<Events::End<MainLoop>>().connect<System::Window::Glfw::on_end_main_loop>();
+        engine->dispatcher.sink<Events::Startup<Engine>>().connect<SystemWindow::Glfw::on_startup_engine>();
+        engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<SystemWindow::Glfw::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::End<MainLoop>>().connect<SystemWindow::Glfw::on_end_main_loop>();
 
         Log::Info("SystemWindow: Initialized").enqueue();
     }
 
     void remove_system() {
         auto *engine = Engine::Instance();
-        engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<System::Window::Glfw::on_startup_engine>();
-        engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<System::Window::Glfw::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<SystemWindow::Glfw::on_startup_engine>();
+        engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<SystemWindow::Glfw::on_shutdown_engine>();
         Log::Info("SystemWindow: Removed").enqueue();
 
         glfwTerminate();
@@ -161,7 +161,7 @@ namespace Bcg::System::Window::Glfw {
             }
         });
 
-        Gui::add_to_window(window);
+        SystemGui().add_to_window(window);
     }
 
     void on_shutdown_engine(const Events::Shutdown<Engine> &event) {

@@ -5,33 +5,34 @@
 #ifndef ENGINE23_SYSTEMPARALLELPROCESSING_H
 #define ENGINE23_SYSTEMPARALLELPROCESSING_H
 
-#include "Events.h"
-#include "EngineFwd.h"
-#include <memory>
-#include <vector>
+#include "System.h"
 
-namespace Bcg::System::ParallelProcessing{
-    void pre_init_system();
+namespace Bcg {
+    class SystemParallelProcessing : protected System {
+    public:
+        SystemParallelProcessing();
 
-    void init_system();
+        ~SystemParallelProcessing() override = default;
 
-    void remove_system();
+        void start(int num_threads);
 
-    void start(int num_threads);
+        void stop();
 
-    void stop();
+        void resize(int num_threads);
 
-    void resize(int num_threads);
+        void enqueue(std::shared_ptr<Command> command);
 
-    void enqueue_parallel(std::shared_ptr<Command> command);
+        void enqueue(std::vector<std::shared_ptr<Command>> commands);
 
-    void enqueue_parallel(std::vector<std::shared_ptr<Command>> commands);
+    protected:
+        friend Engine;
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
+        void pre_init_system() override;
 
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+        void init_system() override;
 
-    void on_begin_frame(const Events::Begin<Frame> &event);
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMPARALLELPROCESSING_H

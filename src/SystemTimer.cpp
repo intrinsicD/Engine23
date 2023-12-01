@@ -8,7 +8,7 @@
 #include "Commands.h"
 #include "imgui.h"
 
-namespace Bcg::System::Timer {
+namespace Bcg::SystemTimer {
 
     void on_begin_simulation_loop(const Events::Begin<SimulationLoop> &event) {
         begin_simulation_loop(Engine::Context().get<Time>());
