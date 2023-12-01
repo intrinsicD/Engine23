@@ -26,19 +26,23 @@ namespace Bcg::System::Timer {
         end_main_loop(Engine::Context().get<Time>());
     }
 
-
-    void add_system() {
+    void pre_init_system(){
         Engine::Context().emplace<Time>();
+    }
+
+    void init_system() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
         Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().connect<&on_begin_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().connect<&on_end_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().connect<&on_begin_main_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
+        Log::Info("SystemTimer: Initialized").enqueue();
     }
 
     void remove_system() {
         Engine::Context().erase<Time>();
+        Log::Info("SystemTimer: Removed").enqueue();
     }
 
     void begin_main_loop(Time &time) {
@@ -76,6 +80,7 @@ namespace Bcg::System::Timer {
         time.engine_run_start = Time::Point::Now();
         time.mainloop.current = Time::Point::Now();
         time.simulationloop.avg_duration = time.simulationloop.min_step_size;
+        Log::Info("SystemTimer: Startup").enqueue();
     }
 
     static bool show_gui = true;

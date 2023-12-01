@@ -15,7 +15,11 @@ namespace Bcg::System::Window::Glfw {
         swap_and_poll_events();
     }
 
-    void add_system() {
+    void pre_init_system() {
+        Engine::Context().emplace<StartupWindowConfig>();
+    }
+
+    void init_system() {
         auto *engine = Engine::Instance();
 
         glfwSetErrorCallback([](int error, const char *description) {
@@ -31,7 +35,7 @@ namespace Bcg::System::Window::Glfw {
         engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<System::Window::Glfw::on_shutdown_engine>();
         engine->dispatcher.sink<Events::End<MainLoop>>().connect<System::Window::Glfw::on_end_main_loop>();
 
-        Log::Info("SystemWindow: Added").enqueue();
+        Log::Info("SystemWindow: Initialized").enqueue();
     }
 
     void remove_system() {

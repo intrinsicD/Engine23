@@ -11,7 +11,9 @@
 #include <vector>
 
 namespace Bcg::System::ParallelProcessing{
-    void add_system();
+    void pre_init_system();
+
+    void init_system();
 
     void remove_system();
 

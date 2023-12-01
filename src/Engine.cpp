@@ -8,33 +8,6 @@
 #include "Systems.h"
 
 namespace Bcg {
-    void on_update_simulation_command_double_buffer(const Events::Update<SimulationCommandDoubleBuffer> &event) {
-        auto &double_buffer = Engine::Context().get<SimulationCommandDoubleBuffer>();
-        for (auto &command: *double_buffer.p_current) {
-            command->execute();
-        }
-
-        double_buffer.clear_and_swap();
-    }
-
-    void on_update_render_command_double_buffer(const Events::Update<RenderCommandDoubleBuffer> &event) {
-        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
-        for (auto &command: *double_buffer.p_current) {
-            command->execute();
-        }
-
-        double_buffer.clear_and_swap();
-    }
-
-    void on_update_command_double_buffer(const Events::Update<CommandDoubleBuffer> &event) {
-        auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();
-        for (auto &command: *double_buffer.p_current) {
-            command->execute();
-        }
-
-        double_buffer.clear_and_swap();
-    }
-
     Engine::Engine() {
         //The engine is a singleton
         //Has an entt::registry as state to store and represent the current state of the engine or application
@@ -49,33 +22,29 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
-        dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&on_update_simulation_command_double_buffer>();
-        dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&on_update_render_command_double_buffer>();
-        dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&on_update_command_double_buffer>();
 
-        auto *command_buffer_current = &state.emplace<CommandBuffer>(state.create());
-        auto *command_buffer_next = &state.emplace<CommandBuffer>(state.create());
-        Engine::Context().emplace<CommandDoubleBuffer>(command_buffer_current, command_buffer_next);
-
-        auto *simulation_command_buffer_current = &state.emplace<CommandBuffer>(state.create());
-        auto *simulation_command_buffer_next = &state.emplace<CommandBuffer>(state.create());
-        Engine::Context().emplace<SimulationCommandDoubleBuffer>(simulation_command_buffer_current, simulation_command_buffer_next);
-
-        auto *render_command_buffer_current = &state.emplace<CommandBuffer>(state.create());
-        auto *render_command_buffer_next = &state.emplace<CommandBuffer>(state.create());
-        Engine::Context().emplace<RenderCommandDoubleBuffer>(render_command_buffer_current, render_command_buffer_next);
-
-        System::Timer::add_system();
+        System::Timer::pre_init_system();
+        System::CommandBuffers::pre_init_system();
+        System::Logger::pre_init_system();
+        System::Renderer::pre_init_system();
+        System::Window::Glfw::pre_init_system();
+        System::Gui::pre_init_system();
+        System::UserInput::pre_init_system();
+        System::ParallelProcessing::pre_init_system();
+        System::Plugins::pre_init_system();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
 
-        System::Logger::add_system();
-        System::Renderer::add_system();
-        System::Window::Glfw::add_system();
-        System::Gui::add_system();
-        System::UserInput::add_system();
-        System::ParallelProcessing::add_system();
+        System::Timer::init_system();
+        System::CommandBuffers::init_system();
+        System::Logger::init_system();
+        System::Renderer::init_system();
+        System::Window::Glfw::init_system();
+        System::Gui::init_system();
+        System::UserInput::init_system();
+        System::ParallelProcessing::init_system();
+        System::Plugins::init_system();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info("Engine: Constructor took " + std::to_string(
@@ -84,12 +53,16 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
+        System::Plugins::remove_system();
         System::ParallelProcessing::remove_system();
         System::UserInput::remove_system();
         System::Window::Glfw::remove_system();
         System::Logger::remove_system();
+
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+
+        System::CommandBuffers::remove_system();
         entt::locator<Engine *>::reset();
     }
 

@@ -1,7 +1,6 @@
 target_sources(${PROJECT_NAME} PRIVATE
         Engine.cpp
         Commands.cpp
-        Managers.cpp
         Plugins.cpp
         SystemLogger.cpp
         SystemUserInput.cpp
@@ -10,5 +9,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         SystemTimer.cpp
         SystemParallelProcessing.cpp
         SystemVulkan.cpp
-        Factories.cpp
+        SystemPlugins.cpp
+        SystemCommandBuffers.cpp
         main.cpp)

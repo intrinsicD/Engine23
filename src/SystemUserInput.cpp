@@ -9,20 +9,16 @@
 #include "imgui.h"
 
 namespace Bcg::System::UserInput {
-    void add_system() {
-        if (!Engine::Context().find<Input>()) {
-            Engine::Context().emplace<Input>();
-            Log::Info("SystemUserInput: Added Input Component to Context").enqueue();
-        }
+    void pre_init_system() {
+        Engine::Context().emplace<Input>();
+    }
+
+    void init_system() {
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Log::Info("SystemUserInput: Added").enqueue();
+        Log::Info("SystemUserInput: Initialized").enqueue();
     }
 
     void remove_system() {
-        if (Engine::Context().find<Input>()) {
-            Engine::Context().erase<Input>();
-            Log::Info("SystemUserInput: Removed Input Component from Context").enqueue();
-        }
         Log::Info("SystemUserInput: Removed").enqueue();
     }
 

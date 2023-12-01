@@ -185,7 +185,7 @@ namespace Bcg {
             double avg_duration = 0;
             double duration = 0;
             size_t iter_counter = 0;
-            double min_step_size = 1.0 / 3000000;
+            double min_step_size = 1.0 / 30000;
             double accumulator = 0;
         } simulationloop;
     };

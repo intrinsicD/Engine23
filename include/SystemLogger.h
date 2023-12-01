@@ -9,7 +9,9 @@
 #include "EngineFwd.h"
 
 namespace Bcg::System::Logger{
-    void add_system();
+    void pre_init_system();
+
+    void init_system();
 
     void remove_system();
 

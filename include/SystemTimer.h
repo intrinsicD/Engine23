@@ -9,7 +9,9 @@
 #include "Events.h"
 
 namespace Bcg::System::Timer{
-    void add_system();
+    void pre_init_system();
+
+    void init_system();
 
     void remove_system();
 

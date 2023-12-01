@@ -12,9 +12,14 @@
 
 
 namespace Bcg::System::Gui {
-    void add_system() {
+    void pre_init_system() {
+
+    }
+
+    void init_system() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&on_shutdown_engine>();
+        Log::Info("SystemGui: Initialized").enqueue();
     }
 
     void remove_system() {
@@ -24,16 +29,19 @@ namespace Bcg::System::Gui {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
+        Log::Info("SystemGui: Removed").enqueue();
     }
 
     void on_startup_engine(const Events::Startup<Engine> &event) {
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
         Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
+        Log::Info("SystemGui: Startup").enqueue();
     }
 
     void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
         Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
+        Log::Info("SystemGui: Shutdown").enqueue();
     }
 
     static bool show_demo_imgui = true;

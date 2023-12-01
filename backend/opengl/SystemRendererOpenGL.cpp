@@ -14,15 +14,15 @@
 
 
 namespace Bcg::System::Renderer {
-    void add_system() {
-        auto *opengl_config = Engine::Context().find<OpenGLConfig>();
-        if (!opengl_config) {
-/*            Log::Error("SystemRenderer: OpenGLConfig not found").enqueue();*/
-            opengl_config = &Engine::Context().emplace<OpenGLConfig>();
-        }
+    void pre_init_system(){
+        Engine::Context().emplace<OpenGLConfig>();
+    }
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opengl_config->major);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opengl_config->minor);
+    void init_system() {
+        auto &opengl_config = Engine::Context().get<OpenGLConfig>();
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opengl_config.major);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opengl_config.minor);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
@@ -31,10 +31,11 @@ namespace Bcg::System::Renderer {
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<on_shutdown_engine>();
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<on_begin_frame>();
         Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<on_end_frame>();
+        Log::Info("SystemRenderer: Initialized").enqueue();
     }
 
     void remove_system() {
-
+        Log::Info("SystemRenderer: Removed").enqueue();
     }
 
     void on_startup_engine(const Events::Startup<Engine> &event) {
@@ -56,6 +57,7 @@ namespace Bcg::System::Renderer {
             opengl_config.renderer = (const char *) glGetString(GL_RENDERER);
             opengl_config.version = (const char *) glGetString(GL_VERSION);
             opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
+            Log::Info("SystemRenderer: Startup").enqueue();
             Log::Info("SystemRenderer: OpenGL vendor: " + opengl_config.vendor).enqueue();
             Log::Info("SystemRenderer: OpenGL renderer: " + opengl_config.renderer).enqueue();
             Log::Info("SystemRenderer: OpenGL version: " + opengl_config.version).enqueue();
@@ -66,7 +68,7 @@ namespace Bcg::System::Renderer {
     }
 
     void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-
+        Log::Info("SystemRenderer: Shutdown").enqueue();
     }
 
     void on_begin_frame(const Events::Begin<Frame> &event) {

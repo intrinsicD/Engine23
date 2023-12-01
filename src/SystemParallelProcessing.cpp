@@ -12,13 +12,15 @@
 #include "imgui.h"
 
 namespace Bcg::System::ParallelProcessing {
+    void pre_init_system() {
+        Engine::Context().emplace<WorkerPool>();
+    }
 
-    void add_system() {
+    void init_system() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&on_shutdown_engine>();
         Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Engine::Context().emplace<WorkerPool>();
-        Log::Info("SystemParallelProcessing: Added").enqueue();
+        Log::Info("SystemParallelProcessing: Initialized").enqueue();
     }
 
     void remove_system() {
@@ -137,13 +139,13 @@ namespace Bcg::System::ParallelProcessing {
                         resize(num_threads);
                     }
 
-                    static int num_tests = 10;
+                    static int num_tests = 100;
                     ImGui::InputInt("Tests", &num_tests);
                     if(ImGui::Button("Test")){
                         ParallelCommands command("TestParallel");
                         for(int i = 0; i < num_tests; ++i){
                             command.add_command_sptr(std::make_shared<TaskCommand>("Test", [&](){
-                                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                                std::this_thread::sleep_for(std::chrono::milliseconds(10));
                                 //thread id
                                 auto id = std::this_thread::get_id();
                                 std::stringstream ss;

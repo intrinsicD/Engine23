@@ -12,5 +12,7 @@
 #include "SystemDearImGui.h"
 #include "SystemTimer.h"
 #include "SystemParallelProcessing.h"
+#include "SystemPlugins.h"
+#include "SystemCommandBuffers.h"
 
 #endif //ENGINE23_SYSTEMS_H

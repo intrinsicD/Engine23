@@ -14,6 +14,7 @@ namespace Bcg{
     struct MainLoop;
     struct SimulationLoop;
     struct Gui;
+    struct Plugin;
     enum class LogLevel{
         Error = 0, Warn = 1, Info = 2
     };
