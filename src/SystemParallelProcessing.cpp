@@ -105,18 +105,18 @@ namespace Bcg {
 
     }
 
-    void SystemParallelProcessing::pre_init_system() {
+    void SystemParallelProcessing::pre_init() {
         Engine::Context().emplace<WorkerPool>();
     }
 
-    void SystemParallelProcessing::init_system() {
+    void SystemParallelProcessing::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemParallelProcessingInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemParallelProcessingInternal::on_shutdown_engine>();
 
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemParallelProcessing::remove_system() {
+    void SystemParallelProcessing::remove() {
         Log::Info(m_name + ": Removed").enqueue();
     }
 

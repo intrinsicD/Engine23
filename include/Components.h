@@ -22,6 +22,7 @@ namespace Bcg {
         int width = 800;
         int height = 600;
     };
+
     struct WindowConfig {
         std::string title = "Viewer";
         int width = 800;
@@ -30,6 +31,7 @@ namespace Bcg {
         double aspect_ratio = 4.0 / 3.0;
         float background_color[4] = {0.1f, 0.3f, 0.6f, 1.0f};
     };
+
     struct OpenGLConfig {
         int major_hint = 4;
         int minor_hint = 6;
@@ -43,6 +45,7 @@ namespace Bcg {
         std::string version;
         std::string glsl_version;
     };
+
     struct Input {
         struct Mouse {
             struct Position {
@@ -123,15 +126,6 @@ namespace Bcg {
     struct SimulationCommandDoubleBuffer : public CommandDoubleBuffer {
         SimulationCommandDoubleBuffer(CommandBuffer *current, CommandBuffer *next) : CommandDoubleBuffer(current,
                                                                                                          next) {}
-    };
-
-    struct CommandBufferSuccessCounter {
-        size_t total_success_count = 0;
-        size_t total_num_commands = 0;
-    };
-
-    struct Priority {
-        int value = 0;
     };
 
     template<typename T>

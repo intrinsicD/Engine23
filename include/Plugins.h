@@ -7,9 +7,10 @@
 
 #include <string>
 #include "entt/fwd.hpp"
+#include "System.h"
 
 namespace Bcg {
-    class Plugin {
+    class Plugin : public System {
     public:
         //Is an Engine component, it lives inside the Engine's state (registry)
         //Adds exchangeable functionality, e.g. formats or third party code to the Engine
@@ -22,12 +23,7 @@ namespace Bcg {
 
         explicit Plugin(std::string name);
 
-        virtual ~Plugin() = default;
-
-        virtual void update() {}
-
-        std::string name;
-        entt::entity id;
+        ~Plugin() override = default;
     };
 }
 

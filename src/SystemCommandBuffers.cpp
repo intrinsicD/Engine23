@@ -50,7 +50,7 @@ namespace Bcg{
 
     }
 
-    void SystemCommandBuffers::pre_init_system(){
+    void SystemCommandBuffers::pre_init(){
         auto &state = Engine::State();
         auto *command_buffer_current = &state.emplace<CommandBuffer>(state.create());
         auto *command_buffer_next = &state.emplace<CommandBuffer>(state.create());
@@ -65,7 +65,7 @@ namespace Bcg{
         Engine::Context().emplace<RenderCommandDoubleBuffer>(render_command_buffer_current, render_command_buffer_next);
     }
 
-    void SystemCommandBuffers::init_system(){
+    void SystemCommandBuffers::init(){
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemCommandBuffersInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemCommandBuffersInternal::on_shutdown>();
         Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
@@ -74,7 +74,7 @@ namespace Bcg{
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemCommandBuffers::remove_system(){
+    void SystemCommandBuffers::remove(){
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemCommandBuffersInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemCommandBuffersInternal::on_shutdown>();
         Log::Info(m_name + ": Removed").enqueue();

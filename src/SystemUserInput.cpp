@@ -67,16 +67,16 @@ namespace Bcg {
 
     }
 
-    void SystemUserInput::pre_init_system() {
+    void SystemUserInput::pre_init() {
         Engine::Context().emplace<Input>();
     }
 
-    void SystemUserInput::init_system() {
+    void SystemUserInput::init() {
         Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemUserInput::remove_system() {
+    void SystemUserInput::remove() {
         Log::Info(m_name + ": Removed").enqueue();
     }
 }

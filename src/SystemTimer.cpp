@@ -98,11 +98,11 @@ namespace Bcg {
     }
 
 
-    void SystemTimer::pre_init_system() {
+    void SystemTimer::pre_init() {
         Engine::Context().emplace<Time>();
     }
 
-    void SystemTimer::init_system() {
+    void SystemTimer::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemTimerInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemTimerInternal::on_render_gui_menu>();
         Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().connect<&SystemTimerInternal::on_begin_simulation_loop>();
@@ -112,7 +112,7 @@ namespace Bcg {
         Log::Info("SystemTimer: Initialized").enqueue();
     }
 
-    void SystemTimer::remove_system() {
+    void SystemTimer::remove() {
         Log::Info("SystemTimer: Removed").enqueue();
     }
 }

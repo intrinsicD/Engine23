@@ -14,7 +14,7 @@ namespace Bcg {
     public:
         System() = default;
 
-        System(std::string name) : m_name(std::move(name)) {}
+        explicit System(std::string name) : m_name(std::move(name)) {}
 
         virtual ~System() = default;
 
@@ -31,11 +31,11 @@ namespace Bcg {
         }
 
     protected:
-        virtual void pre_init_system() = 0;
+        virtual void pre_init() = 0;
 
-        virtual void init_system() = 0;
+        virtual void init() = 0;
 
-        virtual void remove_system() = 0;
+        virtual void remove() = 0;
 
         bool m_is_initialized = false;
         std::string m_name;

@@ -48,17 +48,17 @@ namespace Bcg {
 
     }
 
-    void SystemPlugins::pre_init_system() {
+    void SystemPlugins::pre_init() {
         Engine::Context().emplace<SystemPluginsInternal::PluginsConfig>();
     }
 
-    void SystemPlugins::init_system() {
+    void SystemPlugins::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPluginsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemPlugins::remove_system() {
+    void SystemPlugins::remove() {
         Log::Info(m_name + ": Removed").enqueue();
     }
 

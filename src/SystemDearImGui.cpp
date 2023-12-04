@@ -65,17 +65,17 @@ namespace Bcg {
 
     }
 
-    void SystemGui::pre_init_system() {
+    void SystemGui::pre_init() {
 
     }
 
-    void SystemGui::init_system() {
+    void SystemGui::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemGuiInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemGuiInternal::on_shutdown_engine>();
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemGui::remove_system() {
+    void SystemGui::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemGuiInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemGuiInternal::on_shutdown_engine>();
 

@@ -18,11 +18,11 @@ namespace Bcg{
 
     protected:
         friend Engine;
-        void pre_init_system() override;
+        void pre_init() override;
 
-        void init_system() override;
+        void init() override;
 
-        void remove_system() override;
+        void remove() override;
     };
 }
 

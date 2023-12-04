@@ -60,18 +60,18 @@ namespace Bcg {
 
     }
 
-    void SystemLogger::pre_init_system() {
+    void SystemLogger::pre_init() {
         Engine::Context().emplace<LogLevel>(LogLevel::Info);
     }
 
-    void SystemLogger::init_system() {
+    void SystemLogger::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemLoggerInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemLoggerInternal::on_shutdown_engine>();
         Log::Info(m_name + ": Initialized").enqueue();
         set_log_level(LogLevel::Info);
     }
 
-    void SystemLogger::remove_system() {
+    void SystemLogger::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemLoggerInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemLoggerInternal::on_shutdown_engine>();
         Log::Info(m_name + ": Removed").enqueue();

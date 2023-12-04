@@ -4,16 +4,44 @@
 
 #define GLAD_GL_IMPLEMENTATION
 
-#include "SystemRenderer.h"
+#include "SystemRendererOpenGL.h"
 #include "Engine.h"
 #include "Events.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
 #include "Components.h"
+#include "imgui.h"
 
 namespace Bcg {
-    namespace SystemRenderInternal {
+    namespace SystemRendererOpenGLInternal {
+        static bool show_gui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event) {
+            if (!show_gui) {
+                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui>();
+                return;
+            }
+
+            if(ImGui::Begin("Renderer", &show_gui)) {
+                auto &opengl_config = Engine::Context().get<OpenGLConfig>();
+                ImGui::Text("OpenGL vendor: %s", opengl_config.vendor.c_str());
+                ImGui::Text("OpenGL renderer: %s", opengl_config.renderer.c_str());
+                ImGui::Text("OpenGL version: %s", opengl_config.version.c_str());
+                ImGui::Text("OpenGL GLSL version: %s", opengl_config.glsl_version.c_str());
+            }
+            ImGui::End();
+        }
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+            if (ImGui::BeginMenu("Renderer")) {
+                if (ImGui::MenuItem("Info", nullptr, &show_gui)) {
+                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemRendererOpenGLInternal::on_render_gui>();
+                }
+                ImGui::EndMenu();
+            }
+        }
+
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
@@ -25,12 +53,13 @@ namespace Bcg {
                 Log::Error("Failed to initialize OpenGL context").enqueue();
                 return;
             }
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRenderInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
 
             auto &opengl_config = Engine::Context().get<OpenGLConfig>();
             opengl_config.major = GLAD_VERSION_MAJOR(version);;
             opengl_config.minor = GLAD_VERSION_MINOR(version);
-            const auto &name = SystemRenderer().name();
+            const auto &name = SystemRendererOpenGL().name();
             if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
                 Log::Error(name + ": OpenGL version not supported").enqueue();
                 return;
@@ -50,19 +79,20 @@ namespace Bcg {
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRenderInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
         }
     }
 
-    SystemRenderer::SystemRenderer() : System("SystemRenderer") {
+    SystemRendererOpenGL::SystemRendererOpenGL() : System("SystemRenderer") {
 
     }
 
-    void SystemRenderer::pre_init_system() {
+    void SystemRendererOpenGL::pre_init() {
         Engine::Context().emplace<OpenGLConfig>();
     }
 
-    void SystemRenderer::init_system() {
+    void SystemRendererOpenGL::init() {
         auto &opengl_config = Engine::Context().get<OpenGLConfig>();
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opengl_config.major);
@@ -71,13 +101,15 @@ namespace Bcg {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemRenderInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemRenderInternal::on_shutdown_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemRendererOpenGLInternal::on_startup_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemRendererOpenGLInternal::on_shutdown_engine>();
 
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemRenderer::remove_system() {
+    void SystemRendererOpenGL::remove() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemRendererOpenGLInternal::on_startup_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_engine>();
         Log::Info(m_name + ": Removed").enqueue();
     }
 

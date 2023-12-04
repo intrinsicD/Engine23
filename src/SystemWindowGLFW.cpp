@@ -152,11 +152,11 @@ namespace Bcg{
 
     }
 
-    void SystemWindowGLFW::pre_init_system() {
+    void SystemWindowGLFW::pre_init() {
         Engine::Context().emplace<StartupWindowConfig>();
     }
 
-    void SystemWindowGLFW::init_system() {
+    void SystemWindowGLFW::init() {
         auto *engine = Engine::Instance();
 
         glfwSetErrorCallback([](int error, const char *description) {
@@ -175,7 +175,7 @@ namespace Bcg{
         Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void SystemWindowGLFW::remove_system() {
+    void SystemWindowGLFW::remove() {
         auto *engine = Engine::Instance();
         engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<SystemWindowGLFWInternal::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<SystemWindowGLFWInternal::on_shutdown_engine>();
