@@ -5,21 +5,25 @@
 #ifndef ENGINE23_SYSTEMWINDOWGLFW_H
 #define ENGINE23_SYSTEMWINDOWGLFW_H
 
-#include "Events.h"
-#include "EngineFwd.h"
+#include "System.h"
 
-namespace Bcg::SystemWindow::Glfw {
-    void pre_init_system();
+namespace Bcg{
+    class SystemWindowGLFW : public System {
+    public:
+        SystemWindowGLFW();
 
-    void init_system();
+        ~SystemWindowGLFW() override = default;
 
-    void remove_system();
+        void swap_and_poll_events();
 
-    void on_startup_engine(const Events::Startup<Engine> &event);
+    protected:
+        friend Engine;
+        void pre_init_system() override;
 
-    void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+        void init_system() override;
 
-    void swap_and_poll_events();
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMWINDOWGLFW_H

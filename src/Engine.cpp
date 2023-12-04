@@ -6,6 +6,7 @@
 #include "Commands.h"
 #include "Components.h"
 #include "Systems.h"
+#include "Events.h"
 
 namespace Bcg {
     Engine::Engine() {
@@ -23,26 +24,26 @@ namespace Bcg {
 
         entt::locator<Engine *>::emplace<Engine *>(this);
 
-        SystemTimer::pre_init_system();
+        SystemTimer().pre_init_system();
         SystemCommandBuffers().pre_init_system();
         SystemLogger().pre_init_system();
         SystemRenderer().pre_init_system();
-        SystemWindow::Glfw::pre_init_system();
+        SystemWindowGLFW().pre_init_system();
         SystemGui().pre_init_system();
-        SystemUserInput::pre_init_system();
+        SystemUserInput().pre_init_system();
         SystemParallelProcessing().pre_init_system();
         SystemPlugins().pre_init_system();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
 
-        SystemTimer::init_system();
+        SystemTimer().init_system();
         SystemCommandBuffers().init_system();
         SystemLogger().init_system();
         SystemRenderer().init_system();
-        SystemWindow::Glfw::init_system();
+        SystemWindowGLFW().init_system();
         SystemGui().init_system();
-        SystemUserInput::init_system();
+        SystemUserInput().init_system();
         SystemParallelProcessing().init_system();
         SystemPlugins().init_system();
 
@@ -55,16 +56,18 @@ namespace Bcg {
     Engine::~Engine() {
         SystemPlugins().remove_system();
         SystemParallelProcessing().remove_system();
-        SystemUserInput::remove_system();
+        SystemUserInput().remove_system();
         SystemGui().remove_system();
         SystemRenderer().remove_system();
-        SystemWindow::Glfw::remove_system();
+        SystemWindowGLFW().remove_system();
+        SystemTimer().remove_system();
         SystemLogger().remove_system();
 
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
         SystemCommandBuffers().remove_system();
+
         entt::locator<Engine *>::reset();
     }
 
@@ -94,7 +97,6 @@ namespace Bcg {
 
             while (time.simulationloop.accumulator > time.simulationloop.duration) {
                 dispatcher.trigger<Events::Begin<SimulationLoop>>();
-
                 dispatcher.trigger<Events::Update<SimulationLoop>>();
                 dispatcher.trigger<Events::Update<SimulationCommandDoubleBuffer>>();
 

@@ -5,17 +5,24 @@
 #ifndef ENGINE23_SYSTEMUSERINPUT_H
 #define ENGINE23_SYSTEMUSERINPUT_H
 
-#include "Events.h"
-#include "EngineFwd.h"
+#include "System.h"
 
-namespace Bcg::SystemUserInput{
-    void pre_init_system();
+namespace Bcg{
+    class SystemUserInput : public System {
+    public:
+        SystemUserInput();
 
-    void init_system();
+        ~SystemUserInput() override = default;
 
-    void remove_system();
+    protected:
+        friend Engine;
 
-    void on_begin_frame(const Events::Begin<Frame> &event);
+        void pre_init_system() override;
+
+        void init_system() override;
+
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMUSERINPUT_H

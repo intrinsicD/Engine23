@@ -5,29 +5,24 @@
 #ifndef ENGINE23_SYSTEMTIMER_H
 #define ENGINE23_SYSTEMTIMER_H
 
-#include "EngineFwd.h"
-#include "Events.h"
+#include "System.h"
 
-namespace Bcg::SystemTimer{
-    void pre_init_system();
+namespace Bcg{
+    class SystemTimer : public System {
+    public:
+        SystemTimer();
 
-    void init_system();
+        ~SystemTimer() override = default;
 
-    void remove_system();
+    protected:
+        friend Engine;
 
-    void begin_main_loop(Time &time);
+        void pre_init_system() override;
 
-    void end_main_loop(Time &time);
+        void init_system() override;
 
-    void begin_simulation_loop(Time &time);
-
-    void end_simulation_loop(Time &time);
-
-    void render_gui(Time &time);
-
-    void on_startup(const Events::Startup<Engine> &event);
-
-    void on_begin_frame(const Events::Begin<Frame> &event);
+        void remove_system() override;
+    };
 }
 
 #endif //ENGINE23_SYSTEMTIMER_H

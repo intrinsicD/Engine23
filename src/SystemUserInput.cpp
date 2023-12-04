@@ -3,73 +3,80 @@
 //
 
 #include "SystemUserInput.h"
+#include "Events.h"
 #include "Engine.h"
-#include "Commands.h"
 #include "Components.h"
+#include "Commands.h"
 #include "imgui.h"
 
-namespace Bcg::SystemUserInput {
-    void pre_init_system() {
+namespace Bcg {
+    namespace SystemUserInputInternal {
+        void RenderGuiMouse(const Input::Mouse &mouse) {
+            ImGui::Text("Position: (%f, %f)", mouse.position.x, mouse.position.y);
+            ImGui::Text("Scroll: (%f, %f)", mouse.scroll.x, mouse.scroll.y);
+            ImGui::Text("Buttons: (%d, %d, %d)", mouse.button.left, mouse.button.middle,
+                        mouse.button.right);
+        }
+
+        void RenderGuiKeyboard(const Input::Keyboard &keyboard) {
+            ImGui::Text("Keys: ");
+            for (int i = 0; i < keyboard.keys.size(); ++i) {
+                if (keyboard.keys[i]) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(1, 0, 0, 1), "%d", i);
+                }
+            }
+        }
+
+        static bool show_gui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event){
+            if(!show_gui) {
+                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                return;
+            }
+
+            if (ImGui::Begin("Input", &show_gui)) {
+                auto &input = Engine::Context().get<Input>();
+                if (ImGui::CollapsingHeader("Mouse")) {
+                    ImGui::Indent();
+                    RenderGuiMouse(input.mouse);
+                    ImGui::Unindent();
+                }
+
+                if (ImGui::CollapsingHeader("Keyboard")) {
+                    ImGui::Indent();
+                    RenderGuiKeyboard(input.keyboard);
+                    ImGui::Unindent();
+                }
+            }
+            ImGui::End();
+        }
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event){
+            if (ImGui::BeginMenu("Menu")) {
+                if(ImGui::MenuItem("Input", nullptr, &show_gui)){
+                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                }
+                ImGui::EndMenu();
+            }
+        }
+    }
+
+    SystemUserInput::SystemUserInput() : System("SystemUserInput") {
+
+    }
+
+    void SystemUserInput::pre_init_system() {
         Engine::Context().emplace<Input>();
     }
 
-    void init_system() {
-        Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-        Log::Info("SystemUserInput: Initialized").enqueue();
+    void SystemUserInput::init_system() {
+        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
+        Log::Info(m_name + ": Initialized").enqueue();
     }
 
-    void remove_system() {
-        Log::Info("SystemUserInput: Removed").enqueue();
-    }
-
-    static bool show_gui = false;
-
-    void RenderGuiMouse(const Input::Mouse &mouse) {
-        ImGui::Text("Position: (%f, %f)", mouse.position.x, mouse.position.y);
-        ImGui::Text("Scroll: (%f, %f)", mouse.scroll.x, mouse.scroll.y);
-        ImGui::Text("Buttons: (%d, %d, %d)", mouse.button.left, mouse.button.middle,
-                    mouse.button.right);
-    }
-
-    void RenderGuiKeyboard(const Input::Keyboard &keyboard) {
-        ImGui::Text("Keys: ");
-        for (int i = 0; i < keyboard.keys.size(); ++i) {
-            if (keyboard.keys[i]) {
-                ImGui::SameLine();
-                ImGui::TextColored(ImVec4(1, 0, 0, 1), "%d", i);
-            }
-        }
-    }
-
-    void on_begin_frame(const Events::Begin<Frame> &event) {
-        auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
-        double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiMenu", [&]() {
-            if (ImGui::BeginMenu("Menu")) {
-                ImGui::MenuItem("Input", nullptr, &show_gui);
-                ImGui::EndMenu();
-            }
-            return 1;
-        }));
-
-        if (show_gui) {
-            double_buffer.enqueue_next(std::make_shared<TaskCommand>("GuiWindow", [&]() {
-                if (ImGui::Begin("Input", &show_gui)) {
-                    auto &input = Engine::Context().get<Input>();
-                    if (ImGui::CollapsingHeader("Mouse")) {
-                        ImGui::Indent();
-                        RenderGuiMouse(input.mouse);
-                        ImGui::Unindent();
-                    }
-
-                    if (ImGui::CollapsingHeader("Keyboard")) {
-                        ImGui::Indent();
-                        RenderGuiKeyboard(input.keyboard);
-                        ImGui::Unindent();
-                    }
-                }
-                ImGui::End();
-                return 1;
-            }));
-        }
+    void SystemUserInput::remove_system() {
+        Log::Info(m_name + ": Removed").enqueue();
     }
 }
