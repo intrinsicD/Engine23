@@ -26,6 +26,7 @@ namespace Bcg {
 
         SystemTimer().pre_init();
         SystemCommandBuffers().pre_init();
+        SystemPlatform().pre_init();
         SystemLogger().pre_init();
         SystemRendererOpenGL().pre_init();
         SystemWindowGLFW().pre_init();
@@ -39,6 +40,7 @@ namespace Bcg {
 
         SystemTimer().init();
         SystemCommandBuffers().init();
+        SystemPlatform().init();
         SystemLogger().init();
         SystemRendererOpenGL().init();
         SystemWindowGLFW().init();
@@ -60,6 +62,7 @@ namespace Bcg {
         SystemGui().remove();
         SystemRendererOpenGL().remove();
         SystemWindowGLFW().remove();
+        SystemPlatform().remove();
         SystemTimer().remove();
         SystemLogger().remove();
 

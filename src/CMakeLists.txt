@@ -11,4 +11,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         SystemVulkan.cpp
         SystemPlugins.cpp
         SystemCommandBuffers.cpp
+        SystemPlatform.cpp
         main.cpp)

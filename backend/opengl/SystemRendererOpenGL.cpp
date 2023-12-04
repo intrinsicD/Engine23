@@ -57,7 +57,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
 
             auto &opengl_config = Engine::Context().get<OpenGLConfig>();
-            opengl_config.major = GLAD_VERSION_MAJOR(version);;
+            opengl_config.major = GLAD_VERSION_MAJOR(version);
             opengl_config.minor = GLAD_VERSION_MINOR(version);
             const auto &name = SystemRendererOpenGL().name();
             if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
