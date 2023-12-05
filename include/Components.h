@@ -237,6 +237,19 @@ namespace Bcg {
     struct Cache : public std::unordered_map<Key, Value> {
         using std::unordered_map<Key, Value>::unordered_map;
     };
+
+    struct FileWatcher {
+        Cache<std::string, std::vector<std::function<void()>>> items;
+        Cache<std::string, std::chrono::file_clock::time_point> last_write_times;
+
+        void add(std::string filepath, std::function<void()> callback);
+
+        void remove(std::string filepath);
+
+        void clear();
+
+        void check();
+    };
 }
 
 #endif //ENGINE23_COMPONENTS_H

@@ -1,4 +1,9 @@
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ext/glad/include)
 target_include_directories(${PROJECT_NAME} PUBLIC .)
 
-target_sources(${PROJECT_NAME} PRIVATE SystemRendererOpenGL.cpp)
+target_sources(${PROJECT_NAME} PRIVATE
+        OpenGLUtils.cpp
+        SystemBuffers.cpp
+        SystemShaderPrograms.cpp
+        SystemRendererOpenGL.cpp
+)

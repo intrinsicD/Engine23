@@ -1,4 +1,4 @@
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC entt/src)
+#[[target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC entt/src)]]
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC imgui)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
@@ -18,3 +18,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         implot/implot_demo.cpp
         implot/implot_items.cpp]]
 )
+
+add_subdirectory(entt)
+target_link_libraries(${PROJECT_NAME} PUBLIC EnTT::EnTT)
+add_subdirectory(fmt)
+target_link_libraries(${PROJECT_NAME} PUBLIC fmt::fmt)

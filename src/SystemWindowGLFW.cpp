@@ -10,8 +10,8 @@
 #include "Components.h"
 #include "SystemDearImGui.h"
 
-namespace Bcg{
-    namespace SystemWindowGLFWInternal{
+namespace Bcg {
+    namespace SystemWindowGLFWInternal {
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             SystemWindowGLFW().swap_and_poll_events();
         }
@@ -132,10 +132,13 @@ namespace Bcg{
                 engine->dispatcher.trigger(Events::Update<Input::Drop>{});
             });
 
+            engine->dispatcher.trigger(Events::Startup<Renderer>{});
+
             SystemGui().add_to_window(window);
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
+            Engine::Instance()->dispatcher.trigger(Events::Shutdown<Renderer>{});
             auto m_name = SystemWindowGLFW().name();
             if (!Engine::Instance()->state.ctx().find<WindowConfig>()) {
                 Log::Error(m_name + ": Not started").enqueue();

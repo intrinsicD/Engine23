@@ -12,6 +12,8 @@
 #include "Commands.h"
 #include "Components.h"
 #include "imgui.h"
+#include "SystemShaderPrograms.h"
+#include "SystemBuffers.h"
 
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
@@ -46,15 +48,16 @@ namespace Bcg {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void on_startup_engine(const Events::Startup<Engine> &event) {
+        void on_startup_renderer(const Events::Startup<Renderer> &event) {
+            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
+
             int version = gladLoadGL(glfwGetProcAddress);
 
             if (!version) {
                 Log::Error("Failed to initialize OpenGL context").enqueue();
                 return;
             }
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
 
             auto &opengl_config = Engine::Context().get<OpenGLConfig>();
             opengl_config.major = GLAD_VERSION_MAJOR(version);
@@ -74,11 +77,12 @@ namespace Bcg {
                 Log::Info(name + ": OpenGL version: " + opengl_config.version).enqueue();
                 Log::Info(name + ": OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
             }
+
             auto &bg = Engine::Context().get<WindowConfig>().background_color;
             glClearColor(bg[0], bg[1], bg[2], bg[3]);
         }
 
-        void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
+        void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
         }
@@ -90,6 +94,8 @@ namespace Bcg {
 
     void SystemRendererOpenGL::pre_init() {
         Engine::Context().emplace<OpenGLConfig>();
+        SystemShaderPrograms().pre_init();
+        SystemBuffers().pre_init();
     }
 
     void SystemRendererOpenGL::init() {
@@ -101,15 +107,19 @@ namespace Bcg {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemRendererOpenGLInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemRendererOpenGLInternal::on_shutdown_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().connect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().connect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
 
         Log::Info(m_name + ": Initialized").enqueue();
+        SystemShaderPrograms().init();
+        SystemBuffers().init();
     }
 
     void SystemRendererOpenGL::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemRendererOpenGLInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_engine>();
+        SystemBuffers().remove();
+        SystemShaderPrograms().remove();
+        Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
         Log::Info(m_name + ": Removed").enqueue();
     }
 

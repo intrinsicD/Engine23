@@ -16,6 +16,7 @@ namespace Bcg{
     struct Gui;
     struct GuiMenu;
     struct Plugin;
+    struct Renderer;
     enum class LogLevel{
         Error = 0, Warn = 1, Info = 2
     };

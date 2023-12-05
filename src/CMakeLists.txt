@@ -1,6 +1,7 @@
 target_sources(${PROJECT_NAME} PRIVATE
         Engine.cpp
         Commands.cpp
+        Components.cpp
         Plugins.cpp
         SystemLogger.cpp
         SystemUserInput.cpp
