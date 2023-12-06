@@ -25,7 +25,7 @@ namespace Bcg {
                 return;
             }
 
-            if(ImGui::Begin("Renderer", &show_gui)) {
+            if (ImGui::Begin("Renderer", &show_gui)) {
                 auto &opengl_config = Engine::Context().get<OpenGLConfig>();
                 ImGui::Text("OpenGL vendor: %s", opengl_config.vendor.c_str());
                 ImGui::Text("OpenGL renderer: %s", opengl_config.renderer.c_str());
@@ -46,6 +46,19 @@ namespace Bcg {
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        void on_render_frame(const Events::Render<Frame> &event) {
+            auto &render_batches = Engine::Context().get<RenderBatches>();
+
+            for (const auto &[shader_id, batch]: render_batches.batches) {
+                glUseProgram(shader_id);
+                batch.update_global_uniforms(shader_id);
+                for (const auto &renderable: batch.renderables) {
+                    renderable->update_local_uniforms(shader_id);
+                    renderable->draw();
+                }
+            }
         }
 
         void on_startup_renderer(const Events::Startup<Renderer> &event) {

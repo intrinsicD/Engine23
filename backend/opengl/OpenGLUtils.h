@@ -7,12 +7,17 @@
 
 #include <string>
 #include <array>
+#include <exception>
 #include "Components.h"
 
 namespace Bcg::OpenGL {
     void AssertNoOglError();
 
     std::string TypeToString(unsigned int type);
+
+    unsigned int TypeToSize(unsigned int type);
+
+    unsigned int TypeToElementCount(unsigned int type);
 
     //------------------------------------------------------------------------------------------------------------------
     // OpenGL Components
@@ -79,6 +84,25 @@ namespace Bcg::OpenGL {
                 next_is_dirty = false;
             }
         }
+    };
+
+    struct VertexAttribute {
+        std::string name;
+        unsigned int type;
+        unsigned int element_count = 1;
+        unsigned int offset = 0;
+    };
+
+    struct VertexAttributeLayout {
+        std::vector<VertexAttribute> attributes;
+        unsigned int stride = 0;
+    };
+
+    struct VertexArrayObject{
+        unsigned int id;
+        std::string name;
+        std::vector<Buffer> buffers;
+        VertexAttributeLayout layout;
     };
 }
 

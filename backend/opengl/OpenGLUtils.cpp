@@ -5,6 +5,7 @@
 #include "OpenGLUtils.h"
 #include "glad/gl.h"
 #include <iostream>
+#include <exception>
 
 namespace Bcg::OpenGL {
     void AssertNoOglError() {
@@ -256,6 +257,334 @@ namespace Bcg::OpenGL {
                 return "compute_shader";
             default:
                 return "unknown";
+        }
+    }
+
+    unsigned int TypeToSize(unsigned int type) {
+        switch (type) {
+            case (GL_FLOAT):
+                return sizeof(float);
+            case (GL_FLOAT_VEC2):
+                return sizeof(float) * 2;
+            case (GL_FLOAT_VEC3):
+                return sizeof(float) * 3;
+            case (GL_FLOAT_VEC4):
+                return sizeof(float) * 4;
+            case (GL_DOUBLE):
+                return sizeof(double);
+            case (GL_DOUBLE_VEC2):
+                return sizeof(double) * 2;
+            case (GL_DOUBLE_VEC3):
+                return sizeof(double) * 3;
+            case (GL_DOUBLE_VEC4):
+                return sizeof(double) * 4;
+            case (GL_INT):
+                return sizeof(int);
+            case (GL_INT_VEC2):
+                return sizeof(int) * 2;
+            case (GL_INT_VEC3):
+                return sizeof(int) * 3;
+            case (GL_INT_VEC4):
+                return sizeof(int) * 4;
+            case (GL_UNSIGNED_INT):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_VEC2):
+                return sizeof(unsigned int) * 2;
+            case (GL_UNSIGNED_INT_VEC3):
+                return sizeof(unsigned int) * 3;
+            case (GL_UNSIGNED_INT_VEC4):
+                return sizeof(unsigned int) * 4;
+            case (GL_BOOL):
+                return sizeof(bool);
+            case (GL_BOOL_VEC2):
+                return sizeof(bool) * 2;
+            case (GL_BOOL_VEC3):
+                return sizeof(bool) * 3;
+            case (GL_BOOL_VEC4):
+                return sizeof(bool) * 4;
+            case (GL_FLOAT_MAT2):
+                return sizeof(float) * 4;
+            case (GL_FLOAT_MAT3):
+                return sizeof(float) * 9;
+            case (GL_FLOAT_MAT4):
+                return sizeof(float) * 16;
+            case (GL_FLOAT_MAT2x3):
+                return sizeof(float) * 6;
+            case (GL_FLOAT_MAT2x4):
+                return sizeof(float) * 8;
+            case (GL_FLOAT_MAT3x2):
+                return sizeof(float) * 6;
+            case (GL_FLOAT_MAT3x4):
+                return sizeof(float) * 12;
+            case (GL_FLOAT_MAT4x2):
+                return sizeof(float) * 8;
+            case (GL_FLOAT_MAT4x3):
+                return sizeof(float) * 12;
+            case (GL_DOUBLE_MAT2):
+                return sizeof(double) * 4;
+            case (GL_DOUBLE_MAT3):
+                return sizeof(double) * 9;
+            case (GL_DOUBLE_MAT4):
+                return sizeof(double) * 16;
+            case (GL_DOUBLE_MAT2x3):
+                return sizeof(double) * 6;
+            case (GL_DOUBLE_MAT2x4):
+                return sizeof(double) * 8;
+            case (GL_DOUBLE_MAT3x2):
+                return sizeof(double) * 6;
+            case (GL_DOUBLE_MAT3x4):
+                return sizeof(double) * 12;
+            case (GL_DOUBLE_MAT4x2):
+                return sizeof(double) * 8;
+            case (GL_DOUBLE_MAT4x3):
+                return sizeof(double) * 12;
+            case (GL_SAMPLER_1D):
+                return sizeof(int);
+            case (GL_SAMPLER_2D):
+                return sizeof(int);
+            case (GL_SAMPLER_3D):
+                return sizeof(int);
+            case (GL_SAMPLER_CUBE):
+                return sizeof(int);
+            case (GL_SAMPLER_1D_SHADOW):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_SHADOW):
+                return sizeof(int);
+            case (GL_SAMPLER_1D_ARRAY):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_ARRAY):
+                return sizeof(int);
+            case (GL_SAMPLER_1D_ARRAY_SHADOW):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_ARRAY_SHADOW):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_MULTISAMPLE):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_MULTISAMPLE_ARRAY):
+                return sizeof(int);
+            case (GL_SAMPLER_CUBE_SHADOW):
+                return sizeof(int);
+            case (GL_SAMPLER_BUFFER):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_RECT):
+                return sizeof(int);
+            case (GL_SAMPLER_2D_RECT_SHADOW):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_1D):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_2D):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_3D):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_CUBE):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_1D_ARRAY):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_2D_ARRAY):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_2D_MULTISAMPLE):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_BUFFER):
+                return sizeof(int);
+            case (GL_INT_SAMPLER_2D_RECT):
+                return sizeof(int);
+            case (GL_UNSIGNED_INT_SAMPLER_1D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_2D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_3D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_CUBE):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_1D_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_2D_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_BUFFER):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_SAMPLER_2D_RECT):
+                return sizeof(unsigned int);
+            case (GL_IMAGE_1D):
+                return sizeof(int);
+            case (GL_IMAGE_2D):
+                return sizeof(int);
+            case (GL_IMAGE_3D):
+                return sizeof(int);
+            case (GL_IMAGE_2D_RECT):
+                return sizeof(int);
+            case (GL_IMAGE_CUBE):
+                return sizeof(int);
+            case (GL_IMAGE_BUFFER):
+                return sizeof(int);
+            case (GL_IMAGE_1D_ARRAY):
+                return sizeof(int);
+            case (GL_IMAGE_2D_ARRAY):
+                return sizeof(int);
+            case (GL_IMAGE_2D_MULTISAMPLE):
+                return sizeof(int);
+            case (GL_IMAGE_2D_MULTISAMPLE_ARRAY):
+                return sizeof(int);
+            case (GL_INT_IMAGE_1D):
+                return sizeof(int);
+            case (GL_INT_IMAGE_2D):
+                return sizeof(int);
+            case (GL_INT_IMAGE_3D):
+                return sizeof(int);
+            case (GL_INT_IMAGE_2D_RECT):
+                return sizeof(int);
+            case (GL_INT_IMAGE_CUBE):
+                return sizeof(int);
+            case (GL_INT_IMAGE_BUFFER):
+                return sizeof(int);
+            case (GL_INT_IMAGE_1D_ARRAY):
+                return sizeof(int);
+            case (GL_INT_IMAGE_2D_ARRAY):
+                return sizeof(int);
+            case (GL_INT_IMAGE_2D_MULTISAMPLE):
+                return sizeof(int);
+            case (GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY):
+                return sizeof(int);
+            case (GL_UNSIGNED_INT_IMAGE_1D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_2D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_3D):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_2D_RECT):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_CUBE):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_BUFFER):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_1D_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_2D_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_UNSIGNED_INT_ATOMIC_COUNTER):
+                return sizeof(unsigned int);
+            case (GL_ARRAY_BUFFER):
+                return sizeof(unsigned int);
+            case (GL_ELEMENT_ARRAY_BUFFER):
+                return sizeof(unsigned int);
+            case (GL_VERTEX_ARRAY):
+                return sizeof(unsigned int);
+            case (GL_INVALID_OPERATION):
+                return sizeof(unsigned int);
+            case (GL_INVALID_ENUM):
+                return sizeof(unsigned int);
+            case (GL_INVALID_VALUE):
+                return sizeof(unsigned int);
+            case (GL_OUT_OF_MEMORY):
+                return sizeof(unsigned int);
+            case (GL_INVALID_FRAMEBUFFER_OPERATION):
+                return sizeof(unsigned int);
+            case (GL_VERTEX_SHADER):
+                return sizeof(unsigned int);
+            case (GL_FRAGMENT_SHADER):
+                return sizeof(unsigned int);
+            case (GL_GEOMETRY_SHADER):
+                return sizeof(unsigned int);
+            case (GL_TESS_CONTROL_SHADER):
+                return sizeof(unsigned int);
+            case (GL_TESS_EVALUATION_SHADER):
+                return sizeof(unsigned int);
+            case (GL_COMPUTE_SHADER):
+                return sizeof(unsigned int);
+            default:
+                std::terminate();
+        }
+    }
+
+    unsigned int TypeToElementCount(unsigned int type) {
+        switch (type) {
+            case (GL_FLOAT):
+                return 1;
+            case (GL_FLOAT_VEC2):
+                return 2;
+            case (GL_FLOAT_VEC3):
+                return 3;
+            case (GL_FLOAT_VEC4):
+                return 4;
+            case (GL_DOUBLE):
+                return 1;
+            case (GL_DOUBLE_VEC2):
+                return 2;
+            case (GL_DOUBLE_VEC3):
+                return 3;
+            case (GL_DOUBLE_VEC4):
+                return 4;
+            case (GL_INT):
+                return 1;
+            case (GL_INT_VEC2):
+                return 2;
+            case (GL_INT_VEC3):
+                return 3;
+            case (GL_INT_VEC4):
+                return 4;
+            case (GL_UNSIGNED_INT):
+                return 1;
+            case (GL_UNSIGNED_INT_VEC2):
+                return 2;
+            case (GL_UNSIGNED_INT_VEC3):
+                return 3;
+            case (GL_UNSIGNED_INT_VEC4):
+                return 4;
+            case (GL_BOOL):
+                return 1;
+            case (GL_BOOL_VEC2):
+                return 2;
+            case (GL_BOOL_VEC3):
+                return 3;
+            case (GL_BOOL_VEC4):
+                return 4;
+            case (GL_FLOAT_MAT2):
+                return 4;
+            case (GL_FLOAT_MAT3):
+                return 9;
+            case (GL_FLOAT_MAT4):
+                return 16;
+            case (GL_FLOAT_MAT2x3):
+                return 6;
+            case (GL_FLOAT_MAT2x4):
+                return 8;
+            case (GL_FLOAT_MAT3x2):
+                return 6;
+            case (GL_FLOAT_MAT3x4):
+                return 12;
+            case (GL_FLOAT_MAT4x2):
+                return 8;
+            case (GL_FLOAT_MAT4x3):
+                return 12;
+            case (GL_DOUBLE_MAT2):
+                return 4;
+            case (GL_DOUBLE_MAT3):
+                return 9;
+            case (GL_DOUBLE_MAT4):
+                return 16;
+            case (GL_DOUBLE_MAT2x3):
+                return 6;
+            case (GL_DOUBLE_MAT2x4):
+                return 8;
+            case (GL_DOUBLE_MAT3x2):
+                return 6;
+            case (GL_DOUBLE_MAT3x4):
+                return 12;
+            case (GL_DOUBLE_MAT4x2):
+                return 8;
+            case (GL_DOUBLE_MAT4x3):
+                return 12;
+            default:
+                std::terminate();
         }
     }
 }
