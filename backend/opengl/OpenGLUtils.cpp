@@ -6,6 +6,9 @@
 #include "glad/gl.h"
 #include <iostream>
 #include <exception>
+#include <fstream>
+#include <filesystem>
+#include <regex>
 
 namespace Bcg::OpenGL {
     void AssertNoOglError() {
@@ -586,5 +589,161 @@ namespace Bcg::OpenGL {
             default:
                 std::terminate();
         }
+    }
+
+    inline std::string load_text_file(std::string filepath) {
+        std::ifstream file(filepath);
+        if (!file.is_open()) {
+            return "";
+        }
+        return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+    }
+
+    inline void process_includes(std::string &source, const std::string &directory) {
+        std::regex include_regex(R"(#include\s*"\s*([^"]+)\s*")");
+        std::smatch match;
+        while (std::regex_search(source, match, include_regex)) {
+            std::string include_file = match.str(1);
+            std::string include_source = load_text_file(directory + "/" + include_file);
+            source.replace(match.position(), match.length(), include_source);
+        }
+    }
+
+    void Shader::load_sources() {
+        if (filepath.empty()) return;
+
+        source = load_text_file(filepath);
+        process_includes(source, std::filesystem::path(filepath).parent_path().string());
+    }
+
+    void Shader::compile() {
+        id = glCreateShader(type);
+        OpenGL::AssertNoOglError();
+        const char *src = source.c_str();
+        glShaderSource(id, 1, &src, nullptr);
+        OpenGL::AssertNoOglError();
+        glCompileShader(id);
+        OpenGL::AssertNoOglError();
+    }
+
+    bool Shader::check_compile_status() {
+        int result;
+        glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+        OpenGL::AssertNoOglError();
+        if (result == GL_FALSE) {
+            int length;
+            glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+            OpenGL::AssertNoOglError();
+            char *message = (char *) alloca(length * sizeof(char));
+            glGetShaderInfoLog(id, length, &length, message);
+            OpenGL::AssertNoOglError();
+            glDeleteShader(id);
+            OpenGL::AssertNoOglError();
+            id = 0;
+            error_message = message;
+        }
+        return result;
+    }
+
+    void ShaderProgram::load_shaders() {
+        id = glCreateProgram();
+        OpenGL::AssertNoOglError();
+        if (!v_shader.filepath.empty()) {
+            v_shader.type = GL_VERTEX_SHADER;
+            v_shader.load_sources();
+            v_shader.compile();
+            v_shader.check_compile_status();
+            glAttachShader(id, v_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (!f_shader.filepath.empty()) {
+            f_shader.type = GL_FRAGMENT_SHADER;
+            f_shader.load_sources();
+            f_shader.compile();
+            f_shader.check_compile_status();
+            glAttachShader(id, f_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (!g_shader.filepath.empty()) {
+            g_shader.type = GL_GEOMETRY_SHADER;
+            g_shader.load_sources();
+            g_shader.compile();
+            g_shader.check_compile_status();
+            glAttachShader(id, g_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (!tc_shader.filepath.empty()) {
+            tc_shader.type = GL_TESS_CONTROL_SHADER;
+            tc_shader.load_sources();
+            tc_shader.compile();
+            tc_shader.check_compile_status();
+            glAttachShader(id, tc_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (!te_shader.filepath.empty()) {
+            te_shader.type = GL_TESS_EVALUATION_SHADER;
+            te_shader.load_sources();
+            te_shader.compile();
+            te_shader.check_compile_status();
+            glAttachShader(id, te_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (!c_shader.filepath.empty()) {
+            c_shader.type = GL_COMPUTE_SHADER;
+            c_shader.load_sources();
+            c_shader.compile();
+            c_shader.check_compile_status();
+            glAttachShader(id, c_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+    }
+
+    void ShaderProgram::link() {
+        glLinkProgram(id);
+        OpenGL::AssertNoOglError();
+
+        if (v_shader.id) {
+            glDetachShader(id, v_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (f_shader.id) {
+            glDetachShader(id, f_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (g_shader.id) {
+            glDetachShader(id, g_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (tc_shader.id) {
+            glDetachShader(id, tc_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (te_shader.id) {
+            glDetachShader(id, te_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+        if (c_shader.id) {
+            glDetachShader(id, c_shader.id);
+            OpenGL::AssertNoOglError();
+        }
+    }
+
+    bool ShaderProgram::check_link_status() {
+        int result;
+        glGetProgramiv(id, GL_LINK_STATUS, &result);
+        OpenGL::AssertNoOglError();
+        if (result == GL_FALSE) {
+            int length;
+            glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+            OpenGL::AssertNoOglError();
+            char *message = (char *) alloca(length * sizeof(char));
+            glGetProgramInfoLog(id, length, &length, message);
+            OpenGL::AssertNoOglError();
+            glDeleteProgram(id);
+            OpenGL::AssertNoOglError();
+            id = 0;
+            error_message = message;
+        }
+        return result;
     }
 }

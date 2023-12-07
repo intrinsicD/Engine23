@@ -28,17 +28,32 @@ namespace Bcg::OpenGL {
         unsigned int type = 0;
         std::string name;
         std::string filepath;
+        std::string source;
+        std::string error_message;
+
+        void load_sources();
+
+        void compile();
+
+        bool check_compile_status();
     };
 
     struct ShaderProgram {
         unsigned int id = 0;
         std::string name;
+        std::string error_message;
         Shader v_shader;
         Shader f_shader;
         Shader g_shader;
         Shader tc_shader;
         Shader te_shader;
         Shader c_shader;
+
+        void load_shaders();
+
+        void link();
+
+        bool check_link_status();
     };
 
     struct ShaderPrograms : public Cache<std::string, ShaderProgram> {
@@ -98,7 +113,7 @@ namespace Bcg::OpenGL {
         unsigned int stride = 0;
     };
 
-    struct VertexArrayObject{
+    struct VertexArrayObject {
         unsigned int id;
         std::string name;
         std::vector<Buffer> buffers;

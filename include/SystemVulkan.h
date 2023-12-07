@@ -1,8 +1,0 @@
-//
-// Created by alex on 28.11.23.
-//
-
-#ifndef ENGINE23_SYSTEMVULKAN_H
-#define ENGINE23_SYSTEMVULKAN_H
-
-#endif //ENGINE23_SYSTEMVULKAN_H

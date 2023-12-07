@@ -53,7 +53,7 @@ else()
     message(STATUS "Building for an unknown architecture")
 endif()
 
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC .)
-target_sources(${PROJECT_NAME} PRIVATE Platform.cpp)
+target_include_directories(Engine23Lib SYSTEM PUBLIC .)
+target_sources(Engine23Lib PRIVATE Platform.cpp)
 
 

@@ -7,6 +7,7 @@
 #include "SystemRendererOpenGL.h"
 #include "Engine.h"
 #include "Events.h"
+#include "fmt/core.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
@@ -44,25 +45,22 @@ namespace Bcg {
             }
         }
 
+
+
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        void on_render_frame(const Events::Render<Frame> &event) {
-            auto &render_batches = Engine::Context().get<RenderBatches>();
+        static std::shared_ptr<TaskCommand> forward_render;
 
-            for (const auto &[shader_id, batch]: render_batches.batches) {
-                glUseProgram(shader_id);
-                batch.update_global_uniforms(shader_id);
-                for (const auto &renderable: batch.renderables) {
-                    renderable->update_local_uniforms(shader_id);
-                    renderable->draw();
-                }
-            }
+        void on_render_frame(const Events::Render<Frame> &event) {
+            auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
+            double_buffer.enqueue_next(forward_render);
         }
 
         void on_startup_renderer(const Events::Startup<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().connect<&SystemRendererOpenGLInternal::on_render_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
 
             int version = gladLoadGL(glfwGetProcAddress);
@@ -77,7 +75,7 @@ namespace Bcg {
             opengl_config.minor = GLAD_VERSION_MINOR(version);
             const auto &name = SystemRendererOpenGL().name();
             if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
-                Log::Error(name + ": OpenGL version not supported").enqueue();
+                Log::Error(fmt::format("{}: OpenGL version not supported", name)).enqueue();
                 return;
             } else {
                 opengl_config.vendor = (const char *) glGetString(GL_VENDOR);
@@ -85,14 +83,27 @@ namespace Bcg {
                 opengl_config.version = (const char *) glGetString(GL_VERSION);
                 opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
                 Log::Info(name + ": Startup").enqueue();
-                Log::Info(name + ": OpenGL vendor: " + opengl_config.vendor).enqueue();
-                Log::Info(name + ": OpenGL renderer: " + opengl_config.renderer).enqueue();
-                Log::Info(name + ": OpenGL version: " + opengl_config.version).enqueue();
+                Log::Info(name + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
+                Log::Info(name + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
+                Log::Info(name + ": OpenGL version:      " + opengl_config.version).enqueue();
                 Log::Info(name + ": OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
             }
 
             auto &bg = Engine::Context().get<WindowConfig>().background_color;
             glClearColor(bg[0], bg[1], bg[2], bg[3]);
+
+            forward_render = std::make_shared<TaskCommand>("Render", [](){
+                auto &render_batches = Engine::Context().get<RenderBatches>();
+                for (const auto &[shader_id, batch]: render_batches.batches) {
+                    glUseProgram(shader_id);
+                    batch->update_global_uniforms(shader_id);
+                    for (const auto &renderable: batch->renderables) {
+                        renderable->update_local_uniforms(shader_id);
+                        renderable->draw();
+                    }
+                }
+                return 1;
+            });
         }
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
@@ -107,6 +118,7 @@ namespace Bcg {
 
     void SystemRendererOpenGL::pre_init() {
         Engine::Context().emplace<OpenGLConfig>();
+        Engine::Context().emplace<RenderBatches>();
         SystemShaderPrograms().pre_init();
         SystemBuffers().pre_init();
     }

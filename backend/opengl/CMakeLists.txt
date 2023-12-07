@@ -1,7 +1,7 @@
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ext/glad/include)
-target_include_directories(${PROJECT_NAME} PUBLIC .)
+target_include_directories(Engine23Lib SYSTEM PUBLIC ext/glad/include)
+target_include_directories(Engine23Lib PUBLIC .)
 
-target_sources(${PROJECT_NAME} PRIVATE
+target_sources(Engine23Lib PRIVATE
         OpenGLUtils.cpp
         SystemBuffers.cpp
         SystemVertexArrayObject.cpp

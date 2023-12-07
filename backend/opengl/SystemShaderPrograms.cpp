@@ -48,13 +48,9 @@ namespace Bcg {
 
     }
 
-
-
     inline std::string load_text_file(std::string filepath) {
         std::ifstream file(filepath);
         if (!file.is_open()) {
-            auto m_name = SystemShaderPrograms().name();
-            Log::Error(m_name + ": Failed to open file: " + filepath).enqueue();
             return "";
         }
         return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
@@ -71,57 +67,35 @@ namespace Bcg {
     }
 
     OpenGL::Shader SystemShaderPrograms::load_shader(std::string filepath, unsigned int type) {
-        auto source = load_text_file(filepath);
-        if (source.empty()) {
+        OpenGL::Shader shader;
+        shader.type = type;
+        shader.filepath = filepath;
+        shader.load_sources();
+        if (shader.source.empty()) {
+            Log::Error(m_name + ": Failed to open file: " + filepath).enqueue();
             return {};
         }
-        process_includes(source, std::filesystem::path(filepath).parent_path());
-
-        auto shader = compile_shader(source, type);
-        shader.filepath = filepath;
-        if (check_compile_status(shader.id) == GL_FALSE) {
-            Log::Error(m_name + ": Failed to compile shader: " + filepath).enqueue();
+        shader.compile();
+        shader.check_compile_status();
+        if (shader.id == 0) {
+            Log::Error(m_name + ": Failed to compile shader: " + shader.error_message).enqueue();
+            return {};
         }
-        return std::move(shader);
+        return shader;
     }
 
-    OpenGL::Shader SystemShaderPrograms::compile_shader(std::string source, unsigned int type) {
-        unsigned int shader_id = glCreateShader(type);
-        OpenGL::AssertNoOglError();
-        const char *src = source.c_str();
-        glShaderSource(shader_id, 1, &src, nullptr);
-        OpenGL::AssertNoOglError();
-        glCompileShader(shader_id);
-        OpenGL::AssertNoOglError();
-        return {shader_id, type};
-    }
-
-    bool SystemShaderPrograms::check_compile_status(unsigned int shader_id) {
-        int result;
-        glGetShaderiv(shader_id, GL_COMPILE_STATUS, &result);
-        OpenGL::AssertNoOglError();
-        if (result == GL_FALSE) {
-            int length;
-            glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &length);
-            OpenGL::AssertNoOglError();
-            char *message = (char *) alloca(length * sizeof(char));
-            glGetShaderInfoLog(shader_id, length, &length, message);
-            OpenGL::AssertNoOglError();
-            Log::Error(m_name + ": Failed to compile shader: \n" + std::string(message)).enqueue();
-            glDeleteShader(shader_id);
-            OpenGL::AssertNoOglError();
-        }
-        return result;
-    }
 
     std::function<void()> WatcherCallback(OpenGL::ShaderProgram &program, OpenGL::Shader &shader) {
         return [&]() {
             auto system = SystemShaderPrograms();
-            auto new_shader = system.load_shader(shader.filepath, shader.type);
-            if (new_shader.id) {
+            OpenGL::Shader new_shader;
+            new_shader.filepath = shader.filepath;
+            new_shader.type = shader.type;
+            new_shader.load_sources();
+            new_shader.compile();
+            if (new_shader.check_compile_status()) {
                 //check if new shader can be linked to program
                 //if not then revert to old shader
-
 
                 glAttachShader(program.id, new_shader.id);
                 OpenGL::AssertNoOglError();
@@ -167,6 +141,23 @@ namespace Bcg {
             return {};
         }
         OpenGL::ShaderProgram program;
+        program.v_shader.filepath = vs_filepath;
+        program.f_shader.filepath = fs_filepath;
+        program.g_shader.filepath = gs_filepath;
+        program.tc_shader.filepath = tcs_filepath;
+        program.te_shader.filepath = tes_filepath;
+        program.c_shader.filepath = cs_filepath;
+        program.load_shaders();
+        if ((!program.v_shader.id || !program.f_shader.id) && !program.c_shader.id) {
+            Log::Error(m_name + ": Needs at least vertex and fragment or compute shader!").enqueue();
+            return program;
+        }
+        program.link();
+        if (!program.check_link_status()) {
+            Log::Error(m_name + ": Failed to link program: " + program.error_message).enqueue();
+            return program;
+        }
+        /*
         program.id = glCreateProgram();
         OpenGL::AssertNoOglError();
         program.v_shader = load_shader(vs_filepath, GL_VERTEX_SHADER);
@@ -247,7 +238,7 @@ namespace Bcg {
             glDetachShader(program.id, program.c_shader.id);
             OpenGL::AssertNoOglError();
         }
-
+*/
         return program;
     }
 

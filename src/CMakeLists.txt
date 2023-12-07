@@ -1,4 +1,4 @@
-target_sources(${PROJECT_NAME} PRIVATE
+target_sources(Engine23Lib PRIVATE
         Engine.cpp
         Commands.cpp
         Components.cpp
@@ -9,8 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         SystemWindowGLFW.cpp
         SystemTimer.cpp
         SystemParallelProcessing.cpp
-        SystemVulkan.cpp
+        SystemRendererVulkan.cpp
         SystemPlugins.cpp
         SystemCommandBuffers.cpp
-        SystemPlatform.cpp
-        main.cpp)
+        SystemPlatform.cpp)

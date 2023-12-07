@@ -35,8 +35,6 @@ namespace Bcg {
         entt::dispatcher dispatcher;
         bool is_running = false;
     };
-
-
 }
 
 

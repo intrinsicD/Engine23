@@ -6,6 +6,7 @@
 #include "Engine.h"
 #include "SystemParallelProcessing.h"
 #include "Components.h"
+#include "fmt/core.h"
 
 #include <iostream>
 #include <memory>
@@ -101,7 +102,7 @@ namespace Bcg {
 
     namespace Log {
         Message::Message(std::string type, std::string color, std::string message, double time_stamp) : Command(
-                "[" + type + "] " + color + message + "\033[0m" + " [" + std::to_string(time_stamp) + "] ") {}
+                fmt::format("[{}] {}{}\033[0m[{}]", type, color, message, time_stamp)) {}
 
         Message::Message(std::string name) : Command(std::move(name)) {}
 

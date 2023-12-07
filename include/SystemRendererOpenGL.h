@@ -14,10 +14,6 @@ namespace Bcg {
 
         ~SystemRendererOpenGL() override = default;
 
-        void show(entt::entity entity_id);
-
-        void hide(entt::entity entity_id);
-
     protected:
         friend Engine;
 

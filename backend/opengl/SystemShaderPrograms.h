@@ -19,10 +19,6 @@ namespace Bcg {
 
         OpenGL::Shader load_shader(std::string filepath, unsigned int type);
 
-        OpenGL::Shader compile_shader(std::string source, unsigned int type);
-
-        bool check_compile_status(unsigned int shader_id);
-
         OpenGL::ShaderProgram load_program(std::string vs_filepath, std::string fs_filepath, std::string gs_filepath = "",
                                    std::string tcs_filepath = "", std::string tes_filepath = "",
                                    std::string cs_filepath = "");

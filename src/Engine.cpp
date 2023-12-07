@@ -7,6 +7,7 @@
 #include "Components.h"
 #include "Systems.h"
 #include "Events.h"
+#include "fmt/core.h"
 
 namespace Bcg {
     Engine::Engine() {
@@ -50,9 +51,9 @@ namespace Bcg {
         SystemPlugins().init();
 
         time.engine_constructor_end = Time::Point::Now();
-        Log::Info("Engine: Constructor took " + std::to_string(
-                time.engine_constructor_end.duration<Time::Unit::seconds>(time.engine_constructor_start)) +
-                  " seconds").enqueue();
+        Log::Info(fmt::format("Engine: Constructor took {} seconds",
+                              time.engine_constructor_end.duration<Time::Unit::seconds>(
+                                      time.engine_constructor_start))).enqueue();
     }
 
     Engine::~Engine() {
