@@ -77,6 +77,8 @@ namespace Bcg::OpenGL {
 
         void create();
 
+        void destroy();
+
         void bind();
 
         void set_data(const void *data, unsigned int size);
@@ -150,6 +152,8 @@ namespace Bcg::OpenGL {
         VertexAttributeLayout layout;
 
         void create();
+
+        void destroy();
 
         void bind();
 

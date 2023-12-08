@@ -799,6 +799,11 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
+    void BufferObject::destroy(){
+        glDeleteBuffers(1, &id);
+        OpenGL::AssertNoOglError();
+    }
+
     void BufferObject::bind() {
         glBindBuffer(type, id);
         OpenGL::AssertNoOglError();
@@ -826,6 +831,11 @@ namespace Bcg::OpenGL {
 
     void VertexArrayObject::create() {
         glGenVertexArrays(1, &id);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::destroy(){
+        glDeleteVertexArrays(1, &id);
         OpenGL::AssertNoOglError();
     }
 
