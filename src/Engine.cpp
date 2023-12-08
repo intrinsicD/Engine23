@@ -88,6 +88,7 @@ namespace Bcg {
         //startup engine
         Log::Info("Engine: Startup...").enqueue();
         dispatcher.trigger<Events::Startup<Engine>>();
+        dispatcher.trigger<Events::Startup<Plugin>>();
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
         Log::Info("Engine: Run...").enqueue();

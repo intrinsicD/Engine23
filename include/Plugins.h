@@ -10,6 +10,8 @@
 #include "System.h"
 
 namespace Bcg {
+    class SystemPlugins;
+
     class Plugin : public System {
     public:
         //Is an Engine component, it lives inside the Engine's state (registry)
@@ -24,6 +26,9 @@ namespace Bcg {
         explicit Plugin(std::string name);
 
         ~Plugin() override = default;
+
+    protected:
+        friend SystemPlugins;
     };
 }
 

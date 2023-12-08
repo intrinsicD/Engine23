@@ -646,49 +646,66 @@ namespace Bcg::OpenGL {
     }
 
     void ShaderProgram::load_shaders() {
+        if (!v_shader.filepath.empty()) {
+            v_shader.load_sources();
+        }
+        if (!f_shader.filepath.empty()) {
+            f_shader.load_sources();
+        }
+        if (!g_shader.filepath.empty()) {
+            g_shader.load_sources();
+        }
+        if (!tc_shader.filepath.empty()) {
+            tc_shader.load_sources();
+        }
+        if (!te_shader.filepath.empty()) {
+            te_shader.load_sources();
+        }
+        if (!c_shader.filepath.empty()) {
+            c_shader.load_sources();
+        }
+        compile_from_sources();
+    }
+
+    void ShaderProgram::compile_from_sources() {
         id = glCreateProgram();
         OpenGL::AssertNoOglError();
-        if (!v_shader.filepath.empty()) {
+        if (!v_shader.source.empty()) {
             v_shader.type = GL_VERTEX_SHADER;
-            v_shader.load_sources();
             v_shader.compile();
             v_shader.check_compile_status();
             glAttachShader(id, v_shader.id);
             OpenGL::AssertNoOglError();
         }
-        if (!f_shader.filepath.empty()) {
+        if (!f_shader.source.empty()) {
             f_shader.type = GL_FRAGMENT_SHADER;
-            f_shader.load_sources();
             f_shader.compile();
             f_shader.check_compile_status();
             glAttachShader(id, f_shader.id);
             OpenGL::AssertNoOglError();
         }
-        if (!g_shader.filepath.empty()) {
+        if (!g_shader.source.empty()) {
             g_shader.type = GL_GEOMETRY_SHADER;
-            g_shader.load_sources();
             g_shader.compile();
             g_shader.check_compile_status();
             glAttachShader(id, g_shader.id);
             OpenGL::AssertNoOglError();
         }
-        if (!tc_shader.filepath.empty()) {
+        if (!tc_shader.source.empty()) {
             tc_shader.type = GL_TESS_CONTROL_SHADER;
-            tc_shader.load_sources();
             tc_shader.compile();
             tc_shader.check_compile_status();
             glAttachShader(id, tc_shader.id);
             OpenGL::AssertNoOglError();
         }
-        if (!te_shader.filepath.empty()) {
+        if (!te_shader.source.empty()) {
             te_shader.type = GL_TESS_EVALUATION_SHADER;
-            te_shader.load_sources();
             te_shader.compile();
             te_shader.check_compile_status();
             glAttachShader(id, te_shader.id);
             OpenGL::AssertNoOglError();
         }
-        if (!c_shader.filepath.empty()) {
+        if (!c_shader.source.empty()) {
             c_shader.type = GL_COMPUTE_SHADER;
             c_shader.load_sources();
             c_shader.compile();
@@ -745,5 +762,150 @@ namespace Bcg::OpenGL {
             error_message = message;
         }
         return result;
+    }
+
+
+    void ShaderProgram::use() {
+        glUseProgram(id);
+        OpenGL::AssertNoOglError();
+    }
+
+    BufferObject BufferObject::Static() {
+        return {0, 0, 0, GL_STATIC_DRAW, ""};
+    }
+
+    BufferObject BufferObject::Dynamic() {
+        return {0, 0, 0, GL_DYNAMIC_DRAW, ""};
+    }
+
+    VertexBufferObject VertexBufferObject::Static() {
+        return {0, GL_ARRAY_BUFFER, 0, GL_STATIC_DRAW, ""};
+    }
+
+    VertexBufferObject VertexBufferObject::Dynamic() {
+        return {0, GL_ARRAY_BUFFER, 0, GL_DYNAMIC_DRAW, ""};
+    }
+
+    IndexBufferObject IndexBufferObject::Static() {
+        return {0, GL_ELEMENT_ARRAY_BUFFER, 0, GL_STATIC_DRAW, ""};
+    }
+
+    IndexBufferObject IndexBufferObject::Dynamic() {
+        return {0, GL_ELEMENT_ARRAY_BUFFER, 0, GL_DYNAMIC_DRAW, ""};
+    }
+
+    void BufferObject::create() {
+        glGenBuffers(1, &id);
+        OpenGL::AssertNoOglError();
+    }
+
+    void BufferObject::bind() {
+        glBindBuffer(type, id);
+        OpenGL::AssertNoOglError();
+    }
+
+    void BufferObject::set_data(const void *data, unsigned int size) {
+        glBufferData(type, size, data, usage);
+        OpenGL::AssertNoOglError();
+    }
+
+    void BufferObject::release() {
+        glBindBuffer(type, 0);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexAttribute::enable() {
+        glEnableVertexAttribArray(index);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexAttribute::disable() {
+        glDisableVertexAttribArray(index);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::create() {
+        glGenVertexArrays(1, &id);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::bind() {
+        glBindVertexArray(id);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::release() {
+        glBindVertexArray(0);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized,
+                                                const void *pointer) {
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_FLOAT, normalized, size * sizeof(float),
+                                                         pointer);
+        attribute.enable();
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
+                              attribute.pointer);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::set_double_attribute(unsigned int index, unsigned int size, bool normalized,
+                                                 const void *pointer) {
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_DOUBLE, normalized, size * sizeof(double),
+                                                         pointer);
+        attribute.enable();
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
+                              attribute.pointer);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::set_int_attribute(unsigned int index, unsigned int size, bool normalized,
+                                              const void *pointer) {
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_INT, normalized, size * sizeof(int),
+                                                         pointer);
+        attribute.enable();
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
+                              attribute.pointer);
+        OpenGL::AssertNoOglError();
+    }
+
+    void VertexArrayObject::set_unsigned_int_attribute(unsigned int index, unsigned int size, bool normalized,
+                                                       const void *pointer) {
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_UNSIGNED_INT, normalized,
+                                                         size * sizeof(unsigned int),
+                                                         pointer);
+        attribute.enable();
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
+                              attribute.pointer);
+        OpenGL::AssertNoOglError();
+    }
+
+    Renderable Renderable::Triangles() {
+        Renderable renderable;
+        renderable.mode = GL_TRIANGLES;
+        renderable.type = GL_UNSIGNED_INT;
+        return renderable;
+    }
+
+    Renderable Renderable::Lines() {
+        Renderable renderable;
+        renderable.mode = GL_LINES;
+        renderable.type = GL_UNSIGNED_INT;
+        return renderable;
+    }
+
+    Renderable Renderable::Points() {
+        Renderable renderable;
+        renderable.mode = GL_POINTS;
+        renderable.type = GL_UNSIGNED_INT;
+        return renderable;
+    }
+
+    void Renderable::draw(){
+        program.use();
+        vao.bind();
+        glDrawElements(mode, count, type, (void *) offset);
+        OpenGL::AssertNoOglError();
+        vao.release();
     }
 }

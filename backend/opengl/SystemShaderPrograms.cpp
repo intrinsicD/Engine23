@@ -48,24 +48,6 @@ namespace Bcg {
 
     }
 
-    inline std::string load_text_file(std::string filepath) {
-        std::ifstream file(filepath);
-        if (!file.is_open()) {
-            return "";
-        }
-        return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-    }
-
-    inline void process_includes(std::string &source, const std::string &directory) {
-        std::regex include_regex(R"(#include\s*"\s*([^"]+)\s*")");
-        std::smatch match;
-        while (std::regex_search(source, match, include_regex)) {
-            std::string include_file = match.str(1);
-            std::string include_source = load_text_file(directory + "/" + include_file);
-            source.replace(match.position(), match.length(), include_source);
-        }
-    }
-
     OpenGL::Shader SystemShaderPrograms::load_shader(std::string filepath, unsigned int type) {
         OpenGL::Shader shader;
         shader.type = type;

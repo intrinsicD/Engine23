@@ -17,13 +17,6 @@ namespace Bcg {
 
         ~SystemBuffers() override = default;
 
-        OpenGL::Buffer create_buffer(std::string name, unsigned int type);
-
-        void delete_buffer(OpenGL::Buffer &buffer);
-
-        void set_buffer_data(OpenGL::Buffer &buffer, void *data, unsigned int size, unsigned int usage);
-
-        void set_buffer_sub_data(OpenGL::Buffer &buffer, void *data, unsigned int size, unsigned int offset);
     protected:
         friend Engine;
         friend SystemRendererOpenGL;

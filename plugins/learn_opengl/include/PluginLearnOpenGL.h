@@ -22,7 +22,7 @@ namespace Bcg{
         void remove() override;
     };
 
-    extern "C" Plugin* create_instance_plugin_learn_opengl() {
+    extern "C" Plugin* create_instance_learn_opengl() {
         return new PluginLearnOpenGL;
     }
 }

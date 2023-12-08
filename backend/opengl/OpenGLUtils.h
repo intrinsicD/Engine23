@@ -51,30 +51,54 @@ namespace Bcg::OpenGL {
 
         void load_shaders();
 
+        void compile_from_sources();
+
         void link();
 
         bool check_link_status();
+
+        void use();
     };
 
     struct ShaderPrograms : public Cache<std::string, ShaderProgram> {
         using Cache<std::string, ShaderProgram>::Cache;
     };
 
-    struct Buffer {
-        enum class Format {
-            Plain,
-            Batched,
-            Interleaved
-        } format;
+    struct BufferObject {
         unsigned int id;
         unsigned int type;
         unsigned int size;
         unsigned int usage;
         std::string name;
+
+        static BufferObject Static();
+
+        static BufferObject Dynamic();
+
+        void create();
+
+        void bind();
+
+        void set_data(const void *data, unsigned int size);
+
+        void release();
     };
 
+    struct VertexBufferObject : public BufferObject {
+        static VertexBufferObject Static();
+
+        static VertexBufferObject Dynamic();
+    };
+
+    struct IndexBufferObject : public BufferObject {
+        static IndexBufferObject Static();
+
+        static IndexBufferObject Dynamic();
+    };
+
+
     struct DoubleBuffer {
-        std::array<Buffer, 2> buffers;
+        std::array<BufferObject, 2> buffers;
         bool next_is_dirty = false;
 
         unsigned int current_id() const {
@@ -85,11 +109,11 @@ namespace Bcg::OpenGL {
             return buffers[1].id;
         }
 
-        Buffer &current() {
+        BufferObject &current() {
             return buffers[0];
         }
 
-        Buffer &next() {
+        BufferObject &next() {
             return buffers[1];
         }
 
@@ -101,11 +125,18 @@ namespace Bcg::OpenGL {
         }
     };
 
+
     struct VertexAttribute {
-        std::string name;
+        unsigned int index;
+        unsigned int size;
         unsigned int type;
-        unsigned int element_count = 1;
-        unsigned int offset = 0;
+        bool normalized;
+        unsigned int stride;
+        const void *pointer;
+
+        void enable();
+
+        void disable();
     };
 
     struct VertexAttributeLayout {
@@ -116,8 +147,40 @@ namespace Bcg::OpenGL {
     struct VertexArrayObject {
         unsigned int id;
         std::string name;
-        std::vector<Buffer> buffers;
         VertexAttributeLayout layout;
+
+        void create();
+
+        void bind();
+
+        void set_float_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
+
+        void set_double_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
+
+        void set_int_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
+
+        void set_unsigned_int_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
+
+        void release();
+    };
+
+    struct Renderable {
+        OpenGL::VertexArrayObject vao;
+        OpenGL::VertexBufferObject vbo;
+        OpenGL::IndexBufferObject ebo;
+        OpenGL::ShaderProgram program;
+        unsigned int mode;
+        unsigned int count;
+        unsigned int type;
+        unsigned int offset = 0;
+
+        static Renderable Triangles();
+
+        static Renderable Lines();
+
+        static Renderable Points();
+
+        void draw();
     };
 }
 

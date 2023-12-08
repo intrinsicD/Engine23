@@ -6,6 +6,9 @@
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"
+#include "Plugins.h"
+#include "Components.h"
+
 
 #include <dlfcn.h>
 
@@ -56,10 +59,22 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPluginsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
         Log::Info(m_name + ": Initialized").enqueue();
+
+        auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
+        auto plugin = load("lib/libbcg_plugin_learn_opengl.so");
+        plugin->pre_init();
+        plugin->init();
+        plugins["learn_opengl"] = plugin;
     }
 
     void SystemPlugins::remove() {
         Log::Info(m_name + ": Removed").enqueue();
+
+        auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
+        for(auto &plugin : plugins) {
+            plugin.second->remove();
+            unload(plugin.second);
+        }
     }
 
     Plugin *SystemPlugins::load(const std::string &filepath) {
