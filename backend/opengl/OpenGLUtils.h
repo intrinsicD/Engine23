@@ -58,6 +58,9 @@ namespace Bcg::OpenGL {
         bool check_link_status();
 
         void use();
+
+        void set_vec3(const std::string &name, float r, float g, float b) const;
+        void set_vec3(const std::string &name, const float *value) const;
     };
 
     struct ShaderPrograms : public Cache<std::string, ShaderProgram> {
@@ -177,14 +180,27 @@ namespace Bcg::OpenGL {
         unsigned int count;
         unsigned int type;
         unsigned int offset = 0;
+        float our_color[3] = {1.0f, 1.0f, 1.0f};
 
-        static Renderable Triangles();
+        virtual void draw();
+    };
 
-        static Renderable Lines();
+    struct RenderableTriangles : public Renderable {
+        static RenderableTriangles Create();
 
-        static Renderable Points();
+        void draw() override;
+    };
 
-        void draw();
+    struct RenderableLines : public Renderable {
+        static RenderableLines Create();
+
+        void draw() override;
+    };
+
+    struct RenderablePoints : public Renderable {
+        static RenderablePoints Create();
+
+        void draw() override;
     };
 }
 

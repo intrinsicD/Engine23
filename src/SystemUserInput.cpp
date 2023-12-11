@@ -61,6 +61,17 @@ namespace Bcg {
                 ImGui::EndMenu();
             }
         }
+
+        void on_update_input_drop(const Events::Update<Input::Drop> &event) {
+            auto *engine = Engine::Instance();
+            auto &input = engine->state.ctx().get<Input>();
+
+            for(auto &path : input.drop.paths){
+                Log::Info("Dropped: " + path).enqueue();
+            }
+
+            input.drop.paths.clear();
+        }
     }
 
     SystemUserInput::SystemUserInput() : System("SystemUserInput") {
@@ -73,6 +84,7 @@ namespace Bcg {
 
     void SystemUserInput::init() {
         Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
+        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
         Log::Info(m_name + ": Initialized").enqueue();
     }
 

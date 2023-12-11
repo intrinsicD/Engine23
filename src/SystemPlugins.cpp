@@ -61,10 +61,18 @@ namespace Bcg {
         Log::Info(m_name + ": Initialized").enqueue();
 
         auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
-        auto plugin = load("lib/libbcg_plugin_learn_opengl.so");
-        plugin->pre_init();
-        plugin->init();
-        plugins["learn_opengl"] = plugin;
+        {
+            auto plugin = load("lib/libbcg_plugin_learn_opengl.so");
+            plugin->pre_init();
+            plugin->init();
+            plugins["learn_opengl"] = plugin;
+        }
+        {
+            auto plugin = load("lib/libbcg_plugin_tiny_obj_loader.so");
+            plugin->pre_init();
+            plugin->init();
+            plugins["tiny_obj_loader"] = plugin;
+        }
     }
 
     void SystemPlugins::remove() {

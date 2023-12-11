@@ -1,0 +1,2 @@
+add_subdirectory(tinyobjloader)
+target_link_libraries(Engine23Lib PUBLIC tinyobjloader)

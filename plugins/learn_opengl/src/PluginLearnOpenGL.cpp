@@ -13,26 +13,32 @@
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
         void on_render_frame(const Events::Render<Frame> &event) {
-            auto view = Engine::State().view<OpenGL::Renderable>();
-            for (const auto &entity_id: view) {
-                auto &renderable = view.get<OpenGL::Renderable>(entity_id);
-                renderable.draw();
+            {
+                auto view = Engine::State().view<OpenGL::RenderableTriangles>();
+                for (const auto &entity_id: view) {
+                    auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
+                    renderable.program.use();
+                    renderable.program.set_vec3("our_color", renderable.our_color);
+                    renderable.vao.bind();
+                    renderable.draw();
+                    renderable.vao.release();
+                }
             }
         }
 
         static bool show_gui = false;
 
         void on_render_gui(const Events::Render<Gui> &event) {
-            if(!show_gui){
+            if (!show_gui) {
                 Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&PluginLearnOpenGLInternal::on_render_gui>();
                 return;
             }
 
             static bool hello_triangle = false;
             static entt::entity hello_triangle_id;
-            if(ImGui::Begin("Learn OpenGL", &show_gui)){
-                if(ImGui::Checkbox("Hello Triangle", &hello_triangle)){
-                    if(hello_triangle) {
+            if (ImGui::Begin("Learn OpenGL", &show_gui)) {
+                if (ImGui::Checkbox("Hello Triangle", &hello_triangle)) {
+                    if (hello_triangle) {
                         std::array<float, 12> vertices{
                                 0.5f, 0.5f, 0.0f,  // top right
                                 0.5f, -0.5f, 0.0f,  // bottom right
@@ -46,32 +52,36 @@ namespace Bcg {
                         };
 
                         hello_triangle_id = Engine::State().create();
-                        auto &renderable = Engine::State().emplace<OpenGL::Renderable>(hello_triangle_id);
-                        renderable = OpenGL::Renderable::Triangles();
-                        renderable.vbo = OpenGL::VertexBufferObject::Static();
-                        renderable.ebo = OpenGL::IndexBufferObject::Static();
+                        auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(
+                                hello_triangle_id);
+                        renderable_triangles = OpenGL::RenderableTriangles::Create();
+                        renderable_triangles.vbo = OpenGL::VertexBufferObject::Static();
+                        renderable_triangles.ebo = OpenGL::IndexBufferObject::Static();
 
-                        renderable.vao.create();
-                        renderable.vbo.create();
-                        renderable.ebo.create();
+                        renderable_triangles.vao.create();
+                        renderable_triangles.vbo.create();
+                        renderable_triangles.ebo.create();
 
-                        renderable.vao.bind();
-                        renderable.vbo.bind();
-                        renderable.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
+                        renderable_triangles.vao.bind();
+                        renderable_triangles.vbo.bind();
+                        renderable_triangles.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
 
-                        renderable.ebo.bind();
-                        renderable.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
+                        renderable_triangles.ebo.bind();
+                        renderable_triangles.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
 
-                        renderable.vao.set_float_attribute(0, 3, false, (void *) 0);
+                        renderable_triangles.vao.set_float_attribute(0, 3, false, (void *) 0);
 
-                        renderable.vbo.release();
-                        renderable.vao.release();
-                        renderable.ebo.release();
+                        renderable_triangles.vbo.release();
+                        renderable_triangles.vao.release();
+                        renderable_triangles.ebo.release();
                         auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
-                        renderable.program = programs["learn_opengl"];
-                        renderable.count = 6;
-                        renderable.offset = 0;
-                    }else{
+                        renderable_triangles.program = programs["learn_opengl"];
+                        renderable_triangles.count = 6;
+                        renderable_triangles.offset = 0;
+                        renderable_triangles.our_color[0] = 1.0f;
+                        renderable_triangles.our_color[1] = 0.5f;
+                        renderable_triangles.our_color[2] = 0.2f;
+                    } else {
                         auto &renderable = Engine::State().get<OpenGL::Renderable>(hello_triangle_id);
                         renderable.vao.destroy();
                         renderable.vbo.destroy();
@@ -108,9 +118,10 @@ namespace Bcg {
                                       "}\0";
             program.f_shader.source = "#version 330 core\n"
                                       "out vec4 FragColor;\n"
+                                      "uniform vec3 our_color;\n"
                                       "void main()\n"
                                       "{\n"
-                                      "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                      "   FragColor = vec4(our_color, 1.0f);\n"
                                       "}\n\0";
             program.compile_from_sources();
             program.link();

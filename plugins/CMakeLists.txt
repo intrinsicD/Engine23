@@ -1,1 +1,2 @@
 add_subdirectory(learn_opengl)
+add_subdirectory(tiny_obj_loader)

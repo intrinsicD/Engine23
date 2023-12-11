@@ -770,6 +770,20 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
+    void ShaderProgram::set_vec3(const std::string &name, float r, float g, float b) const {
+        auto location = glGetUniformLocation(id, name.c_str());
+        if(location == -1) return;
+        glUniform3f(location, r, g, b);
+        OpenGL::AssertNoOglError();
+    }
+
+    void ShaderProgram::set_vec3(const std::string &name, const float *value) const {
+        auto location = glGetUniformLocation(id, name.c_str());
+        if(location == -1) return;
+        glUniform3fv(location, 1, value);
+        OpenGL::AssertNoOglError();
+    }
+
     BufferObject BufferObject::Static() {
         return {0, 0, 0, GL_STATIC_DRAW, ""};
     }
@@ -799,7 +813,7 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
-    void BufferObject::destroy(){
+    void BufferObject::destroy() {
         glDeleteBuffers(1, &id);
         OpenGL::AssertNoOglError();
     }
@@ -834,7 +848,7 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
-    void VertexArrayObject::destroy(){
+    void VertexArrayObject::destroy() {
         glDeleteVertexArrays(1, &id);
         OpenGL::AssertNoOglError();
     }
@@ -890,32 +904,46 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
-    Renderable Renderable::Triangles() {
-        Renderable renderable;
+    void Renderable::draw() {
+        vao.bind();
+        glDrawElements(mode, count, type, (void *) offset);
+        OpenGL::AssertNoOglError();
+        vao.release();
+    }
+
+    RenderableTriangles RenderableTriangles::Create() {
+        RenderableTriangles renderable;
         renderable.mode = GL_TRIANGLES;
         renderable.type = GL_UNSIGNED_INT;
         return renderable;
     }
 
-    Renderable Renderable::Lines() {
-        Renderable renderable;
+    void RenderableTriangles::draw() {
+        glDrawElements(mode, count, type, (void *) offset);
+        OpenGL::AssertNoOglError();
+    }
+
+    RenderableLines RenderableLines::Create() {
+        RenderableLines renderable;
         renderable.mode = GL_LINES;
         renderable.type = GL_UNSIGNED_INT;
         return renderable;
     }
 
-    Renderable Renderable::Points() {
-        Renderable renderable;
+    void RenderableLines::draw() {
+        glDrawElements(mode, count, type, (void *) offset);
+        OpenGL::AssertNoOglError();
+    }
+
+    RenderablePoints RenderablePoints::Create() {
+        RenderablePoints renderable;
         renderable.mode = GL_POINTS;
         renderable.type = GL_UNSIGNED_INT;
         return renderable;
     }
 
-    void Renderable::draw(){
-        program.use();
-        vao.bind();
-        glDrawElements(mode, count, type, (void *) offset);
+    void RenderablePoints::draw() {
+        glDrawArrays(mode, offset, count);
         OpenGL::AssertNoOglError();
-        vao.release();
     }
 }

@@ -1,0 +1,11 @@
+add_library(bcg_plugin_tiny_obj_loader SHARED)
+
+add_subdirectory(include)
+add_subdirectory(ext)
+add_subdirectory(src)
+
+target_link_libraries(bcg_plugin_tiny_obj_loader PRIVATE Engine23Lib)
+
+export(TARGETS bcg_plugin_tiny_obj_loader NAMESPACE FILE BcgPluginTinyObjLoaderTargets.cmake)
+
+add_dependencies(Engine23 bcg_plugin_tiny_obj_loader)
