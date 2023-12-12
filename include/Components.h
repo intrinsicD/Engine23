@@ -268,6 +268,39 @@ namespace Bcg {
     struct RenderBatches {
         std::unordered_map<unsigned int, std::shared_ptr<RenderBatch>> batches;
     };
+
+    template<typename T>
+    struct Vec3 {
+        union{
+            T data[3];
+            struct {
+                T x, y, z;
+            };
+            struct {
+                T r, g, b;
+            };
+            struct {
+                T i, j, k;
+            };
+        };
+    };
+
+    struct Faces {
+        std::vector<Vec3<unsigned int>> vertices;
+        std::vector<Vec3<unsigned int>> normals;
+        std::vector<Vec3<unsigned int>> texcoords;
+    };
+
+    struct Vertices {
+        std::vector<Vec3<float>> positions;
+        std::vector<Vec3<float>> normals;
+        std::vector<Vec3<float>> colors;
+    };
+
+    struct Mesh {
+        Vertices vertices;
+        Faces faces;
+    };
 }
 
 #endif //ENGINE23_COMPONENTS_H
