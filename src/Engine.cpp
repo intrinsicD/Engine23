@@ -57,6 +57,7 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
+/*
         SystemPlugins().remove();
         SystemParallelProcessing().remove();
         SystemUserInput().remove();
@@ -72,7 +73,7 @@ namespace Bcg {
 
         SystemCommandBuffers().remove();
 
-        entt::locator<Engine *>::reset();
+        entt::locator<Engine *>::reset();*/
     }
 
     void Engine::run() {

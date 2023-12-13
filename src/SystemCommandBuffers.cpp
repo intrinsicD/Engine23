@@ -77,6 +77,9 @@ namespace Bcg{
     void SystemCommandBuffers::remove(){
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemCommandBuffersInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemCommandBuffersInternal::on_shutdown>();
+        Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
+        Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
+        Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
         Log::Info(m_name + ": Removed").enqueue();
     }
 

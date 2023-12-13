@@ -271,7 +271,7 @@ namespace Bcg {
 
     template<typename T>
     struct Vec3 {
-        union{
+        union {
             T data[3];
             struct {
                 T x, y, z;
@@ -283,6 +283,10 @@ namespace Bcg {
                 T i, j, k;
             };
         };
+
+        size_t dims() const { return 3; }
+
+        size_t size() const { return dims(); }
     };
 
     struct Faces {

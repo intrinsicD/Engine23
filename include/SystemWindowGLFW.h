@@ -14,7 +14,7 @@ namespace Bcg{
 
         ~SystemWindowGLFW() override = default;
 
-        void swap_and_poll_events();
+        static void swap_and_poll_events();
 
     protected:
         friend Engine;

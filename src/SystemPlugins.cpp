@@ -76,6 +76,8 @@ namespace Bcg {
     }
 
     void SystemPlugins::remove() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPluginsInternal::on_startup>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPluginsInternal::on_shutdown>();
         Log::Info(m_name + ": Removed").enqueue();
 
         auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();

@@ -35,10 +35,18 @@ namespace Bcg {
             }
 
             static bool hello_triangle = false;
-            static entt::entity hello_triangle_id;
+            static entt::entity hello_triangle_id = entt::null;
             if (ImGui::Begin("Learn OpenGL", &show_gui)) {
                 if (ImGui::Checkbox("Hello Triangle", &hello_triangle)) {
                     if (hello_triangle) {
+                        Mesh mesh;
+                        mesh.vertices.positions = {{0.5f,  0.5f,  0.0f},
+                                                   {0.5f,  -0.5f, 0.0f},
+                                                   {-0.5f, -0.5f, 0.0f},
+                                                   {-0.5f, 0.5f,  0.0f}};
+                        mesh.faces.vertices = {{0, 1, 3},
+                                               {1, 2, 3}};
+
                         std::array<float, 12> vertices{
                                 0.5f, 0.5f, 0.0f,  // top right
                                 0.5f, -0.5f, 0.0f,  // bottom right
@@ -64,25 +72,32 @@ namespace Bcg {
 
                         renderable_triangles.vao.bind();
                         renderable_triangles.vbo.bind();
-                        renderable_triangles.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
+                        //size = 48 = 3 * 4 * 4 = dims * num_vertices * sizeof(type)
+                       // renderable_triangles.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
+                        renderable_triangles.vbo.set_data(mesh.vertices.positions.data(), mesh.vertices.positions.size() * mesh.vertices.positions[0].dims() * sizeof(mesh.vertices.positions[0].x));
 
                         renderable_triangles.ebo.bind();
-                        renderable_triangles.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
-
-                        renderable_triangles.vao.set_float_attribute(0, 3, false, (void *) 0);
+                        //size = 24 = 3 * 2 * 4 = dims * num_triangles * sizeof(type)
+                        //renderable_triangles.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
+                        renderable_triangles.ebo.set_data(mesh.faces.vertices.data(), mesh.faces.vertices.size() * mesh.faces.vertices[0].dims() * sizeof(mesh.faces.vertices[0].x));
+                        //dims = 3
+                        //renderable_triangles.vao.set_float_attribute(0, 3, false, (void *) 0);
+                        renderable_triangles.vao.set_float_attribute(0, mesh.vertices.positions[0].dims(), false, (void *) 0);
 
                         renderable_triangles.vbo.release();
                         renderable_triangles.vao.release();
                         renderable_triangles.ebo.release();
                         auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
                         renderable_triangles.program = programs["learn_opengl"];
-                        renderable_triangles.count = 6;
+                        //count = 6 = 3 * 2 = dims * num_triangles
+                        //renderable_triangles.count = 6;
+                        renderable_triangles.count = mesh.faces.vertices[0].dims() * mesh.faces.vertices.size();
                         renderable_triangles.offset = 0;
                         renderable_triangles.our_color[0] = 1.0f;
                         renderable_triangles.our_color[1] = 0.5f;
                         renderable_triangles.our_color[2] = 0.2f;
                     } else {
-                        auto &renderable = Engine::State().get<OpenGL::Renderable>(hello_triangle_id);
+                        auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(hello_triangle_id);
                         renderable.vao.destroy();
                         renderable.vbo.destroy();
                         renderable.ebo.destroy();

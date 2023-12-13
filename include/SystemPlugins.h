@@ -14,9 +14,9 @@ namespace Bcg {
 
         ~SystemPlugins() override = default;
 
-        Plugin *load(const std::string &filepath);
+        static Plugin *load(const std::string &filepath);
 
-        void unload(void *handle);
+        static void unload(void *handle);
 
     protected:
         friend Engine;

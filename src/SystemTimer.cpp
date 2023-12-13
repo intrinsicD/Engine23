@@ -112,6 +112,12 @@ namespace Bcg {
     }
 
     void SystemTimer::remove() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemTimerInternal::on_startup>();
+        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemTimerInternal::on_render_gui_menu>();
+        Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().disconnect<&SystemTimerInternal::on_begin_simulation_loop>();
+        Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().disconnect<&SystemTimerInternal::on_end_simulation_loop>();
+        Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().disconnect<&SystemTimerInternal::on_begin_main_loop>();
+        Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().disconnect<&SystemTimerInternal::on_end_main_loop>();
         Log::Info(m_name + ": Removed").enqueue();
     }
 }

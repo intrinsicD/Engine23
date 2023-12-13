@@ -89,11 +89,10 @@ namespace Bcg {
             }
         }
 
-
         void on_startup_engine(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_render_gui_menu>();
 
-            SystemParallelProcessing().start(std::thread::hardware_concurrency() - 1);
+            SystemParallelProcessing::start(std::thread::hardware_concurrency() - 1);
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
@@ -117,6 +116,9 @@ namespace Bcg {
     }
 
     void SystemParallelProcessing::remove() {
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemParallelProcessingInternal::on_startup_engine>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemParallelProcessingInternal::on_shutdown_engine>();
+
         Log::Info(m_name + ": Removed").enqueue();
     }
 
@@ -128,7 +130,7 @@ namespace Bcg {
         for (size_t i = 0; i < num_threads; ++i) {
             worker_pool.workers.emplace_back(&SystemParallelProcessingInternal::worker_thread);
         }
-        Log::Info(m_name + ": Started with " + std::to_string(num_threads) + " threads").enqueue();
+        Log::Info("SystemParallelProcessing: Started with " + std::to_string(num_threads) + " threads").enqueue();
     }
 
     void SystemParallelProcessing::stop() {
@@ -141,7 +143,7 @@ namespace Bcg {
         for (auto &worker: worker_pool.workers) {
             worker.join();
         }
-        Log::Info(m_name + ": Stopped " + std::to_string(worker_pool.workers.size()) +
+        Log::Info("SystemParallelProcessing: Stopped " + std::to_string(worker_pool.workers.size()) +
                   " threads").enqueue();
     }
 

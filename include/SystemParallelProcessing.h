@@ -14,15 +14,15 @@ namespace Bcg {
 
         ~SystemParallelProcessing() override = default;
 
-        void start(int num_threads);
+        static void start(int num_threads);
 
-        void stop();
+        static void stop();
 
-        void resize(int num_threads);
+        static void resize(int num_threads);
 
-        void enqueue(std::shared_ptr<Command> command);
+        static void enqueue(std::shared_ptr<Command> command);
 
-        void enqueue(std::vector<std::shared_ptr<Command>> commands);
+        static void enqueue(std::vector<std::shared_ptr<Command>> commands);
 
     protected:
         friend Engine;

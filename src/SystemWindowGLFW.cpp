@@ -13,7 +13,7 @@
 namespace Bcg {
     namespace SystemWindowGLFWInternal {
         void on_end_main_loop(const Events::End<MainLoop> &event) {
-            SystemWindowGLFW().swap_and_poll_events();
+            SystemWindowGLFW::swap_and_poll_events();
         }
 
         double GetDpiScale() {
@@ -182,6 +182,7 @@ namespace Bcg {
         auto *engine = Engine::Instance();
         engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<SystemWindowGLFWInternal::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<SystemWindowGLFWInternal::on_shutdown_engine>();
+        engine->dispatcher.sink<Events::End<MainLoop>>().disconnect<SystemWindowGLFWInternal::on_end_main_loop>();
         Log::Info(m_name + ": Removed").enqueue();
 
         glfwTerminate();

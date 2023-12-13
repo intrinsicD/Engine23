@@ -18,10 +18,6 @@ namespace Bcg {
 
         virtual ~System() = default;
 
-        bool is_initialized() const {
-            return m_is_initialized;
-        }
-
         const std::string &name() const {
             return m_name;
         }
@@ -37,7 +33,6 @@ namespace Bcg {
 
         virtual void remove() = 0;
 
-        bool m_is_initialized = false;
         std::string m_name;
         entt::entity m_id;
     };

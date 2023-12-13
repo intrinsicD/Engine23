@@ -72,6 +72,18 @@ namespace Bcg {
 
             input.drop.paths.clear();
         }
+
+        void on_startup(const Events::Startup<Engine> &events) {
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Log::Info("SystemUserInput: Startup").enqueue();
+        }
+
+        void on_shutdown(const Events::Shutdown<Engine> &events) {
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Log::Info("SystemUserInput: Shutdown").enqueue();
+        }
     }
 
     SystemUserInput::SystemUserInput() : System("SystemUserInput") {
@@ -89,6 +101,8 @@ namespace Bcg {
     }
 
     void SystemUserInput::remove() {
+        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
+        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&SystemUserInputInternal::on_update_input_drop>();
         Log::Info(m_name + ": Removed").enqueue();
     }
 }
