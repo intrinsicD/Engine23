@@ -25,30 +25,30 @@ namespace Bcg {
 
         entt::locator<Engine *>::emplace<Engine *>(this);
 
-        SystemTimer().pre_init();
-        SystemCommandBuffers().pre_init();
-        SystemPlatform().pre_init();
-        SystemLogger().pre_init();
-        SystemRendererOpenGL().pre_init();
-        SystemWindowGLFW().pre_init();
-        SystemGui().pre_init();
-        SystemUserInput().pre_init();
-        SystemParallelProcessing().pre_init();
-        SystemPlugins().pre_init();
+        SystemTimer::pre_init();
+        SystemCommandBuffers::pre_init();
+        SystemPlatform::pre_init();
+        SystemLogger::pre_init();
+        SystemRendererOpenGL::pre_init();
+        SystemWindowGLFW::pre_init();
+        SystemGui::pre_init();
+        SystemUserInput::pre_init();
+        SystemParallelProcessing::pre_init();
+        SystemPlugins::pre_init();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
 
-        SystemTimer().init();
-        SystemCommandBuffers().init();
-        SystemPlatform().init();
-        SystemLogger().init();
-        SystemRendererOpenGL().init();
-        SystemWindowGLFW().init();
-        SystemGui().init();
-        SystemUserInput().init();
-        SystemParallelProcessing().init();
-        SystemPlugins().init();
+        SystemTimer::init();
+        SystemCommandBuffers::init();
+        SystemPlatform::init();
+        SystemLogger::init();
+        SystemRendererOpenGL::init();
+        SystemWindowGLFW::init();
+        SystemGui::init();
+        SystemUserInput::init();
+        SystemParallelProcessing::init();
+        SystemPlugins::init();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info(fmt::format("Engine: Constructor took {} seconds",
@@ -58,20 +58,20 @@ namespace Bcg {
 
     Engine::~Engine() {
 /*
-        SystemPlugins().remove();
-        SystemParallelProcessing().remove();
-        SystemUserInput().remove();
-        SystemGui().remove();
-        SystemRendererOpenGL().remove();
-        SystemWindowGLFW().remove();
-        SystemPlatform().remove();
-        SystemTimer().remove();
-        SystemLogger().remove();
+        SystemPlugins::remove();
+        SystemParallelProcessing::remove();
+        SystemUserInput::remove();
+        SystemGui::remove();
+        SystemRendererOpenGL::remove();
+        SystemWindowGLFW::remove();
+        SystemPlatform::remove();
+        SystemTimer::remove();
+        SystemLogger::remove();
 
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
 
-        SystemCommandBuffers().remove();
+        SystemCommandBuffers::remove();
 
         entt::locator<Engine *>::reset();*/
     }

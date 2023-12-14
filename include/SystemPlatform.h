@@ -5,23 +5,25 @@
 #ifndef ENGINE23_SYSTEMPLATFORM_H
 #define ENGINE23_SYSTEMPLATFORM_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemPlatform : public System {
+    class SystemPlatform {
     public:
-        SystemPlatform();
+        SystemPlatform() = default;
 
-        ~SystemPlatform() override = default;
+        ~SystemPlatform() = default;
+
+        static std::string name();
 
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

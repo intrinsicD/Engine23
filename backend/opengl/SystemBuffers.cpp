@@ -7,8 +7,8 @@
 #include "Commands.h"
 
 namespace Bcg {
-    SystemBuffers::SystemBuffers() : System("SystemBuffers") {
-
+    std::string SystemBuffers::name() {
+        return "SystemBuffers";
     }
 
     void SystemBuffers::pre_init() {
@@ -16,10 +16,10 @@ namespace Bcg {
     }
 
     void SystemBuffers::init() {
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemBuffers::remove() {
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

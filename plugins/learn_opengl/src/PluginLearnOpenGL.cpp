@@ -146,10 +146,14 @@ namespace Bcg {
                 auto m_name = PluginLearnOpenGL().name();
                 Log::Error(m_name + ": " + program.name + " Error: " + program.error_message).enqueue();
             }
+
+            Log::Info(PluginLearnOpenGL().name() + ": Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().disconnect<&on_render_frame>();
+
+            Log::Info(PluginLearnOpenGL().name() + ": Shutdown").enqueue();
         }
     }
 
@@ -165,10 +169,10 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginLearnOpenGLInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&PluginLearnOpenGLInternal::on_shutdown>();
 
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void PluginLearnOpenGL::remove() {
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

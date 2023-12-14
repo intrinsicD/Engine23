@@ -50,12 +50,11 @@ namespace Bcg {
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            auto m_name = SystemWindowGLFW().name();
             if (Engine::Instance()->state.ctx().find<WindowConfig>()) {
-                Log::Warn(m_name + ": Already started").enqueue();
+                Log::Warn(SystemWindowGLFW::name() + ": Already started").enqueue();
                 return;
             } else {
-                Log::Info(m_name + ": Started").enqueue();
+                Log::Info(SystemWindowGLFW::name() + ": Started").enqueue();
                 Engine::Instance()->state.ctx().emplace<WindowConfig>();
             }
             auto *engine = Engine::Instance();
@@ -73,7 +72,7 @@ namespace Bcg {
             }
 
             window_config.dpi = GetDpiScale();
-            Log::Info(m_name + ": Detected DPI: " + std::to_string(window_config.dpi)).enqueue();
+            Log::Info(SystemWindowGLFW::name() + ": Detected DPI: " + std::to_string(window_config.dpi)).enqueue();
 
 
             auto *window = glfwCreateWindow(window_config.width, window_config.height, window_config.title.c_str(),
@@ -139,20 +138,19 @@ namespace Bcg {
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.trigger(Events::Shutdown<Renderer>{});
-            auto m_name = SystemWindowGLFW().name();
             if (!Engine::Instance()->state.ctx().find<WindowConfig>()) {
-                Log::Error(m_name + ": Not started").enqueue();
+                Log::Error(SystemWindowGLFW::name() + ": Not started").enqueue();
                 return;
             } else {
-                Log::Info(m_name + ": Stopped").enqueue();
+                Log::Info(SystemWindowGLFW::name() + ": Stopped").enqueue();
                 Engine::Instance()->state.ctx().erase<WindowConfig>();
             }
             glfwDestroyWindow(glfwGetCurrentContext());
         }
     }
 
-    SystemWindowGLFW::SystemWindowGLFW() : System("SystemWindowGLFW") {
-
+    std::string SystemWindowGLFW::name(){
+        return "SystemWindowGLFW";
     }
 
     void SystemWindowGLFW::pre_init() {
@@ -167,7 +165,7 @@ namespace Bcg {
         });
 
         if (!glfwInit()) {
-            Log::Error(m_name + ": Failed to initialize GLFW").enqueue();
+            Log::Error(name() + ": Failed to initialize GLFW").enqueue();
             return;
         }
 
@@ -175,7 +173,7 @@ namespace Bcg {
         engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<SystemWindowGLFWInternal::on_shutdown_engine>();
         engine->dispatcher.sink<Events::End<MainLoop>>().connect<SystemWindowGLFWInternal::on_end_main_loop>();
 
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemWindowGLFW::remove() {
@@ -183,7 +181,7 @@ namespace Bcg {
         engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<SystemWindowGLFWInternal::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<SystemWindowGLFWInternal::on_shutdown_engine>();
         engine->dispatcher.sink<Events::End<MainLoop>>().disconnect<SystemWindowGLFWInternal::on_end_main_loop>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
 
         glfwTerminate();
     }

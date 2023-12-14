@@ -5,14 +5,16 @@
 #ifndef ENGINE23_SYSTEMPARALLELPROCESSING_H
 #define ENGINE23_SYSTEMPARALLELPROCESSING_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemParallelProcessing : protected System {
+    class SystemParallelProcessing {
     public:
-        SystemParallelProcessing();
+        SystemParallelProcessing() = default;
 
-        ~SystemParallelProcessing() override = default;
+        ~SystemParallelProcessing() = default;
+
+        static std::string name();
 
         static void start(int num_threads);
 
@@ -27,11 +29,11 @@ namespace Bcg {
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

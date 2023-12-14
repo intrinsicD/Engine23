@@ -44,15 +44,17 @@ namespace Bcg {
 
         void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemPlatformInternal::on_render_gui_menu>();
+            Log::Info(SystemPlatform::name() + ": Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemPlatformInternal::on_render_gui_menu>();
+            Log::Info(SystemPlatform::name() + ": Shutdown").enqueue();
         }
     }
 
-    SystemPlatform::SystemPlatform() : System("SystemPlatform") {
-
+    std::string SystemPlatform::name() {
+        return "SystemPlatform";
     }
 
     void SystemPlatform::pre_init() {
@@ -99,13 +101,13 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPlatformInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPlatformInternal::on_shutdown>();
         auto &info = Engine::Context().emplace<PlatformInfo>();
-        Log::Info(m_name + ": Initialized. Compiled with " + info.compiler + " on " + info.os + " for " + info.arch +
+        Log::Info(name() + ": Initialized. Compiled with " + info.compiler + " on " + info.os + " for " + info.arch +
                   " Architecture.").enqueue();
     }
 
     void SystemPlatform::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPlatformInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPlatformInternal::on_shutdown>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

@@ -5,23 +5,25 @@
 #ifndef ENGINE23_SYSTEMCOMMANDBUFFERS_H
 #define ENGINE23_SYSTEMCOMMANDBUFFERS_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemCommandBuffers : protected System{
+    class SystemCommandBuffers {
     public:
-        SystemCommandBuffers();
+        SystemCommandBuffers() = default;
 
-        ~SystemCommandBuffers() override = default;
+        ~SystemCommandBuffers() = default;
+
+        static std::string name();
 
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

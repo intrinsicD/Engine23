@@ -24,11 +24,11 @@ namespace Bcg {
         };
 
         void on_startup(Events::Startup<Engine> &event) {
-            Log::Info("SystemPlugins: Startup").enqueue();
+            Log::Info(SystemPlugins::name() + ": Startup").enqueue();
         }
 
         void on_shutdown(Events::Shutdown<Engine> &event) {
-            Log::Info("SystemPlugins: Shutdown").enqueue();
+            Log::Info(SystemPlugins::name() + ": Shutdown").enqueue();
         }
 
         inline std::string
@@ -47,8 +47,8 @@ namespace Bcg {
         }
     }
 
-    SystemPlugins::SystemPlugins() : System("SystemPlugins") {
-
+    std::string SystemPlugins::name() {
+        return "SystemPlugins";
     }
 
     void SystemPlugins::pre_init() {
@@ -58,7 +58,7 @@ namespace Bcg {
     void SystemPlugins::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPluginsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
 
         auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
         {
@@ -78,7 +78,7 @@ namespace Bcg {
     void SystemPlugins::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPluginsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPluginsInternal::on_shutdown>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
 
         auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
         for(auto &plugin : plugins) {

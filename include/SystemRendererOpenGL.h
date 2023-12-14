@@ -5,23 +5,25 @@
 #ifndef ENGINE23_SYSTEMRENDEREROPENGL_H
 #define ENGINE23_SYSTEMRENDEREROPENGL_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemRendererOpenGL : public System {
+    class SystemRendererOpenGL {
     public:
-        SystemRendererOpenGL();
+        SystemRendererOpenGL() = default;
 
-        ~SystemRendererOpenGL() override = default;
+        ~SystemRendererOpenGL() = default;
+
+        static std::string name();
 
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

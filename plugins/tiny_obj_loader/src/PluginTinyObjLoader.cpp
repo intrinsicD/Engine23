@@ -160,17 +160,19 @@ namespace Bcg {
             }
 
             if (!could_load_obj) {
-                Log::Warn("TinyObjLoader: Could not load any obj file").enqueue();
+                Log::Warn(PluginTinyObjLoader().name() + ": Could not load any obj file").enqueue();
             }
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&on_update>();
+            Log::Info(PluginTinyObjLoader().name() + ": Startup").enqueue();
         }
 
 
         void on_shutdown(const Events::Shutdown<Plugin> &event) {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
+            Log::Info(PluginTinyObjLoader().name() + ": Shutdown").enqueue();
         }
     }
 
@@ -185,12 +187,12 @@ namespace Bcg {
     void PluginTinyObjLoader::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_shutdown>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void PluginTinyObjLoader::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_shutdown>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

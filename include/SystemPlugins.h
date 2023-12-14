@@ -5,14 +5,16 @@
 #ifndef ENGINE23_SYSTEMPLUGINS_H
 #define ENGINE23_SYSTEMPLUGINS_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemPlugins : protected System {
+    class SystemPlugins {
     public:
-        SystemPlugins();
+        SystemPlugins() = default;
 
-        ~SystemPlugins() override = default;
+        ~SystemPlugins() = default;
+
+        static std::string name();
 
         static Plugin *load(const std::string &filepath);
 
@@ -21,11 +23,11 @@ namespace Bcg {
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

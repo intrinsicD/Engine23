@@ -5,39 +5,41 @@
 #ifndef ENGINE23_SYSTEMSHADERPROGRAMS_H
 #define ENGINE23_SYSTEMSHADERPROGRAMS_H
 
-#include "System.h"
+#include "EngineFwd.h"
 #include "OpenGLUtils.h"
 
 namespace Bcg {
     class SystemRendererOpenGL;
 
-    class SystemShaderPrograms : public System {
+    class SystemShaderPrograms {
     public:
-        SystemShaderPrograms();
+        SystemShaderPrograms() = default;
 
-        ~SystemShaderPrograms() override = default;
+        ~SystemShaderPrograms() = default;
 
-        OpenGL::Shader load_shader(std::string filepath, unsigned int type);
+        static std::string name();
 
-        OpenGL::ShaderProgram load_program(std::string vs_filepath, std::string fs_filepath, std::string gs_filepath = "",
+        static OpenGL::Shader load_shader(std::string filepath, unsigned int type);
+
+        static OpenGL::ShaderProgram load_program(std::string vs_filepath, std::string fs_filepath, std::string gs_filepath = "",
                                    std::string tcs_filepath = "", std::string tes_filepath = "",
                                    std::string cs_filepath = "");
 
-        bool check_link_status(unsigned int program_id);
+        static bool check_link_status(unsigned int program_id);
 
-        bool add_to_watcher(OpenGL::ShaderProgram &program);
+        static bool add_to_watcher(OpenGL::ShaderProgram &program);
 
-        std::string glsl_base_path() const;
+        static std::string glsl_base_path();
 
     protected:
         friend Engine;
         friend SystemRendererOpenGL;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

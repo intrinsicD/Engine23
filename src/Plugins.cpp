@@ -6,5 +6,5 @@
 #include "entt/entity/entity.hpp"
 
 namespace Bcg{
-    Plugin::Plugin(std::string name) : System(std::move(name)) {}
+    Plugin::Plugin(std::string name) : m_name(std::move(name)) {}
 }

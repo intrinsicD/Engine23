@@ -8,10 +8,6 @@
 #include "glad/gl.h"
 
 namespace Bcg {
-    SystemVertexArrayObject::SystemVertexArrayObject() : System("SystemVertexArrayObject") {
-
-    }
-
     OpenGL::VertexArrayObject SystemVertexArrayObject::create_vertex_array_object(std::string name) {
 
         OpenGL::VertexArrayObject vao;
@@ -37,15 +33,19 @@ namespace Bcg {
         OpenGL::AssertNoOglError();
     }
 
+    std::string SystemVertexArrayObject::name() {
+        return "SystemVertexArrayObject";
+    }
+
     void SystemVertexArrayObject::pre_init() {
 
     }
 
     void SystemVertexArrayObject::init() {
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemVertexArrayObject::remove() {
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

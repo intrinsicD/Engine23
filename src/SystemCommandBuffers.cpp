@@ -11,11 +11,11 @@
 namespace Bcg{
     namespace SystemCommandBuffersInternal{
         void on_startup(const Events::Startup<Engine> &event){
-            Log::Info("SystemCommandBuffers: Startup").enqueue();
+            Log::Info(SystemCommandBuffers::name() + ": Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event){
-            Log::Info("SystemCommandBuffers: Shutdown").enqueue();
+            Log::Info(SystemCommandBuffers::name() + ": Shutdown").enqueue();
         }
 
         void on_update_simulation_command_double_buffer(const Events::Update<SimulationCommandDoubleBuffer> &event) {
@@ -46,8 +46,8 @@ namespace Bcg{
         }
     }
 
-    SystemCommandBuffers::SystemCommandBuffers() : System("SystemCommandBuffers"){
-
+    std::string SystemCommandBuffers::name(){
+        return "SystemCommandBuffers";
     }
 
     void SystemCommandBuffers::pre_init(){
@@ -71,7 +71,7 @@ namespace Bcg{
         Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemCommandBuffers::remove(){
@@ -80,8 +80,6 @@ namespace Bcg{
         Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
-
-
 }

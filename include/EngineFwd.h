@@ -5,6 +5,8 @@
 #ifndef ENGINE23_ENGINEFWD_H
 #define ENGINE23_ENGINEFWD_H
 
+#include "entt/fwd.hpp"
+
 namespace Bcg{
     class Engine;
     struct Frame;

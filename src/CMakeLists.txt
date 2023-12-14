@@ -9,7 +9,6 @@ target_sources(Engine23Lib PRIVATE
         SystemWindowGLFW.cpp
         SystemTimer.cpp
         SystemParallelProcessing.cpp
-        SystemRendererVulkan.cpp
         SystemPlugins.cpp
         SystemCommandBuffers.cpp
         SystemPlatform.cpp)

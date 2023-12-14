@@ -21,15 +21,15 @@ namespace Bcg {
             if (ImGui::Begin("Logger", &show_gui, ImGuiWindowFlags_AlwaysAutoResize)) {
                 int logLevelInt = static_cast<int>(Engine::Context().get<LogLevel>());
                 if (ImGui::RadioButton("Error", &logLevelInt, 0)) {
-                    SystemLogger().set_log_level(LogLevel::Error);
+                    SystemLogger::set_log_level(LogLevel::Error);
                 }
                 ImGui::SameLine();
                 if (ImGui::RadioButton("Warning", &logLevelInt, 1)) {
-                    SystemLogger().set_log_level(LogLevel::Warn);
+                    SystemLogger::set_log_level(LogLevel::Warn);
                 }
                 ImGui::SameLine();
                 if (ImGui::RadioButton("Info", &logLevelInt, 2)) {
-                    SystemLogger().set_log_level(LogLevel::Info);
+                    SystemLogger::set_log_level(LogLevel::Info);
                 }
             }
             ImGui::End();
@@ -56,8 +56,8 @@ namespace Bcg {
         }
     }
 
-    SystemLogger::SystemLogger() : System("SystemLogger") {
-
+    std::string SystemLogger::name() {
+        return "SystemLogger";
     }
 
     void SystemLogger::pre_init() {
@@ -67,15 +67,15 @@ namespace Bcg {
     void SystemLogger::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemLoggerInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemLoggerInternal::on_shutdown_engine>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
         set_log_level(LogLevel::Info);
     }
 
     void SystemLogger::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemLoggerInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemLoggerInternal::on_shutdown_engine>();
-        Log::Info(m_name + ": Removed").enqueue();
-        Log::TODO(m_name + ": figure out enabling and disabling logging").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
+        Log::TODO(name() + ": figure out enabling and disabling logging").enqueue();
     }
 
     void SystemLogger::set_log_level(LogLevel level) {
@@ -93,6 +93,6 @@ namespace Bcg {
                 level_str = "Error";
                 break;
         }
-        Log::Always(m_name + ": Set LogLevel to " + level_str).enqueue();
+        Log::Always(name() + ": Set LogLevel to " + level_str).enqueue();
     }
 }

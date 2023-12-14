@@ -5,23 +5,25 @@
 #ifndef ENGINE23_SYSTEMUSERINPUT_H
 #define ENGINE23_SYSTEMUSERINPUT_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg{
-    class SystemUserInput : public System {
+    class SystemUserInput {
     public:
-        SystemUserInput();
+        SystemUserInput() = default;
 
-        ~SystemUserInput() override = default;
+        ~SystemUserInput() = default;
+
+        static std::string name();
 
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

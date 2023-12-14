@@ -5,23 +5,24 @@
 #ifndef ENGINE23_SYSTEMTIMER_H
 #define ENGINE23_SYSTEMTIMER_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg{
-    class SystemTimer : public System {
+    class SystemTimer {
     public:
-        SystemTimer();
+        SystemTimer() = default;
 
-        ~SystemTimer() override = default;
+        ~SystemTimer() = default;
 
+        static std::string name();
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

@@ -45,8 +45,6 @@ namespace Bcg {
             }
         }
 
-
-
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
@@ -73,20 +71,19 @@ namespace Bcg {
             auto &opengl_config = Engine::Context().get<OpenGLConfig>();
             opengl_config.major = GLAD_VERSION_MAJOR(version);
             opengl_config.minor = GLAD_VERSION_MINOR(version);
-            const auto &name = SystemRendererOpenGL().name();
             if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
-                Log::Error(fmt::format("{}: OpenGL version not supported", name)).enqueue();
+                Log::Error(fmt::format("{}: OpenGL version not supported", SystemRendererOpenGL::name())).enqueue();
                 return;
             } else {
                 opengl_config.vendor = (const char *) glGetString(GL_VENDOR);
                 opengl_config.renderer = (const char *) glGetString(GL_RENDERER);
                 opengl_config.version = (const char *) glGetString(GL_VERSION);
                 opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-                Log::Info(name + ": Startup").enqueue();
-                Log::Info(name + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
-                Log::Info(name + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
-                Log::Info(name + ": OpenGL version:      " + opengl_config.version).enqueue();
-                Log::Info(name + ": OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": Startup").enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": OpenGL version:      " + opengl_config.version).enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
             }
 
             auto &bg = Engine::Context().get<WindowConfig>().background_color;
@@ -109,11 +106,12 @@ namespace Bcg {
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
+            Log::Info(SystemRendererOpenGL::name() + ": Shutdown").enqueue();
         }
     }
 
-    SystemRendererOpenGL::SystemRendererOpenGL() : System("SystemRenderer") {
-
+    std::string SystemRendererOpenGL::name() {
+        return "SystemRenderer";
     }
 
     void SystemRendererOpenGL::pre_init() {
@@ -135,7 +133,7 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().connect<&SystemRendererOpenGLInternal::on_startup_renderer>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().connect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
 
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
         SystemShaderPrograms().init();
         SystemBuffers().init();
     }
@@ -145,7 +143,7 @@ namespace Bcg {
         SystemShaderPrograms().remove();
         Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 
 }

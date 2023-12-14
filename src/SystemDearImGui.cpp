@@ -52,17 +52,19 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemGuiInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
+            Log::Info(SystemGui::name() + ": Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemGuiInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
+            Log::Info(SystemGui::name() + ": Shutdown").enqueue();
         }
     }
 
-    SystemGui::SystemGui() : System("SystemGui") {
-
+    std::string SystemGui::name() {
+        return "SystemGui";
     }
 
     void SystemGui::pre_init() {
@@ -72,7 +74,7 @@ namespace Bcg {
     void SystemGui::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemGuiInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemGuiInternal::on_shutdown_engine>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemGui::remove() {
@@ -82,7 +84,7 @@ namespace Bcg {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        Log::Info(m_name + ": Removed").enqueue();
+        Log::Info(name() + ": Removed").enqueue();
     }
 
     void SystemGui::add_to_window(void *window) {
@@ -99,6 +101,6 @@ namespace Bcg {
 #ifndef __APPLE__
         ImGui_ImplOpenGL3_Init();
 #endif
-        Log::Info(m_name + ": Create DearImGui context").enqueue();
+        Log::Info(name() + ": Create DearImGui context").enqueue();
     }
 }

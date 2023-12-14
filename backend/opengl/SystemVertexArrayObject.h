@@ -5,35 +5,37 @@
 #ifndef ENGINE23_SYSTEMVERTEXARRAYOBJECT_H
 #define ENGINE23_SYSTEMVERTEXARRAYOBJECT_H
 
-#include "System.h"
+#include "EngineFwd.h"
 #include "OpenGLUtils.h"
 
 namespace Bcg {
     class SystemRendererOpenGL;
 
-    class SystemVertexArrayObject : public System {
+    class SystemVertexArrayObject{
     public:
-        SystemVertexArrayObject();
+        SystemVertexArrayObject() = default;
 
-        ~SystemVertexArrayObject() override = default;
+        ~SystemVertexArrayObject() = default;
 
-        OpenGL::VertexArrayObject create_vertex_array_object(std::string name);
+        static std::string name();
 
-        void delete_vertex_array_object(OpenGL::VertexArrayObject &vao);
+        static OpenGL::VertexArrayObject create_vertex_array_object(std::string name);
 
-        void bind_vertex_array_object(OpenGL::VertexArrayObject &vao);
+        static void delete_vertex_array_object(OpenGL::VertexArrayObject &vao);
 
-        void unbind_vertex_array_object();
+        static void bind_vertex_array_object(OpenGL::VertexArrayObject &vao);
+
+        static void unbind_vertex_array_object();
 
     protected:
         friend Engine;
         friend SystemRendererOpenGL;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

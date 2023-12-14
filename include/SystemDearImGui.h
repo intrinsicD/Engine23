@@ -5,25 +5,27 @@
 #ifndef ENGINE23_SYSTEMDEARIMGUI_H
 #define ENGINE23_SYSTEMDEARIMGUI_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemGui : protected System {
+    class SystemGui {
     public:
-        SystemGui();
+        SystemGui() = default;
 
-        ~SystemGui() override = default;
+        ~SystemGui() = default;
 
-        void add_to_window(void *window);
+        static std::string name();
+
+        static void add_to_window(void *window);
 
     protected:
         friend Engine;
 
-        void pre_init() override;
+        static void pre_init();
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 

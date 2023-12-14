@@ -76,18 +76,18 @@ namespace Bcg {
         void on_startup(const Events::Startup<Engine> &events) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
-            Log::Info("SystemUserInput: Startup").enqueue();
+            Log::Info(SystemUserInput::name() + ": Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &events) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
-            Log::Info("SystemUserInput: Shutdown").enqueue();
+            Log::Info(SystemUserInput::name() + ": Shutdown").enqueue();
         }
     }
 
-    SystemUserInput::SystemUserInput() : System("SystemUserInput") {
-
+    std::string SystemUserInput::name() {
+        return "SystemUserInput";
     }
 
     void SystemUserInput::pre_init() {
@@ -95,14 +95,14 @@ namespace Bcg {
     }
 
     void SystemUserInput::init() {
-        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
-        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
-        Log::Info(m_name + ": Initialized").enqueue();
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemUserInputInternal::on_startup>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemUserInputInternal::on_shutdown>();
+        Log::Info(name() + ": Initialized").enqueue();
     }
 
     void SystemUserInput::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
-        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&SystemUserInputInternal::on_update_input_drop>();
-        Log::Info(m_name + ": Removed").enqueue();
+        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemUserInputInternal::on_startup>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemUserInputInternal::on_shutdown>();
+        Log::Info(name() + ": Removed").enqueue();
     }
 }

@@ -5,24 +5,27 @@
 #ifndef ENGINE23_SYSTEMWINDOWGLFW_H
 #define ENGINE23_SYSTEMWINDOWGLFW_H
 
-#include "System.h"
+#include "EngineFwd.h"
 
 namespace Bcg{
-    class SystemWindowGLFW : public System {
+    class SystemWindowGLFW {
     public:
-        SystemWindowGLFW();
+        SystemWindowGLFW() = default;
 
-        ~SystemWindowGLFW() override = default;
+        ~SystemWindowGLFW() = default;
 
         static void swap_and_poll_events();
 
+        static std::string name();
+
     protected:
         friend Engine;
-        void pre_init() override;
 
-        void init() override;
+        static void pre_init();
 
-        void remove() override;
+        static void init();
+
+        static void remove();
     };
 }
 

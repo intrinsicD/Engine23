@@ -5,27 +5,29 @@
 #ifndef ENGINE23_SYSTEMBUFFERS_H
 #define ENGINE23_SYSTEMBUFFERS_H
 
-#include "System.h"
+#include "EngineFwd.h"
 #include "OpenGLUtils.h"
 
 namespace Bcg {
     class SystemRendererOpenGL;
 
-    class SystemBuffers : public System {
+    class SystemBuffers {
     public:
-        SystemBuffers();
+        SystemBuffers() = default;
 
-        ~SystemBuffers() override = default;
+        ~SystemBuffers() = default;
+
+        static std::string name();
 
     protected:
         friend Engine;
         friend SystemRendererOpenGL;
 
-        void pre_init() override;
+        static void pre_init() ;
 
-        void init() override;
+        static void init();
 
-        void remove() override;
+        static void remove();
     };
 }
 
