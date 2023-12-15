@@ -22,6 +22,6 @@ add_subdirectory(ext)
 add_subdirectory(include)
 add_subdirectory(src)
 
-export(TARGETS Engine23Lib glfw fmt NAMESPACE FILE BcgEngine23LibTargets.cmake)
+export(TARGETS Engine23Lib glfw fmt glm NAMESPACE FILE BcgEngine23LibTargets.cmake)
 
 

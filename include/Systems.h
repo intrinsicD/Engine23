@@ -8,6 +8,7 @@
 #include "SystemLogger.h"
 #include "SystemWindowGLFW.h"
 #include "SystemUserInput.h"
+#include "SystemCamera.h"
 #include "SystemRendererOpenGL.h"
 #include "SystemDearImGui.h"
 #include "SystemTimer.h"

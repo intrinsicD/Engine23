@@ -123,8 +123,14 @@ namespace Bcg {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
                 auto &input = engine->state.ctx().get<Input>();
                 if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
+                if(GLFW_REPEAT == action) return;
                 input.keyboard.keys[key] = action == GLFW_PRESS;
                 engine->dispatcher.trigger(Events::Update<Input::Keyboard>{});
+                if(action == GLFW_PRESS){
+                    Log::Info("Key: " + std::to_string(key) + " Press").enqueue();
+                }else{
+                    Log::Info("Key: " + std::to_string(key) + " Release").enqueue();
+                };
             });
             glfwSetDropCallback(window, [](GLFWwindow *window, int count, const char **paths) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));

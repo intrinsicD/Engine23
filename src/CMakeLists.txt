@@ -7,6 +7,7 @@ target_sources(Engine23Lib PRIVATE
         SystemUserInput.cpp
         SystemDearImGui.cpp
         SystemWindowGLFW.cpp
+        SystemCamera.cpp
         SystemTimer.cpp
         SystemParallelProcessing.cpp
         SystemPlugins.cpp

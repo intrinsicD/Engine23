@@ -91,7 +91,8 @@ namespace Bcg {
     }
 
     void SystemUserInput::pre_init() {
-        Engine::Context().emplace<Input>();
+        auto &input = Engine::Context().emplace<Input>();
+        input.keyboard.keys.resize(1024);
     }
 
     void SystemUserInput::init() {

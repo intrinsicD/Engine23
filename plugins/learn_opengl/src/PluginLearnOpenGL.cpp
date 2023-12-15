@@ -10,16 +10,22 @@
 #include "Commands.h"
 #include "imgui.h"
 #include "glad/gl.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
         void on_render_frame(const Events::Render<Frame> &event) {
             {
+                auto &camera = Engine::Context().get<Camera>();
+                auto camera_view = camera.view();
+                auto camera_projection = camera.projection();
                 auto view = Engine::State().view<OpenGL::RenderableTriangles>();
                 for (const auto &entity_id: view) {
                     auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
                     renderable.program.use();
                     renderable.program.set_vec3("our_color", renderable.our_color);
+                    renderable.program.set_mat4("view", glm::value_ptr(camera_view));
+                    renderable.program.set_mat4("projection", glm::value_ptr(camera_projection));
                     renderable.vao.bind();
                     renderable.draw();
                     renderable.vao.release();
@@ -74,16 +80,22 @@ namespace Bcg {
                         renderable_triangles.vao.bind();
                         renderable_triangles.vbo.bind();
                         //size = 48 = 3 * 4 * 4 = dims * num_vertices * sizeof(type)
-                       // renderable_triangles.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
-                        renderable_triangles.vbo.set_data(mesh.vertices.positions.data(), mesh.vertices.positions.size() * mesh.vertices.positions[0].dims() * sizeof(mesh.vertices.positions[0].x));
+                        // renderable_triangles.vbo.set_data(vertices.data(), vertices.size() * sizeof(vertices[0]));
+                        renderable_triangles.vbo.set_data(mesh.vertices.positions.data(),
+                                                          mesh.vertices.positions.size() *
+                                                          dims(mesh.vertices.positions[0]) *
+                                                          sizeof(mesh.vertices.positions[0].x));
 
                         renderable_triangles.ebo.bind();
                         //size = 24 = 3 * 2 * 4 = dims * num_triangles * sizeof(type)
                         //renderable_triangles.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
-                        renderable_triangles.ebo.set_data(mesh.faces.vertices.data(), mesh.faces.vertices.size() * mesh.faces.vertices[0].dims() * sizeof(mesh.faces.vertices[0].x));
+                        renderable_triangles.ebo.set_data(mesh.faces.vertices.data(),
+                                                          mesh.faces.vertices.size() * dims(mesh.faces.vertices[0]) *
+                                                          sizeof(mesh.faces.vertices[0].x));
                         //dims = 3
                         //renderable_triangles.vao.set_float_attribute(0, 3, false, (void *) 0);
-                        renderable_triangles.vao.set_float_attribute(0, mesh.vertices.positions[0].dims(), false, (void *) 0);
+                        renderable_triangles.vao.set_float_attribute(0, dims(mesh.vertices.positions[0]), false,
+                                                                     (void *) 0);
 
                         renderable_triangles.vbo.release();
                         renderable_triangles.vao.release();
@@ -92,7 +104,7 @@ namespace Bcg {
                         renderable_triangles.program = programs["learn_opengl"];
                         //count = 6 = 3 * 2 = dims * num_triangles
                         //renderable_triangles.count = 6;
-                        renderable_triangles.count = mesh.faces.vertices[0].dims() * mesh.faces.vertices.size();
+                        renderable_triangles.count = dims(mesh.faces.vertices[0]) * mesh.faces.vertices.size();
                         renderable_triangles.offset = 0;
                         renderable_triangles.our_color[0] = 1.0f;
                         renderable_triangles.our_color[1] = 0.5f;
@@ -131,10 +143,12 @@ namespace Bcg {
                                       "layout (location = 0) in vec3 aPos;\n"
                                       "layout (location = 1) in vec3 aNormal;\n"
                                       "out vec3 Normal;\n"
+                                      "uniform mat4 view;\n"
+                                      "uniform mat4 projection;\n"
                                       "void main()\n"
                                       "{\n"
                                       "   Normal = aNormal;\n"
-                                      "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                      "   gl_Position = projection * view * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
                                       "}\0";
             program.f_shader.source = "#version 330 core\n"
                                       "in vec3 Normal;\n"

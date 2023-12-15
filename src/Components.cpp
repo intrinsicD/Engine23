@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <iostream>
 #include "fmt/core.h"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace Bcg{
     //------------------------------------------------------------------------------------------------------------------
@@ -37,5 +38,21 @@ namespace Bcg{
                 }
             }
         }
+    }
+
+    glm::mat4 Camera::view() const {
+        return glm::lookAt(position, target, up);
+    }
+
+    glm::mat4 Camera::projection() const {
+        return glm::perspective(glm::radians(fov), aspect_ratio, near, far);
+    }
+
+    glm::vec3 Camera::right() const{
+        return glm::normalize(glm::cross(forward, up));
+    }
+
+    glm::vec3 Camera::left() const{
+        return -right();
     }
 }

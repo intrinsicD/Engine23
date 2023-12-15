@@ -1,0 +1,1 @@
+target_include_directories(bcg_plugin_geometry_processing PUBLIC .)

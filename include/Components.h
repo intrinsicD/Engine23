@@ -15,6 +15,7 @@
 #include <chrono>
 #include <string>
 #include <cmath>
+#include "glm/glm.hpp"
 #include "entt/fwd.hpp"
 
 namespace Bcg {
@@ -24,7 +25,7 @@ namespace Bcg {
         int height = 600;
     };
 
-    struct Viewport{
+    struct Viewport {
         int x = 0;
         int y = 0;
         int width = 800;
@@ -56,18 +57,14 @@ namespace Bcg {
 
     struct Input {
         struct Mouse {
-            struct Position {
-                double x = 0;
-                double y = 0;
+            struct Position : public glm::vec2 {
             };
             struct Button {
                 bool left = false;
                 bool right = false;
                 bool middle = false;
             };
-            struct Scroll {
-                double x = 0;
-                double y = 0;
+            struct Scroll : public glm::vec2 {
             };
             Position position;
             Scroll scroll;
@@ -277,66 +274,16 @@ namespace Bcg {
         std::unordered_map<unsigned int, std::shared_ptr<RenderBatch>> batches;
     };
 
-    template<typename T>
-    struct Vec3 {
-        union {
-            T data[3];
-            struct {
-                T x, y, z;
-            };
-            struct {
-                T r, g, b;
-            };
-            struct {
-                T i, j, k;
-            };
-        };
-
-        size_t dims() const { return 3; }
-
-        size_t size() const { return dims(); }
-
-        Vec3 cross(const Vec3 &other) const {
-            return Vec3{
-                    y * other.z - z * other.y,
-                    z * other.x - x * other.z,
-                    x * other.y - y * other.x
-            };
-        }
-
-        Vec3 operator-(const Vec3 &other) const {
-            return Vec3{
-                    x - other.x,
-                    y - other.y,
-                    z - other.z
-            };
-        }
-
-        Vec3 &operator+=(const Vec3 &other) {
-            x += other.x;
-            y += other.y;
-            z += other.z;
-            return *this;
-        }
-
-        void normalize() {
-            T length = std::sqrt(x * x + y * y + z * z);
-            x /= length;
-            y /= length;
-            z /= length;
-        }
-    };
-
     struct Faces {
-        std::vector<Vec3<unsigned int>> vertices;
-        std::vector<Vec3<unsigned int>> normals;
-        std::vector<Vec3<unsigned int>> texcoords;
+        std::vector<glm::uvec3> vertices;
+        std::vector<glm::uvec3> normals;
+        std::vector<glm::uvec3> texcoords;
     };
 
     struct Vertices {
-        std::vector<Vec3<float>> positions;
-        std::vector<Vec3<float>> normals;
-        std::vector<Vec3<float>> colors;
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec3> normals;
+        std::vector<glm::vec3> colors;
     };
 
     struct Mesh {
@@ -344,14 +291,49 @@ namespace Bcg {
         Faces faces;
     };
 
-    struct Camera{
-        Vec3<float> position;
-        Vec3<float> target;
-        Vec3<float> up;
+    inline auto dims(const glm::vec2 &v) -> size_t {
+        return 2;
+    }
+
+    inline auto dims(const glm::uvec2 &v) -> size_t {
+        return 2;
+    }
+
+    inline auto dims(const glm::vec3 &v) -> size_t {
+        return 3;
+    }
+
+    inline auto dims(const glm::uvec3 &v) -> size_t {
+        return 3;
+    }
+
+    inline auto dims(const glm::vec4 &v) -> size_t {
+        return 4;
+    }
+
+    template<typename T>
+    inline auto dims(const std::vector<T> &v) -> size_t {
+        return dims(v[0]);
+    }
+
+    struct Camera {
+        glm::vec3 position;
+        glm::vec3 target;
+        glm::vec3 forward;
+        glm::vec3 up;
         float fov;
         float aspect_ratio;
         float near;
         float far;
+        float speed;
+
+        glm::mat4 view() const;
+
+        glm::mat4 projection() const;
+
+        glm::vec3 right() const;
+
+        glm::vec3 left() const;
     };
 }
 

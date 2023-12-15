@@ -17,7 +17,8 @@ target_sources(Engine23Lib PRIVATE
         implot/implot_demo.cpp
         implot/implot_items.cpp]]
 )
-
+add_subdirectory(glm)
+target_link_libraries(Engine23Lib PUBLIC glm::glm)
 add_subdirectory(entt)
 target_link_libraries(Engine23Lib PUBLIC EnTT::EnTT)
 add_subdirectory(fmt)

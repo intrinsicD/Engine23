@@ -61,6 +61,7 @@ namespace Bcg::OpenGL {
 
         void set_vec3(const std::string &name, float r, float g, float b) const;
         void set_vec3(const std::string &name, const float *value) const;
+        void set_mat4(const std::string &name, const float *value) const;
     };
 
     struct ShaderPrograms : public Cache<std::string, ShaderProgram> {

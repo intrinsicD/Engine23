@@ -1,0 +1,2 @@
+add_subdirectory(bcg_geometry_processing)
+target_link_libraries(bcg_plugin_geometry_processing PUBLIC bcg_geometry_processing_lib)

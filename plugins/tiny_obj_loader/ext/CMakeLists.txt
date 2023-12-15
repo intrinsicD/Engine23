@@ -1,2 +1,2 @@
 add_subdirectory(tinyobjloader)
-target_link_libraries(Engine23Lib PUBLIC tinyobjloader)
+target_link_libraries(bcg_plugin_tiny_obj_loader PUBLIC tinyobjloader)

@@ -784,6 +784,13 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
+    void ShaderProgram::set_mat4(const std::string &name, const float *value) const {
+        auto location = glGetUniformLocation(id, name.c_str());
+        if(location == -1) return;
+        glUniformMatrix4fv(location, 1, GL_FALSE, value);
+        OpenGL::AssertNoOglError();
+    }
+
     BufferObject BufferObject::Static() {
         return {0, 0, 0, GL_STATIC_DRAW, ""};
     }
