@@ -37,6 +37,11 @@ namespace Bcg::Events{
     };
 
     template<typename T>
+    struct Change{
+
+    };
+
+    template<typename T>
     struct End{
 
     };

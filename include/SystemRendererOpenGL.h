@@ -16,6 +16,10 @@ namespace Bcg {
 
         static std::string name();
 
+        static void set_viewport(int x, int y, int width, int height);
+
+        static void set_viewport(int width, int height);
+
     protected:
         friend Engine;
 

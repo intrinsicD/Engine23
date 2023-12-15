@@ -18,6 +18,11 @@
 
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
+        void on_update_viewport(const Events::Update<Viewport> &event) {
+            auto &window_config = Engine::Context().get<WindowConfig>();
+            SystemRendererOpenGL::set_viewport(window_config.width, window_config.height);
+        }
+
         static bool show_gui = false;
 
         void on_render_gui(const Events::Render<Gui> &event) {
@@ -58,6 +63,7 @@ namespace Bcg {
 
         void on_startup_renderer(const Events::Startup<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&SystemRendererOpenGLInternal::on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().connect<&SystemRendererOpenGLInternal::on_render_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
 
@@ -83,13 +89,14 @@ namespace Bcg {
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL version:      " + opengl_config.version).enqueue();
-                Log::Info(SystemRendererOpenGL::name() + ": OpenGL GLSL version: " + opengl_config.glsl_version).enqueue();
+                Log::Info(SystemRendererOpenGL::name() + ": OpenGL GLSL version: " +
+                          opengl_config.glsl_version).enqueue();
             }
 
             auto &bg = Engine::Context().get<WindowConfig>().background_color;
             glClearColor(bg[0], bg[1], bg[2], bg[3]);
 
-            forward_render = std::make_shared<TaskCommand>("Render", [](){
+            forward_render = std::make_shared<TaskCommand>("Render", []() {
                 auto &render_batches = Engine::Context().get<RenderBatches>();
                 for (const auto &[shader_id, batch]: render_batches.batches) {
                     glUseProgram(shader_id);
@@ -108,6 +115,15 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
             Log::Info(SystemRendererOpenGL::name() + ": Shutdown").enqueue();
         }
+    }
+
+    void SystemRendererOpenGL::set_viewport(int x, int y, int width, int height) {
+        glViewport(x, y, width, height);
+        OpenGL::AssertNoOglError();
+    }
+
+    void SystemRendererOpenGL::set_viewport(int width, int height) {
+        set_viewport(0, 0, width, height);
     }
 
     std::string SystemRendererOpenGL::name() {
@@ -141,8 +157,10 @@ namespace Bcg {
     void SystemRendererOpenGL::remove() {
         SystemBuffers().remove();
         SystemShaderPrograms().remove();
-        Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
+        Engine::Instance()->dispatcher.sink < Events::Startup <
+        Renderer >> ().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Instance()->dispatcher.sink < Events::Shutdown <
+        Renderer >> ().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
         Log::Info(name() + ": Removed").enqueue();
     }
 

@@ -9,6 +9,7 @@
 #include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
+#include "glad/gl.h"
 
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
@@ -121,22 +122,28 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().connect<&on_render_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
 
-
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
             OpenGL::ShaderProgram program;
             program.name = "learn_opengl";
             program.v_shader.source = "#version 330 core\n"
                                       "layout (location = 0) in vec3 aPos;\n"
+                                      "layout (location = 1) in vec3 aNormal;\n"
+                                      "out vec3 Normal;\n"
                                       "void main()\n"
                                       "{\n"
+                                      "   Normal = aNormal;\n"
                                       "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
                                       "}\0";
             program.f_shader.source = "#version 330 core\n"
+                                      "in vec3 Normal;\n"
                                       "out vec4 FragColor;\n"
                                       "uniform vec3 our_color;\n"
                                       "void main()\n"
                                       "{\n"
-                                      "   FragColor = vec4(our_color, 1.0f);\n"
+                                      //"   FragColor = vec4(Normal * log(1 + gl_FragCoord.z), 1.0f);\n"
+                                      "   FragColor = vec4(Normal * abs(Normal.z), 1.0f);\n"
                                       "}\n\0";
             program.compile_from_sources();
             program.link();

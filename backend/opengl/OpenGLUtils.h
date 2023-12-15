@@ -86,6 +86,8 @@ namespace Bcg::OpenGL {
 
         void set_data(const void *data, unsigned int size);
 
+        void set_sub_data(const void *data, unsigned int size, unsigned int offset);
+
         void release();
     };
 

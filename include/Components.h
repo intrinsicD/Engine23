@@ -14,11 +14,19 @@
 #include <condition_variable>
 #include <chrono>
 #include <string>
+#include <cmath>
 #include "entt/fwd.hpp"
 
 namespace Bcg {
     struct StartupWindowConfig {
         std::string title = "Viewer";
+        int width = 800;
+        int height = 600;
+    };
+
+    struct Viewport{
+        int x = 0;
+        int y = 0;
         int width = 800;
         int height = 600;
     };
@@ -287,6 +295,36 @@ namespace Bcg {
         size_t dims() const { return 3; }
 
         size_t size() const { return dims(); }
+
+        Vec3 cross(const Vec3 &other) const {
+            return Vec3{
+                    y * other.z - z * other.y,
+                    z * other.x - x * other.z,
+                    x * other.y - y * other.x
+            };
+        }
+
+        Vec3 operator-(const Vec3 &other) const {
+            return Vec3{
+                    x - other.x,
+                    y - other.y,
+                    z - other.z
+            };
+        }
+
+        Vec3 &operator+=(const Vec3 &other) {
+            x += other.x;
+            y += other.y;
+            z += other.z;
+            return *this;
+        }
+
+        void normalize() {
+            T length = std::sqrt(x * x + y * y + z * z);
+            x /= length;
+            y /= length;
+            z /= length;
+        }
     };
 
     struct Faces {
@@ -304,6 +342,16 @@ namespace Bcg {
     struct Mesh {
         Vertices vertices;
         Faces faces;
+    };
+
+    struct Camera{
+        Vec3<float> position;
+        Vec3<float> target;
+        Vec3<float> up;
+        float fov;
+        float aspect_ratio;
+        float near;
+        float far;
     };
 }
 

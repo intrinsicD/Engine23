@@ -91,6 +91,7 @@ namespace Bcg {
                 window_config.width = width;
                 window_config.height = height;
                 window_config.aspect_ratio = static_cast<double>(width) / static_cast<double>(height);
+                engine->dispatcher.trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
@@ -102,24 +103,28 @@ namespace Bcg {
                 } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
                     input.mouse.button.middle = action == GLFW_PRESS;
                 }
+                engine->dispatcher.trigger(Events::Update<Input::Mouse::Button>{});
             });
             glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xpos, double ypos) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.position.x = xpos;
                 input.mouse.position.y = ypos;
+                engine->dispatcher.trigger(Events::Update<Input::Mouse::Position>{});
             });
             glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.scroll.x = xoffset;
                 input.mouse.scroll.y = yoffset;
+                engine->dispatcher.trigger(Events::Update<Input::Mouse::Scroll>{});
             });
             glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
                 auto &input = engine->state.ctx().get<Input>();
                 if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
                 input.keyboard.keys[key] = action == GLFW_PRESS;
+                engine->dispatcher.trigger(Events::Update<Input::Keyboard>{});
             });
             glfwSetDropCallback(window, [](GLFWwindow *window, int count, const char **paths) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));

@@ -828,6 +828,11 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
+    void BufferObject::set_sub_data(const void *data, unsigned int size, unsigned int offset) {
+        glBufferSubData(type, offset, size, data);
+        OpenGL::AssertNoOglError();
+    }
+
     void BufferObject::release() {
         glBindBuffer(type, 0);
         OpenGL::AssertNoOglError();
