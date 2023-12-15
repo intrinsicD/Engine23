@@ -13,6 +13,3 @@
 [submodule "plugins/tiny_obj_loader/ext/tinyobjloader"]
 	path = plugins/tiny_obj_loader/ext/tinyobjloader
 	url = https://github.com/tinyobjloader/tinyobjloader.git
-[submodule "ext/bcg_geometry_processing"]
-	path = ext/bcg_geometry_processing
-	url = https://github.com/intrinsicD/bcg_geometry_processing.git
