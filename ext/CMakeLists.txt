@@ -1,4 +1,3 @@
-#[[target_include_directories(Engine23Lib SYSTEM PUBLIC entt/src)]]
 target_include_directories(Engine23Lib SYSTEM PUBLIC imgui)
 
 target_compile_definitions(Engine23Lib PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
