@@ -90,7 +90,6 @@ namespace Bcg {
                 auto &window_config = engine->state.ctx().get<WindowConfig>();
                 window_config.width = width;
                 window_config.height = height;
-                window_config.aspect_ratio = static_cast<double>(width) / static_cast<double>(height);
                 engine->dispatcher.trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {

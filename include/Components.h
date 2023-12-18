@@ -23,6 +23,11 @@ namespace Bcg {
         std::string title = "Viewer";
         int width = 800;
         int height = 600;
+
+        template<typename T>
+        T get_aspect() const {
+            return static_cast<T>(width) / static_cast<T>(height);
+        }
     };
 
     struct Viewport {
@@ -37,8 +42,12 @@ namespace Bcg {
         int width = 800;
         int height = 600;
         double dpi = 1.0;
-        double aspect_ratio = 4.0 / 3.0;
         float background_color[4] = {0.1f, 0.3f, 0.6f, 1.0f};
+
+        template<typename T>
+        T get_aspect() const {
+            return static_cast<T>(width) / static_cast<T>(height);
+        }
     };
 
     struct OpenGLConfig {
@@ -316,24 +325,125 @@ namespace Bcg {
         return dims(v[0]);
     }
 
+    struct Transform {
+        glm::mat4 model;
+
+        glm::vec3 get_position() const;
+
+        glm::vec3 get_scale() const;
+
+        glm::quat get_rotation() const;
+
+        glm::vec3 get_euler_angles() const;
+
+        glm::vec3 get_angles_axis() const;
+
+        glm::vec3 get_x_axis() const;
+
+        glm::vec3 get_y_axis() const;
+
+        glm::vec3 get_z_axis() const;
+
+        void set_position(const glm::vec3 &position);
+
+        void set_scale(const glm::vec3 &scale);
+
+        void set_rotation(const glm::quat &rotation);
+
+        void set_rotation(const glm::vec3 &axis, float angle);
+
+        void set_rotation(const glm::vec3 &euler_angles);
+
+        void set_rotation(float pitch, float yaw, float roll);
+    };
+
     struct Camera {
-        glm::vec3 position;
-        glm::vec3 target;
-        glm::vec3 forward;
-        glm::vec3 up;
-        float fov;
-        float aspect_ratio;
-        float near;
-        float far;
-        float speed;
+        struct ProjectionParameters {
+            struct Perspective {
+                float fovy = 45.0f;
+                float aspect = 4.0f / 3.0f;
+                float near;
+                float far;
+            } perspective_parameters;
+            struct Orthographic {
+                float left;
+                float right;
+                float bottom;
+                float top;
+                float near;
+                float far;
+            } orthographic_parameters;
+        } projection_parameters;
 
-        glm::mat4 view() const;
+        struct ViewParameters {
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
+            glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f);
+            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        } view_parameters;
 
-        glm::mat4 projection() const;
+        glm::mat4 view;
+        glm::mat4 projection;
 
-        glm::vec3 right() const;
+        float zoom_speed = 1.0f;
+        float mov_speed = 1.0f;
+        float rot_speed = 1.0f;
+        bool is_orthographic = true;
 
-        glm::vec3 left() const;
+        Camera();
+
+        glm::mat4 get_model() const;
+
+        glm::vec3 get_direction() const;
+
+        glm::vec3 get_up() const;
+
+        glm::vec3 get_right() const;
+
+        glm::vec3 get_position() const;
+
+        ViewParameters get_view_parameters() const;
+
+        void set_view_parameters(const ViewParameters &view_parameters);
+
+        ProjectionParameters::Perspective get_perspective_parameters() const;
+
+        void set_perspective_parameters(const ProjectionParameters::Perspective &perspective_parameters);
+
+        ProjectionParameters::Orthographic get_orthographic_parameters() const;
+
+        void set_orthographic_parameters(const ProjectionParameters::Orthographic &orthographic_parameters);
+    };
+
+    struct ArcBallCameraController {
+        Camera &camera;
+        bool last_point_ok;
+        glm::vec3 target_point;
+        glm::vec2 last_point_2d;
+        glm::vec3 last_point_3d;
+    };
+
+    struct FPSCameraController {
+        Camera &camera;
+        float yaw = -90.0f;
+        float pitch = 0.0f;
+        float last_x = 0.0f;
+        float last_y = 0.0f;
+        bool first_mouse = true;
+    };
+
+    struct AABB {
+        glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
+        glm::vec3 max = glm::vec3(std::numeric_limits<float>::lowest());
+
+        void grow(const glm::vec3 &point);
+
+        void merge(const AABB &aabb);
+
+        glm::vec3 get_center() const;
+
+        glm::vec3 get_extent() const;
+
+        void set(const glm::vec3 &center, const glm::vec3 &extent);
     };
 }
 

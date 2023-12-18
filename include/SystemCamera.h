@@ -16,6 +16,11 @@ namespace Bcg{
 
         static std::string name();
 
+        static void make_arc_ball_camera();
+
+        static void make_first_person_camera();
+
+        static void toggle_camera_mode();
     protected:
         friend Engine;
 

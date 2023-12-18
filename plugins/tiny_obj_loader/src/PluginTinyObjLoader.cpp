@@ -48,32 +48,32 @@ namespace Bcg {
 
             //convert to mesh
             Mesh mesh;
+            AABB aabb;
             mesh.vertices.positions.resize(attrib.vertices.size() / 3);
             mesh.vertices.normals.resize(attrib.normals.size() / 3);
             mesh.vertices.colors.resize(attrib.colors.size() / 3);
 
-            glm::vec3 min = {attrib.vertices[0], attrib.vertices[1], attrib.vertices[2]};
-            glm::vec3 max = {attrib.vertices[0], attrib.vertices[1], attrib.vertices[2]};
             glm::vec3 center = {0.0, 0.0, 0.0};
             for (size_t i = 0; i < attrib.vertices.size() / 3; i++) {
                 mesh.vertices.positions[i].x = attrib.vertices[3 * i + 0];
                 mesh.vertices.positions[i].y = attrib.vertices[3 * i + 1];
                 mesh.vertices.positions[i].z = attrib.vertices[3 * i + 2];
-                min = glm::min(min, mesh.vertices.positions[i]);
-                max = glm::max(max, mesh.vertices.positions[i]);
                 center.x += mesh.vertices.positions[i].x;
                 center.y += mesh.vertices.positions[i].y;
                 center.z += mesh.vertices.positions[i].z;
-            }
 
+                aabb.grow(mesh.vertices.positions[i]);
+            }
+            auto abs_max = glm::max(aabb.max, -aabb.min);
+            auto scaling = glm::max(abs_max.x, glm::max(abs_max.y, abs_max.z));
             center.x /= mesh.vertices.positions.size();
             center.y /= mesh.vertices.positions.size();
             center.z /= mesh.vertices.positions.size();
 
             for(auto &v: mesh.vertices.positions) {
-                v.x = (v.x - center.x) / (max.x - min.x);
-                v.y = (v.y - center.y) / (max.y - min.y);
-                v.z = (v.z - center.z) / (max.z - min.z);
+                v.x = (v.x - center.x) / scaling;
+                v.y = (v.y - center.y) / scaling;
+                v.z = (v.z - center.z) / scaling;
             }
 
             for (size_t i = 0; i < attrib.normals.size() / 3; i++) {

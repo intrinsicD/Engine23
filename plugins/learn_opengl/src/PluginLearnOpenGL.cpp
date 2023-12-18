@@ -17,15 +17,13 @@ namespace Bcg {
         void on_render_frame(const Events::Render<Frame> &event) {
             {
                 auto &camera = Engine::Context().get<Camera>();
-                auto camera_view = camera.view();
-                auto camera_projection = camera.projection();
                 auto view = Engine::State().view<OpenGL::RenderableTriangles>();
                 for (const auto &entity_id: view) {
                     auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
                     renderable.program.use();
                     renderable.program.set_vec3("our_color", renderable.our_color);
-                    renderable.program.set_mat4("view", glm::value_ptr(camera_view));
-                    renderable.program.set_mat4("projection", glm::value_ptr(camera_projection));
+                    renderable.program.set_mat4("view", glm::value_ptr(camera.view));
+                    renderable.program.set_mat4("projection", glm::value_ptr(camera.projection));
                     renderable.vao.bind();
                     renderable.draw();
                     renderable.vao.release();
