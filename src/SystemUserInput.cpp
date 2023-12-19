@@ -62,6 +62,20 @@ namespace Bcg {
             }
         }
 
+        void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event){
+            auto *engine = Engine::Instance();
+            auto &input = engine->state.ctx().get<Input>();
+            if(input.mouse.button.left){
+                input.mouse.last_left_click = input.mouse.position;
+            }
+            if(input.mouse.button.middle){
+                input.mouse.last_middle_click = input.mouse.position;
+            }
+            if(input.mouse.button.right){
+                input.mouse.last_right_click = input.mouse.position;
+            }
+        }
+
         void on_update_input_drop(const Events::Update<Input::Drop> &event) {
             auto *engine = Engine::Instance();
             auto &input = engine->state.ctx().get<Input>();
@@ -76,12 +90,14 @@ namespace Bcg {
         void on_startup(const Events::Startup<Engine> &events) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() + ": Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &events) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() + ": Shutdown").enqueue();
         }
     }

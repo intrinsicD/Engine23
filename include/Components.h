@@ -76,6 +76,11 @@ namespace Bcg {
             struct Scroll : public glm::vec2 {
             };
             Position position;
+            Position position_delta;
+            Position last_left_click;
+            Position last_middle_click;
+            Position last_right_click;
+            glm::vec3 drag_begin;
             Scroll scroll;
             Button button;
         } mouse;
@@ -375,23 +380,21 @@ namespace Bcg {
             } orthographic_parameters;
         } projection_parameters;
 
-        struct ViewParameters {
-            glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
-            glm::vec3 direction = glm::vec3(0.0f, 0.0f, -1.0f);
-            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        } view_parameters;
 
-        glm::mat4 view;
-        glm::mat4 projection;
+        glm::mat4 model;
 
-        float zoom_speed = 1.0f;
-        float mov_speed = 1.0f;
-        float rot_speed = 1.0f;
+        float zoom_speed = 5.0f;
+        float mov_speed = 5.0f;
+        float rot_speed = 5.0f;
         bool is_orthographic = true;
 
         Camera();
 
-        glm::mat4 get_model() const;
+        glm::mat4 get_view() const;
+
+        glm::mat4 get_projection() const;
+
+        glm::vec3 get_forward() const;
 
         glm::vec3 get_direction() const;
 
@@ -401,9 +404,9 @@ namespace Bcg {
 
         glm::vec3 get_position() const;
 
-        ViewParameters get_view_parameters() const;
+        void set_model(const glm::mat4 &model);
 
-        void set_view_parameters(const ViewParameters &view_parameters);
+        void set(const glm::vec3 &position, const glm::vec3 &target, const glm::vec3 &up);
 
         ProjectionParameters::Perspective get_perspective_parameters() const;
 
@@ -416,10 +419,10 @@ namespace Bcg {
 
     struct ArcBallCameraController {
         Camera &camera;
-        bool last_point_ok;
-        glm::vec3 target_point;
-        glm::vec2 last_point_2d;
-        glm::vec3 last_point_3d;
+        bool last_point_ok = false;
+        glm::vec3 target = glm::vec3(0.0f);
+        glm::vec2 last_point_2d = glm::vec2(0.0f);
+        glm::vec3 last_point_3d = glm::vec3(0.0f);
     };
 
     struct FPSCameraController {
@@ -428,6 +431,7 @@ namespace Bcg {
         float pitch = 0.0f;
         float last_x = 0.0f;
         float last_y = 0.0f;
+        float sensitivity = 0.1f;
         bool first_mouse = true;
     };
 

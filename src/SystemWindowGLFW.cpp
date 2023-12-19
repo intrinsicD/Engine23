@@ -107,6 +107,8 @@ namespace Bcg {
             glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xpos, double ypos) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
                 auto &input = engine->state.ctx().get<Input>();
+                input.mouse.position_delta.x = xpos - input.mouse.position.x;
+                input.mouse.position_delta.y = ypos - input.mouse.position.y;
                 input.mouse.position.x = xpos;
                 input.mouse.position.y = ypos;
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Position>{});

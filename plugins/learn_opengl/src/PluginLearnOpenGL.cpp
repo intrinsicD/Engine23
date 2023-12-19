@@ -22,8 +22,8 @@ namespace Bcg {
                     auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
                     renderable.program.use();
                     renderable.program.set_vec3("our_color", renderable.our_color);
-                    renderable.program.set_mat4("view", glm::value_ptr(camera.view));
-                    renderable.program.set_mat4("projection", glm::value_ptr(camera.projection));
+                    renderable.program.set_mat4("view", glm::value_ptr(camera.get_view()));
+                    renderable.program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
                     renderable.vao.bind();
                     renderable.draw();
                     renderable.vao.release();

@@ -100,43 +100,57 @@ namespace Bcg {
         model = glm::mat4_cast(glm::quat(glm::vec3(pitch, yaw, roll)));
     }
 
-    Camera::Camera() : view(glm::mat4(1.0f)), projection(glm::mat4(1.0f)), is_orthographic(false) {
-        set_view_parameters({glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f)});
+    Camera::Camera() : model(glm::mat4(1.0f)), is_orthographic(false) {
+        set(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0f, 0.0f));
         set_perspective_parameters({0.1f, 100.0f, 800.0f / 600.0f, glm::radians(45.0f)});
     }
 
-    glm::mat4 Camera::get_model() const {
-        return glm::inverse(view);
+    glm::mat4 Camera::get_view() const {
+        return glm::inverse(model);
+    }
+
+    glm::mat4 Camera::get_projection() const{
+        if(is_orthographic){
+            return glm::ortho(projection_parameters.orthographic_parameters.left, projection_parameters.orthographic_parameters.right,
+                              projection_parameters.orthographic_parameters.bottom, projection_parameters.orthographic_parameters.top,
+                              projection_parameters.orthographic_parameters.near, projection_parameters.orthographic_parameters.far);
+        }else{
+            return glm::perspective(projection_parameters.perspective_parameters.fovy, projection_parameters.perspective_parameters.aspect,
+                                    projection_parameters.perspective_parameters.near, projection_parameters.perspective_parameters.far);
+        }
+    }
+
+    glm::vec3 Camera::get_forward() const {
+        //get direction vector from view_matrix
+        return glm::vec3(-model[2]);
     }
 
     glm::vec3 Camera::get_direction() const {
         //get direction vector from view_matrix
-        return view_parameters.direction;
+        return glm::vec3(model[2]);
     }
 
     glm::vec3 Camera::get_up() const {
         //get up vector from view_matrix
-        return view_parameters.up;
+        return glm::vec3(model[1]);
     }
 
     glm::vec3 Camera::get_right() const {
         //get right vector from view_matrix
-        return glm::cross(view_parameters.direction, view_parameters.up);
+        return glm::vec3(model[0]);
     }
 
     glm::vec3 Camera::get_position() const {
         //get position from view_matrix
-        return view_parameters.position;
+        return glm::vec3(model[3]);
     }
 
-    Camera::ViewParameters Camera::get_view_parameters() const {
-        return view_parameters;
+    void Camera::set_model(const glm::mat4 &model_) {
+        model = model_;
     }
 
-    void Camera::set_view_parameters(const Bcg::Camera::ViewParameters &view_parameters) {
-        this->view_parameters = view_parameters;
-        view = glm::lookAt(view_parameters.position, view_parameters.position + view_parameters.direction,
-                           view_parameters.up);
+    void Camera::set(const glm::vec3 &position, const glm::vec3 &target, const glm::vec3 &up){
+        model = glm::inverse(glm::lookAt(position, target, up));
     }
 
     Camera::ProjectionParameters::Perspective Camera::get_perspective_parameters() const {
@@ -144,8 +158,6 @@ namespace Bcg {
     }
 
     void Camera::set_perspective_parameters(const ProjectionParameters::Perspective &perspective_parameters) {
-        projection = glm::perspective(perspective_parameters.fovy, perspective_parameters.aspect,
-                                      perspective_parameters.near, perspective_parameters.far);
         projection_parameters.perspective_parameters = perspective_parameters;
         is_orthographic = false;
     }
@@ -155,9 +167,6 @@ namespace Bcg {
     }
 
     void Camera::set_orthographic_parameters(const ProjectionParameters::Orthographic &orthographic_parameters) {
-        projection = glm::ortho(orthographic_parameters.left, orthographic_parameters.right,
-                                orthographic_parameters.bottom, orthographic_parameters.top,
-                                orthographic_parameters.near, orthographic_parameters.far);
         projection_parameters.orthographic_parameters = orthographic_parameters;
         is_orthographic = true;
     }
