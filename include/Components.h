@@ -80,7 +80,7 @@ namespace Bcg {
             Position last_left_click;
             Position last_middle_click;
             Position last_right_click;
-            glm::vec3 drag_begin;
+            Position last_drag_pos;
             Scroll scroll;
             Button button;
         } mouse;
@@ -369,6 +369,7 @@ namespace Bcg {
                 float aspect = 4.0f / 3.0f;
                 float near;
                 float far;
+                bool dirty;
             } perspective_parameters;
             struct Orthographic {
                 float left;
@@ -377,44 +378,48 @@ namespace Bcg {
                 float top;
                 float near;
                 float far;
+                bool dirty;
             } orthographic_parameters;
         } projection_parameters;
+        struct ViewParameters{
+            glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
+            glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
+            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+            glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
+            glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+            bool dirty;
+        }view_parameters;
 
+        struct Sensitivity{
+            float zoom = 5.0f;
+            float move = 5.0f;
+            float rotate = 5.0f;
+            float drag = 0.01f;
+        }sensitivity;
 
-        glm::mat4 model;
-
-        float zoom_speed = 5.0f;
-        float mov_speed = 5.0f;
-        float rot_speed = 5.0f;
         bool is_orthographic = true;
 
         Camera();
+
+        glm::mat4 get_model() const;
 
         glm::mat4 get_view() const;
 
         glm::mat4 get_projection() const;
 
-        glm::vec3 get_forward() const;
+        void set_front(const glm::vec3 &front);
 
-        glm::vec3 get_direction() const;
+        void set_target(const glm::vec3 &target);
 
-        glm::vec3 get_up() const;
+        void set_position(const glm::vec3 &position);
 
-        glm::vec3 get_right() const;
+        void set_worldup(const glm::vec3 &world_up);
 
-        glm::vec3 get_position() const;
+        void set_view_parameters(const ViewParameters &parameters);
 
-        void set_model(const glm::mat4 &model);
+        void set_perspective_parameters(const ProjectionParameters::Perspective &parameters);
 
-        void set(const glm::vec3 &position, const glm::vec3 &target, const glm::vec3 &up);
-
-        ProjectionParameters::Perspective get_perspective_parameters() const;
-
-        void set_perspective_parameters(const ProjectionParameters::Perspective &perspective_parameters);
-
-        ProjectionParameters::Orthographic get_orthographic_parameters() const;
-
-        void set_orthographic_parameters(const ProjectionParameters::Orthographic &orthographic_parameters);
+        void set_orthographic_parameters(const ProjectionParameters::Orthographic &parameters);
     };
 
     struct ArcBallCameraController {
@@ -423,16 +428,6 @@ namespace Bcg {
         glm::vec3 target = glm::vec3(0.0f);
         glm::vec2 last_point_2d = glm::vec2(0.0f);
         glm::vec3 last_point_3d = glm::vec3(0.0f);
-    };
-
-    struct FPSCameraController {
-        Camera &camera;
-        float yaw = -90.0f;
-        float pitch = 0.0f;
-        float last_x = 0.0f;
-        float last_y = 0.0f;
-        float sensitivity = 0.1f;
-        bool first_mouse = true;
     };
 
     struct AABB {
