@@ -12,8 +12,11 @@
 
 #include <dlfcn.h>
 
-namespace Bcg {
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
 
+namespace Bcg {
     namespace SystemPluginsInternal {
         struct PluginsConfig {
             std::string plugin_prefix = "libbcg_plugin_";
@@ -23,6 +26,21 @@ namespace Bcg {
             std::vector<std::pair<Plugin *, void *>> plugins;
         };
 
+        void on_startup(Events::Startup<Engine> &event);
+
+        void on_shutdown(Events::Shutdown<Engine> &event);
+
+        inline std::string extract_plugin_name(const std::string &prefix,
+                                               const std::string &filepath, const std::string &ext);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemPluginsInternal {
         void on_startup(Events::Startup<Engine> &event) {
             Log::Info(SystemPlugins::name() + ": Startup").enqueue();
         }
@@ -46,9 +64,39 @@ namespace Bcg {
             return filepath.substr(start, end - start);
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
     std::string SystemPlugins::name() {
         return "SystemPlugins";
+    }
+
+    Plugin *SystemPlugins::load(const std::string &filepath) {
+        void *handle = dlopen(filepath.c_str(), RTLD_LAZY);
+        if (handle) {
+            dlerror();
+            auto &config = Engine::Context().get<SystemPluginsInternal::PluginsConfig>();
+            auto create_instance_name = config.create_instance_prefix +
+                                        SystemPluginsInternal::extract_plugin_name(config.plugin_prefix, filepath,
+                                                                                   config.plugin_ext);
+            auto create = (Plugin *(*)()) dlsym(handle, create_instance_name.c_str());
+            if (create) {
+                const char *dlsym_error = dlerror();
+                if (!dlsym_error) {
+                    return create();
+                }
+            }
+        }
+        dlclose(handle);
+        return nullptr;
+    }
+
+    void SystemPlugins::unload(void *handle) {
+        dlclose(handle);
     }
 
     void SystemPlugins::pre_init() {
@@ -81,33 +129,9 @@ namespace Bcg {
         Log::Info(name() + ": Removed").enqueue();
 
         auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
-        for(auto &plugin : plugins) {
+        for (auto &plugin: plugins) {
             plugin.second->remove();
             unload(plugin.second);
         }
-    }
-
-    Plugin *SystemPlugins::load(const std::string &filepath) {
-        void *handle = dlopen(filepath.c_str(), RTLD_LAZY);
-        if (handle) {
-            dlerror();
-            auto &config = Engine::Context().get<SystemPluginsInternal::PluginsConfig>();
-            auto create_instance_name = config.create_instance_prefix +
-                                        SystemPluginsInternal::extract_plugin_name(config.plugin_prefix, filepath,
-                                                                                   config.plugin_ext);
-            auto create = (Plugin *(*)()) dlsym(handle, create_instance_name.c_str());
-            if (create) {
-                const char *dlsym_error = dlerror();
-                if (!dlsym_error) {
-                    return create();
-                }
-            }
-        }
-        dlclose(handle);
-        return nullptr;
-    }
-
-    void SystemPlugins::unload(void *handle) {
-        dlclose(handle);
     }
 }

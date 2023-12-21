@@ -1,0 +1,10 @@
+add_library(bcg_plugin_compute_shader_normals SHARED)
+
+add_subdirectory(include)
+add_subdirectory(src)
+
+target_link_libraries(bcg_plugin_compute_shader_normals PRIVATE Engine23Lib)
+
+export(TARGETS bcg_plugin_compute_shader_normals NAMESPACE FILE BcgPluginComputeShaderNormalsTargets.cmake)
+
+add_dependencies(Engine23 bcg_plugin_compute_shader_normals)

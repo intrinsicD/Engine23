@@ -32,6 +32,11 @@ namespace Bcg::Events{
     };
 
     template<typename T>
+    struct End{
+
+    };
+
+    template<typename T>
     struct Notify{
 
     };
@@ -42,7 +47,22 @@ namespace Bcg::Events{
     };
 
     template<typename T>
-    struct End{
+    struct Load{
+
+    };
+
+    template<typename T>
+    struct Save{
+
+    };
+
+    template<typename T>
+    struct Create{
+
+    };
+
+    template<typename T>
+    struct Destroy{
 
     };
 }

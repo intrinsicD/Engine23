@@ -8,15 +8,35 @@
 #include "Commands.h"
 #include "imgui.h"
 
-namespace Bcg {
-    struct PlatformInfo {
-        std::string os;
-        std::string arch;
-        std::string compiler;
-    };
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
 
+namespace Bcg {
     namespace SystemPlatformInternal {
         static bool show_gui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_startup(const Events::Startup<Engine> &event);
+
+        void on_shutdown(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemPlatformInternal {
+        struct PlatformInfo {
+            std::string os;
+            std::string arch;
+            std::string compiler;
+        };
 
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
@@ -52,13 +72,20 @@ namespace Bcg {
             Log::Info(SystemPlatform::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     std::string SystemPlatform::name() {
         return "SystemPlatform";
     }
 
     void SystemPlatform::pre_init() {
-        auto &info = Engine::Context().emplace<PlatformInfo>();
+        auto &info = Engine::Context().emplace<SystemPlatformInternal::PlatformInfo>();
 
         // Detect Operating System
 #if defined(_WIN32) || defined(_WIN64)
@@ -90,7 +117,8 @@ namespace Bcg {
                          std::to_string(__clang_patchlevel__);
 #elif defined(__GNUC__)
         info.compiler = "GCC";
-        info.compiler += " " + std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." + std::to_string(__GNUC_PATCHLEVEL__);
+        info.compiler += " " + std::to_string(__GNUC__) + "." + std::to_string(__GNUC_MINOR__) + "." +
+                         std::to_string(__GNUC_PATCHLEVEL__);
 #else
         info.compiler = "Unknown";
 #endif
@@ -100,7 +128,7 @@ namespace Bcg {
     void SystemPlatform::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPlatformInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPlatformInternal::on_shutdown>();
-        auto &info = Engine::Context().emplace<PlatformInfo>();
+        auto &info = Engine::Context().emplace<SystemPlatformInternal::PlatformInfo>();
         Log::Info(name() + ": Initialized. Compiled with " + info.compiler + " on " + info.os + " for " + info.arch +
                   " Architecture.").enqueue();
     }

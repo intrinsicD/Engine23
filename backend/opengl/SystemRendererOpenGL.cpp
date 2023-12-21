@@ -16,14 +16,42 @@
 #include "SystemShaderPrograms.h"
 #include "SystemBuffers.h"
 
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemRendererOpenGLInternal {
+        void on_update_viewport(const Events::Update<Viewport> &event);
+
+        static bool show_gui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_begin_frame(const Events::Begin<Frame> &event);
+
+        static std::shared_ptr<TaskCommand> forward_render;
+
+        void on_render_frame(const Events::Render<Frame> &event);
+
+        void on_startup_renderer(const Events::Startup<Renderer> &event);
+
+        void on_shutdown_renderer(const Events::Shutdown<Renderer> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
         void on_update_viewport(const Events::Update<Viewport> &event) {
             auto &window_config = Engine::Context().get<WindowConfig>();
             SystemRendererOpenGL::set_viewport(window_config.width, window_config.height);
         }
-
-        static bool show_gui = false;
 
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
@@ -53,8 +81,6 @@ namespace Bcg {
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-
-        static std::shared_ptr<TaskCommand> forward_render;
 
         void on_render_frame(const Events::Render<Frame> &event) {
             auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
@@ -116,7 +142,13 @@ namespace Bcg {
             Log::Info(SystemRendererOpenGL::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
     void SystemRendererOpenGL::set_viewport(int x, int y, int width, int height) {
         glViewport(x, y, width, height);
         OpenGL::AssertNoOglError();
@@ -157,10 +189,10 @@ namespace Bcg {
     void SystemRendererOpenGL::remove() {
         SystemBuffers().remove();
         SystemShaderPrograms().remove();
-        Engine::Instance()->dispatcher.sink < Events::Startup <
-        Renderer >> ().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
-        Engine::Instance()->dispatcher.sink < Events::Shutdown <
-        Renderer >> ().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
+        Engine::Instance()->dispatcher.sink<Events::Startup<
+                Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Instance()->dispatcher.sink<Events::Shutdown<
+                Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
         Log::Info(name() + ": Removed").enqueue();
     }
 

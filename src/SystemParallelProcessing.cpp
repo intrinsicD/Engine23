@@ -7,10 +7,35 @@
 #include "Events.h"
 #include <thread>
 #include <queue>
+#include <sstream>
 #include <condition_variable>
 #include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemParallelProcessingInternal {
+        void worker_thread();
+
+        static bool show_gui = false;
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_startup_engine(const Events::Startup<Engine> &event);
+
+        void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
     namespace SystemParallelProcessingInternal {
@@ -32,8 +57,6 @@ namespace Bcg {
                 task->execute();
             }
         }
-
-        static bool show_gui = false;
 
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
@@ -101,7 +124,14 @@ namespace Bcg {
             Log::Info(SystemParallelProcessing::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     std::string SystemParallelProcessing::name() {
         return "SystemParallelProcessing";
     }

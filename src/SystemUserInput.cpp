@@ -9,7 +9,35 @@
 #include "Commands.h"
 #include "imgui.h"
 
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace Bcg {
+    namespace SystemUserInputInternal {
+        void RenderGuiMouse(const Input::Mouse &mouse);
+
+        void RenderGuiKeyboard(const Input::Keyboard &keyboard);
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event);
+
+        void on_update_input_drop(const Events::Update<Input::Drop> &event);
+
+        void on_startup(const Events::Startup<Engine> &events);
+
+        void on_shutdown(const Events::Shutdown<Engine> &events);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
     namespace SystemUserInputInternal {
         void RenderGuiMouse(const Input::Mouse &mouse) {
             ImGui::Text("Position: (%f, %f)", mouse.position.x, mouse.position.y);
@@ -101,7 +129,13 @@ namespace Bcg {
             Log::Info(SystemUserInput::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
     std::string SystemUserInput::name() {
         return "SystemUserInput";
     }

@@ -12,10 +12,50 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <iostream>
 
-namespace Bcg {
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
     namespace SystemCameraInternal {
         static bool show_gui = false;
 
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_update_viewport(const Events::Update<Viewport> &event);
+
+        void on_update_input(const Events::Update<Input> &event);
+
+        void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event);
+
+        void on_update_mouse_position(const Events::Update<Input::Mouse::Position> &event);
+
+        void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event);
+
+        inline bool
+        MapToSphere(const glm::vec2 &point, int width, int height, glm::vec3 &result);
+
+        double SafeAcos(double value);
+
+
+        void on_end_main_loop(const Events::End<MainLoop> &event);
+
+        void on_update_arc_ball_controller(const Events::Update<Input::Mouse::Position> &event);
+
+        void on_startup(const Events::Startup<Engine> &event);
+
+        void on_shutdown(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+    namespace SystemCameraInternal {
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
                 Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
@@ -338,7 +378,14 @@ namespace Bcg {
             Log::Info(SystemCamera::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     std::string SystemCamera::name() {
         return "camera";
     }

@@ -12,6 +12,30 @@
 #include "glad/gl.h"
 #include "glm/gtc/type_ptr.hpp"
 
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace PluginLearnOpenGLInternal {
+        static bool show_gui = false;
+
+        void on_render_frame(const Events::Render<Frame> &event);
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_startup(const Events::Startup<Plugin> &event);
+
+        void on_shutdown(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
         void on_render_frame(const Events::Render<Frame> &event) {
@@ -30,8 +54,6 @@ namespace Bcg {
                 }
             }
         }
-
-        static bool show_gui = false;
 
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
@@ -175,7 +197,14 @@ namespace Bcg {
             Log::Info(PluginLearnOpenGL().name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     PluginLearnOpenGL::PluginLearnOpenGL() : Plugin("learn_opengl") {
 
     }

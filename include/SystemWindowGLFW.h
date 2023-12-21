@@ -14,9 +14,9 @@ namespace Bcg{
 
         ~SystemWindowGLFW() = default;
 
-        static void swap_and_poll_events();
-
         static std::string name();
+
+        static void swap_and_poll_events();
 
     protected:
         friend Engine;

@@ -9,12 +9,33 @@
 #include "SystemWindowGLFW.h"
 #include "SystemUserInput.h"
 #include "SystemCamera.h"
-#include "SystemRendererOpenGL.h"
 #include "SystemDearImGui.h"
 #include "SystemTimer.h"
 #include "SystemParallelProcessing.h"
 #include "SystemPlugins.h"
 #include "SystemPlatform.h"
 #include "SystemCommandBuffers.h"
+#include "SystemRendererOpenGL.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
 
 #endif //ENGINE23_SYSTEMS_H

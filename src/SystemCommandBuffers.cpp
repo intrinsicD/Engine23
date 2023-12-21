@@ -8,16 +8,30 @@
 #include "Commands.h"
 #include "Components.h"
 
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace Bcg{
     namespace SystemCommandBuffersInternal{
-        void on_startup(const Events::Startup<Engine> &event){
-            Log::Info(SystemCommandBuffers::name() + ": Startup").enqueue();
-        }
+        void on_update_simulation_command_double_buffer(const Events::Update<SimulationCommandDoubleBuffer> &event);
 
-        void on_shutdown(const Events::Shutdown<Engine> &event){
-            Log::Info(SystemCommandBuffers::name() + ": Shutdown").enqueue();
-        }
+        void on_update_render_command_double_buffer(const Events::Update<RenderCommandDoubleBuffer> &event);
 
+        void on_update_command_double_buffer(const Events::Update<CommandDoubleBuffer> &event);
+
+        void on_startup(const Events::Startup<Engine> &event);
+
+        void on_shutdown(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+    namespace SystemCommandBuffersInternal{
         void on_update_simulation_command_double_buffer(const Events::Update<SimulationCommandDoubleBuffer> &event) {
             auto &double_buffer = Engine::Context().get<SimulationCommandDoubleBuffer>();
             for (auto &command: *double_buffer.p_current) {
@@ -44,8 +58,23 @@ namespace Bcg{
 
             double_buffer.clear_and_swap();
         }
-    }
 
+        void on_startup(const Events::Startup<Engine> &event){
+            Log::Info(SystemCommandBuffers::name() + ": Startup").enqueue();
+        }
+
+        void on_shutdown(const Events::Shutdown<Engine> &event){
+            Log::Info(SystemCommandBuffers::name() + ": Shutdown").enqueue();
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg{
     std::string SystemCommandBuffers::name(){
         return "SystemCommandBuffers";
     }

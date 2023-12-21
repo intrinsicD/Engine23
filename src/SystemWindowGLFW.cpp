@@ -10,7 +10,27 @@
 #include "Components.h"
 #include "SystemDearImGui.h"
 
-namespace Bcg {
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+    namespace SystemWindowGLFWInternal {
+        void on_end_main_loop(const Events::End<MainLoop> &event);
+
+        double GetDpiScale();
+
+        void on_startup_engine(const Events::Startup<Engine> &event);
+
+        void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
     namespace SystemWindowGLFWInternal {
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             SystemWindowGLFW::swap_and_poll_events();
@@ -160,9 +180,20 @@ namespace Bcg {
             glfwDestroyWindow(glfwGetCurrentContext());
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
     std::string SystemWindowGLFW::name(){
         return "SystemWindowGLFW";
+    }
+
+    void SystemWindowGLFW::swap_and_poll_events() {
+        glfwSwapBuffers(glfwGetCurrentContext());
+        glfwPollEvents();
     }
 
     void SystemWindowGLFW::pre_init() {
@@ -196,10 +227,5 @@ namespace Bcg {
         Log::Info(name() + ": Removed").enqueue();
 
         glfwTerminate();
-    }
-
-    void SystemWindowGLFW::swap_and_poll_events() {
-        glfwSwapBuffers(glfwGetCurrentContext());
-        glfwPollEvents();
     }
 }

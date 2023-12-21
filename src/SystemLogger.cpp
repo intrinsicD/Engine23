@@ -8,10 +8,31 @@
 #include "Commands.h"
 #include "imgui.h"
 
-namespace Bcg {
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
     namespace SystemLoggerInternal {
         static bool show_gui = false;
 
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+
+        void on_startup_engine(const Events::Startup<Engine> &event);
+
+        void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg{
+    namespace SystemLoggerInternal {
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
                 Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemLoggerInternal::on_render_gui>();
@@ -55,7 +76,13 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemLoggerInternal::on_render_gui_menu>();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
     std::string SystemLogger::name() {
         return "SystemLogger";
     }

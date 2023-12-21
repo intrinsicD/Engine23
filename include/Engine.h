@@ -23,7 +23,7 @@ namespace Bcg {
 
         //Main way to have access to the engines state
         static auto &State() {
-            return Engine::Instance()->state;
+            return Instance()->state;
         }
 
         //Main way to have access to the engines state context

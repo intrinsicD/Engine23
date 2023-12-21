@@ -9,6 +9,32 @@
 #include "Commands.h"
 #include "imgui.h"
 
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemTimerInternal {
+        void on_startup(const Events::Startup<Engine> &event);
+
+        void on_begin_simulation_loop(const Events::Begin<SimulationLoop> &event);
+
+        void on_end_simulation_loop(const Events::End<SimulationLoop> &event);
+
+        void on_begin_main_loop(const Events::Begin<MainLoop> &event);
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_end_main_loop(const Events::End<MainLoop> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
 namespace Bcg {
     namespace SystemTimerInternal {
         void on_startup(const Events::Startup<Engine> &event) {
@@ -74,7 +100,7 @@ namespace Bcg {
 
         void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if(ImGui::MenuItem("Timer", nullptr, &show_gui)){
+                if (ImGui::MenuItem("Timer", nullptr, &show_gui)) {
                     Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
                 }
                 ImGui::EndMenu();
@@ -86,13 +112,21 @@ namespace Bcg {
             time.mainloop.last = time.mainloop.current;
             time.mainloop.current = Time::Point::Now();
             time.mainloop.duration = time.mainloop.current.duration<Time::Unit::seconds>(time.mainloop.last);
-            time.mainloop.avg_duration = time.mainloop.avg_duration * time.mainloop.iter_counter + time.mainloop.duration;
+            time.mainloop.avg_duration =
+                    time.mainloop.avg_duration * time.mainloop.iter_counter + time.mainloop.duration;
             time.mainloop.avg_duration /= ++time.mainloop.iter_counter;
             time.mainloop.fps = 1.0f / time.mainloop.duration;
             time.mainloop.avg_fps = 1.0f / time.mainloop.avg_duration;
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     std::string SystemTimer::name() {
         return "SystemTimer";
     }
