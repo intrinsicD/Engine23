@@ -60,7 +60,9 @@ namespace Bcg::OpenGL {
         void use();
 
         void set_vec3(const std::string &name, float r, float g, float b) const;
+
         void set_vec3(const std::string &name, const float *value) const;
+
         void set_mat4(const std::string &name, const float *value) const;
     };
 
@@ -135,6 +137,10 @@ namespace Bcg::OpenGL {
 
 
     struct VertexAttribute {
+        VertexAttribute(unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride,
+                        const void *pointer) : index(index), size(size), type(type), normalized(normalized),
+                                               stride(stride), pointer(pointer) {}
+
         unsigned int index;
         unsigned int size;
         unsigned int type;
