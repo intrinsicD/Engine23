@@ -66,7 +66,7 @@ namespace Bcg {
             if (ImGui::Begin("Learn OpenGL", &show_gui)) {
                 if (ImGui::Checkbox("Hello Triangle", &hello_triangle)) {
                     if (hello_triangle) {
-                        Mesh mesh;
+                        TriMesh mesh;
                         mesh.vertices.positions = {{0.5f,  0.5f,  0.0f},
                                                    {0.5f,  -0.5f, 0.0f},
                                                    {-0.5f, -0.5f, 0.0f},
@@ -158,8 +158,11 @@ namespace Bcg {
             glDepthFunc(GL_LESS);
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
             OpenGL::ShaderProgram program;
+            program.v_shader.filepath = "../backend/glsl/programs/simple_shading/vertex_shader.glsl";
+            program.f_shader.filepath = "../backend/glsl/programs/simple_shading/fragment_shader.glsl";
             program.name = "learn_opengl";
-            program.v_shader.source = "#version 330 core\n"
+            program.load_shaders();
+/*            program.v_shader.source = "#version 330 core\n"
                                       "layout (location = 0) in vec3 aPos;\n"
                                       "layout (location = 1) in vec3 aNormal;\n"
                                       "out vec3 Normal;\n"
@@ -178,7 +181,7 @@ namespace Bcg {
                                       "{\n"
                                       //"   FragColor = vec4(Normal * log(1 + gl_FragCoord.z), 1.0f);\n"
                                       "   FragColor = vec4(Normal * abs(Normal.z), 1.0f);\n"
-                                      "}\n\0";
+                                      "}\n\0";*/
             program.compile_from_sources();
             program.link();
             if (program.check_link_status()) {
@@ -202,7 +205,6 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 // Implementation of public functions
 //----------------------------------------------------------------------------------------------------------------------
-
 
 namespace Bcg {
     PluginLearnOpenGL::PluginLearnOpenGL() : Plugin("learn_opengl") {

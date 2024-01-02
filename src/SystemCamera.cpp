@@ -9,6 +9,7 @@
 #include "Events.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
+#include "fmt/core.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include <iostream>
 
@@ -16,7 +17,7 @@
 // Predefines for better overview
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace Bcg{
+namespace Bcg {
     namespace SystemCameraInternal {
         static bool show_gui = false;
 
@@ -54,7 +55,7 @@ namespace Bcg{
 // Implementation hidden internal functions
 //----------------------------------------------------------------------------------------------------------------------
 
-namespace Bcg{
+namespace Bcg {
     namespace SystemCameraInternal {
         void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
@@ -318,7 +319,6 @@ namespace Bcg{
             }
         }
 
-
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
             auto &input = Engine::Context().get<Input>();
@@ -341,18 +341,28 @@ namespace Bcg{
                 auto model = arc_ball.camera.get_model();
                 glm::vec3 new_point_3d;
                 if (MapToSphere(input.mouse.position, window_config.width, window_config.height, new_point_3d)) {
-                    glm::vec3 axis =
-                            glm::mat3(model) * glm::normalize(glm::cross(new_point_3d, arc_ball.last_point_3d));
-                    float cos_angle = glm::dot(arc_ball.last_point_3d, new_point_3d);
-                    float angle = SafeAcos(cos_angle) * arc_ball.camera.sensitivity.rotate;
+                    if(new_point_3d.x != arc_ball.last_point_3d.x || new_point_3d.y != arc_ball.last_point_3d.y || new_point_3d.z != arc_ball.last_point_3d.z){
+                        glm::vec3 axis =
+                                glm::mat3(model) * glm::normalize(glm::cross(new_point_3d, arc_ball.last_point_3d));
+                        float cos_angle = glm::dot(arc_ball.last_point_3d, new_point_3d);
+                        float angle = SafeAcos(std::min(1.0f, cos_angle)) * arc_ball.camera.sensitivity.rotate;
+                        auto rot = glm::rotate(glm::mat4(1.0f), angle, axis);
 
-                    auto position = arc_ball.camera.view_parameters.position;
-                    auto direction = position - arc_ball.target;
-                    auto rot = glm::rotate(glm::mat4(1.0f), angle, axis);
-                    direction = glm::vec3(rot * glm::vec4(direction, 0.0f));
-                    arc_ball.camera.set_position(arc_ball.target + direction);
-                    arc_ball.camera.set_target(arc_ball.target);
+                        auto position = arc_ball.camera.view_parameters.position;
+                        auto direction = position - arc_ball.target;
+                        direction = glm::vec3(rot * glm::vec4(direction, 0.0f));
+                        //if direction is nan, then dont update
+
+                        arc_ball.camera.set_position(arc_ball.target + direction);
+                        arc_ball.camera.set_target(arc_ball.target);
+                    }
                 }
+            }
+            if(input.mouse.button.middle){
+                auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * arc_ball.camera.sensitivity.drag;
+                auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
+                arc_ball.target += -arc_ball.camera.view_parameters.right * pos_delta.x;
+                arc_ball.target += arc_ball.camera.view_parameters.up * pos_delta.y;
             }
         }
 

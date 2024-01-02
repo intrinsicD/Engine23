@@ -134,7 +134,7 @@ namespace Bcg {
 
     void Camera::set_front(const glm::vec3 &front) {
         view_parameters.front = glm::normalize(front);
-        view_parameters.right = glm::normalize(glm::cross(view_parameters.front, view_parameters.world_up));
+        view_parameters.right = glm::normalize(glm::cross(view_parameters.front, view_parameters.up));
         view_parameters.up = glm::normalize(glm::cross(view_parameters.right, view_parameters.front));
     }
 

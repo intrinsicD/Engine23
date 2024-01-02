@@ -125,7 +125,6 @@ namespace Bcg {
 // Implementation of public functions
 //----------------------------------------------------------------------------------------------------------------------
 
-
 namespace Bcg {
     std::string SystemTimer::name() {
         return "SystemTimer";

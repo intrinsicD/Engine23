@@ -1,6 +1,5 @@
 add_library(bcg_plugin_geometry_processing SHARED)
 
-add_subdirectory(ext)
 add_subdirectory(include)
 add_subdirectory(src)
 

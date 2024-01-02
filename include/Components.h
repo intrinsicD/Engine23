@@ -258,8 +258,8 @@ namespace Bcg {
     };
 
     struct FileWatcher {
-        Cache<std::string, std::vector<std::function<void()>>> items;
-        Cache<std::string, std::chrono::file_clock::time_point> last_write_times;
+        std::unordered_map<std::string, std::vector<std::function<void()>>> items;
+        std::unordered_map<std::string, std::chrono::file_clock::time_point> last_write_times;
 
         void add(std::string filepath, std::function<void()> callback);
 
@@ -300,7 +300,7 @@ namespace Bcg {
         std::vector<glm::vec3> colors;
     };
 
-    struct Mesh {
+    struct TriMesh {
         Vertices vertices;
         Faces faces;
     };

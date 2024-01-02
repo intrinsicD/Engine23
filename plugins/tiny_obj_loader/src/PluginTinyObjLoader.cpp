@@ -47,7 +47,7 @@ namespace Bcg {
             }
 
             //convert to mesh
-            Mesh mesh;
+            TriMesh mesh;
             AABB aabb;
             mesh.vertices.positions.resize(attrib.vertices.size() / 3);
             mesh.vertices.normals.resize(attrib.normals.size() / 3);
