@@ -9,7 +9,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "Commands.h"
-#include "Components.h"
+#include "components/Window.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -124,7 +124,7 @@ namespace Bcg {
 
         auto &style = ImGui::GetStyle();
         style.WindowRounding = 0;
-        //io.FontGlobalScale = Engine::Context().get<WindowConfig>().dpi;
+        //io.FontGlobalScale = Engine::Context().get<Window>().dpi;
         ImGui::StyleColorsDark(&style);
         ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), true);
 #ifndef __APPLE__

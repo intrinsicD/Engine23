@@ -8,7 +8,8 @@
 #include <string>
 #include <array>
 #include <exception>
-#include "Components.h"
+#include <unordered_map>
+#include <vector>
 
 namespace Bcg::OpenGL {
     void AssertNoOglError();
@@ -66,8 +67,8 @@ namespace Bcg::OpenGL {
         void set_mat4(const std::string &name, const float *value) const;
     };
 
-    struct ShaderPrograms : public Cache<std::string, ShaderProgram> {
-        using Cache<std::string, ShaderProgram>::Cache;
+    struct ShaderPrograms : public std::unordered_map<std::string, ShaderProgram> {
+        using std::unordered_map<std::string, ShaderProgram>::unordered_map;
     };
 
     struct BufferObject {

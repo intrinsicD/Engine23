@@ -7,7 +7,6 @@
 #include "Events.h"
 #include "Commands.h"
 #include "Plugins.h"
-#include "Components.h"
 
 
 #include <dlfcn.h>
@@ -108,7 +107,7 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
         Log::Info(name() + ": Initialized").enqueue();
 
-        auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
+        auto &plugins = Engine::Context().emplace<std::unordered_map<std::string, Plugin *>>();
         {
             auto plugin = load("lib/libbcg_plugin_learn_opengl.so");
             plugin->pre_init();
@@ -128,7 +127,7 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPluginsInternal::on_shutdown>();
         Log::Info(name() + ": Removed").enqueue();
 
-        auto &plugins = Engine::Context().emplace<Cache<std::string, Plugin *>>();
+        auto &plugins = Engine::Context().emplace<std::unordered_map<std::string, Plugin *>>();
         for (auto &plugin: plugins) {
             plugin.second->remove();
             unload(plugin.second);

@@ -5,9 +5,9 @@
 #include "SystemUserInput.h"
 #include "Events.h"
 #include "Engine.h"
-#include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
+#include "components/Input.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

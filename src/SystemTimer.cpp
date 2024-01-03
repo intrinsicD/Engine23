@@ -5,9 +5,9 @@
 #include "SystemTimer.h"
 #include "Engine.h"
 #include "Events.h"
-#include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
+#include "components/Time.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -115,8 +115,8 @@ namespace Bcg {
             time.mainloop.avg_duration =
                     time.mainloop.avg_duration * time.mainloop.iter_counter + time.mainloop.duration;
             time.mainloop.avg_duration /= ++time.mainloop.iter_counter;
-            time.mainloop.fps = 1.0f / time.mainloop.duration;
-            time.mainloop.avg_fps = 1.0f / time.mainloop.avg_duration;
+            time.mainloop.fps = static_cast<int>(1.0 / time.mainloop.duration);
+            time.mainloop.avg_fps = static_cast<int>(1.0 / time.mainloop.avg_duration);
         }
     }
 }

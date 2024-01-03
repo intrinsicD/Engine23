@@ -7,8 +7,10 @@
 #include "Events.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
-#include "Components.h"
 #include "SystemDearImGui.h"
+#include "components/Window.h"
+#include "components/Viewport.h"
+#include "components/Input.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -70,50 +72,37 @@ namespace Bcg{
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            if (Engine::Instance()->state.ctx().find<WindowConfig>()) {
-                Log::Warn(SystemWindowGLFW::name() + ": Already started").enqueue();
-                return;
-            } else {
+            if (!Engine::Instance()->state.ctx().find<Window>()) {
                 Log::Info(SystemWindowGLFW::name() + ": Started").enqueue();
-                Engine::Instance()->state.ctx().emplace<WindowConfig>();
+                Engine::Instance()->state.ctx().emplace<Window>();
             }
             auto *engine = Engine::Instance();
 
-            auto *startup_window_config = engine->state.ctx().find<StartupWindowConfig>();
-            auto &window_config = engine->state.ctx().get<WindowConfig>();
-            if (startup_window_config) {
-                window_config.title = startup_window_config->title;
-                window_config.width = startup_window_config->width;
-                window_config.height = startup_window_config->height;
-            } else {
-                window_config.title = "Viewer";
-                window_config.width = 800;
-                window_config.height = 600;
-            }
+            auto &window = engine->state.ctx().get<Window>();
 
-            window_config.dpi = GetDpiScale();
-            Log::Info(SystemWindowGLFW::name() + ": Detected DPI: " + std::to_string(window_config.dpi)).enqueue();
+            window.dpi = GetDpiScale();
+            Log::Info(SystemWindowGLFW::name() + ": Detected DPI: " + std::to_string(window.dpi)).enqueue();
 
 
-            auto *window = glfwCreateWindow(window_config.width, window_config.height, window_config.title.c_str(),
+            auto *h_window = glfwCreateWindow(window.width, window.height, window.title.c_str(),
                                             nullptr, nullptr);
-            glfwSetWindowUserPointer(window, engine);
-            glfwMakeContextCurrent(window);
+            glfwSetWindowUserPointer(h_window, engine);
+            glfwMakeContextCurrent(h_window);
             glfwSwapInterval(1);
 
-            glfwSetWindowCloseCallback(window, [](GLFWwindow *window) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetWindowCloseCallback(h_window, [](GLFWwindow *h_window) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 engine->is_running = false;
             });
-            glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
-                auto &window_config = engine->state.ctx().get<WindowConfig>();
-                window_config.width = width;
-                window_config.height = height;
+            glfwSetWindowSizeCallback(h_window, [](GLFWwindow *h_window, int width, int height) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                auto &window = engine->state.ctx().get<Window>();
+                window.width = width;
+                window.height = height;
                 engine->dispatcher.trigger(Events::Update<Viewport>{});
             });
-            glfwSetMouseButtonCallback(window, [](GLFWwindow *window, int button, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetMouseButtonCallback(h_window, [](GLFWwindow *h_window, int button, int action, int mods) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 if (button == GLFW_MOUSE_BUTTON_LEFT) {
                     input.mouse.button.left = action == GLFW_PRESS;
@@ -124,8 +113,8 @@ namespace Bcg{
                 }
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Button>{});
             });
-            glfwSetCursorPosCallback(window, [](GLFWwindow *window, double xpos, double ypos) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetCursorPosCallback(h_window, [](GLFWwindow *h_window, double xpos, double ypos) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.position_delta.x = xpos - input.mouse.position.x;
                 input.mouse.position_delta.y = ypos - input.mouse.position.y;
@@ -133,15 +122,15 @@ namespace Bcg{
                 input.mouse.position.y = ypos;
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Position>{});
             });
-            glfwSetScrollCallback(window, [](GLFWwindow *window, double xoffset, double yoffset) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetScrollCallback(h_window, [](GLFWwindow *h_window, double xoffset, double yoffset) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.scroll.x = xoffset;
                 input.mouse.scroll.y = yoffset;
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Scroll>{});
             });
-            glfwSetKeyCallback(window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetKeyCallback(h_window, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
                 if(GLFW_REPEAT == action) return;
@@ -153,8 +142,8 @@ namespace Bcg{
                     Log::Info("Key: " + std::to_string(key) + " Release").enqueue();
                 };
             });
-            glfwSetDropCallback(window, [](GLFWwindow *window, int count, const char **paths) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
+            glfwSetDropCallback(h_window, [](GLFWwindow *h_window, int count, const char **paths) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.drop.paths.clear();
                 for (int i = 0; i < count; ++i) {
@@ -165,17 +154,17 @@ namespace Bcg{
 
             engine->dispatcher.trigger(Events::Startup<Renderer>{});
 
-            SystemGui().add_to_window(window);
+            SystemGui().add_to_window(h_window);
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.trigger(Events::Shutdown<Renderer>{});
-            if (!Engine::Instance()->state.ctx().find<WindowConfig>()) {
+            if (!Engine::Instance()->state.ctx().find<Window>()) {
                 Log::Error(SystemWindowGLFW::name() + ": Not started").enqueue();
                 return;
             } else {
                 Log::Info(SystemWindowGLFW::name() + ": Stopped").enqueue();
-                Engine::Instance()->state.ctx().erase<WindowConfig>();
+                Engine::Instance()->state.ctx().erase<Window>();
             }
             glfwDestroyWindow(glfwGetCurrentContext());
         }
@@ -197,7 +186,7 @@ namespace Bcg {
     }
 
     void SystemWindowGLFW::pre_init() {
-        Engine::Context().emplace<StartupWindowConfig>();
+        Engine::Context().emplace<Window>();
     }
 
     void SystemWindowGLFW::init() {

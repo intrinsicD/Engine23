@@ -6,7 +6,8 @@
 #include "Events.h"
 #include "Engine.h"
 #include "Commands.h"
-#include "Components.h"
+#include "components/CommandDoubleBufferSimulation.h"
+#include "components/CommandDoubleBufferRender.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

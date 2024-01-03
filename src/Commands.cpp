@@ -5,8 +5,9 @@
 #include "Commands.h"
 #include "Engine.h"
 #include "SystemParallelProcessing.h"
-#include "Components.h"
 #include "fmt/core.h"
+#include "components/CommandDoubleBuffer.h"
+#include "components/Time.h"
 
 #include <iostream>
 #include <memory>

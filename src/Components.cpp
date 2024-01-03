@@ -2,12 +2,14 @@
 // Created by alex on 05.12.23.
 //
 
-#include "Components.h"
 #include <filesystem>
 #include <iostream>
-#include "fmt/core.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/euler_angles.hpp"
+#include "components/FileWatcher.h"
+#include "components/Camera.h"
+#include "components/Transform.h"
+#include "components/AABB.h"
 
 namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------

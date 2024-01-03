@@ -11,10 +11,14 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
-#include "Components.h"
 #include "imgui.h"
 #include "SystemShaderPrograms.h"
 #include "SystemBuffers.h"
+#include "components/Window.h"
+#include "components/Viewport.h"
+#include "components/OpenGLInfo.h"
+#include "components/CommandDoubleBufferRender.h"
+#include "components/Renderable.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -49,8 +53,8 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
         void on_update_viewport(const Events::Update<Viewport> &event) {
-            auto &window_config = Engine::Context().get<WindowConfig>();
-            SystemRendererOpenGL::set_viewport(window_config.width, window_config.height);
+            auto &window = Engine::Context().get<Window>();
+            SystemRendererOpenGL::set_viewport(window.width, window.height);
         }
 
         void on_render_gui(const Events::Render<Gui> &event) {
@@ -60,7 +64,7 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("Renderer", &show_gui)) {
-                auto &opengl_config = Engine::Context().get<OpenGLConfig>();
+                auto &opengl_config = Engine::Context().get<OpenglInfo>();
                 ImGui::Text("OpenGL vendor: %s", opengl_config.vendor.c_str());
                 ImGui::Text("OpenGL renderer: %s", opengl_config.renderer.c_str());
                 ImGui::Text("OpenGL version: %s", opengl_config.version.c_str());
@@ -100,7 +104,7 @@ namespace Bcg {
                 return;
             }
 
-            auto &opengl_config = Engine::Context().get<OpenGLConfig>();
+            auto &opengl_config = Engine::Context().get<OpenglInfo>();
             opengl_config.major = GLAD_VERSION_MAJOR(version);
             opengl_config.minor = GLAD_VERSION_MINOR(version);
             if (opengl_config.major < opengl_config.major_hint || opengl_config.minor < opengl_config.minor_hint) {
@@ -119,7 +123,7 @@ namespace Bcg {
                           opengl_config.glsl_version).enqueue();
             }
 
-            auto &bg = Engine::Context().get<WindowConfig>().background_color;
+            auto &bg = Engine::Context().get<Window>().background_color;
             glClearColor(bg[0], bg[1], bg[2], bg[3]);
 
             forward_render = std::make_shared<TaskCommand>("Render", []() {
@@ -163,14 +167,14 @@ namespace Bcg {
     }
 
     void SystemRendererOpenGL::pre_init() {
-        Engine::Context().emplace<OpenGLConfig>();
+        Engine::Context().emplace<OpenglInfo>();
         Engine::Context().emplace<RenderBatches>();
         SystemShaderPrograms().pre_init();
         SystemBuffers().pre_init();
     }
 
     void SystemRendererOpenGL::init() {
-        auto &opengl_config = Engine::Context().get<OpenGLConfig>();
+        auto &opengl_config = Engine::Context().get<OpenglInfo>();
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, opengl_config.major);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, opengl_config.minor);

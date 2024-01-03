@@ -4,14 +4,16 @@
 
 #include "SystemCamera.h"
 #include "Engine.h"
-#include "Components.h"
 #include "Commands.h"
 #include "Events.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
-#include "fmt/core.h"
 #include "glm/gtc/matrix_transform.hpp"
-#include <iostream>
+#include "components/Window.h"
+#include "components/Viewport.h"
+#include "components/Input.h"
+#include "components/Time.h"
+#include "components/CameraArcballController.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -184,9 +186,9 @@ namespace Bcg {
                             }
                         }
                         if (ImGui::Button("Reset##Perspective")) {
-                            auto &window_config = Engine::Context().get<WindowConfig>();
+                            auto &window = Engine::Context().get<Window>();
                             camera.set_perspective_parameters(
-                                    {45.0f, window_config.get_aspect<float>(), 0.1f, 100.0f});
+                                    {45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
                         }
                     }
                 }
@@ -216,15 +218,15 @@ namespace Bcg {
 
         void on_update_viewport(const Events::Update<Viewport> &event) {
             auto &camera = Engine::Context().get<Camera>();
-            auto &window_config = Engine::Context().get<WindowConfig>();
+            auto &window = Engine::Context().get<Window>();
             if (camera.is_orthographic) {
-                camera.set_orthographic_parameters({-window_config.width / 2.0f, window_config.width / 2.0f,
-                                                    -window_config.height / 2.0f, window_config.height / 2.0f,
+                camera.set_orthographic_parameters({-window.width / 2.0f, window.width / 2.0f,
+                                                    -window.height / 2.0f, window.height / 2.0f,
                                                     camera.projection_parameters.orthographic_parameters.near,
                                                     camera.projection_parameters.orthographic_parameters.far});
             } else {
                 camera.set_perspective_parameters({camera.projection_parameters.perspective_parameters.fovy,
-                                                   window_config.get_aspect<float>(),
+                                                   window.get_aspect<float>(),
                                                    camera.projection_parameters.perspective_parameters.near,
                                                    camera.projection_parameters.perspective_parameters.far});
             }
@@ -322,25 +324,25 @@ namespace Bcg {
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
             auto &input = Engine::Context().get<Input>();
-            auto &window_config = Engine::Context().get<WindowConfig>();
+            auto &window = Engine::Context().get<Window>();
             arc_ball.last_point_2d = input.mouse.position;
             arc_ball.last_point_ok = MapToSphere(arc_ball.last_point_2d,
-                                                 window_config.width,
-                                                 window_config.height,
+                                                 window.width,
+                                                 window.height,
                                                  arc_ball.last_point_3d);
         }
 
         void on_update_arc_ball_controller(const Events::Update<Input::Mouse::Position> &event) {
             auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
             auto &input = Engine::Context().get<Input>();
-            auto &window_config = Engine::Context().get<WindowConfig>();
+            auto &window = Engine::Context().get<Window>();
 
             //TODO: implement arc ball camera controller
             //Rotate the camera around the target_point
             if (arc_ball.last_point_ok && input.mouse.button.right) {
                 auto model = arc_ball.camera.get_model();
                 glm::vec3 new_point_3d;
-                if (MapToSphere(input.mouse.position, window_config.width, window_config.height, new_point_3d)) {
+                if (MapToSphere(input.mouse.position, window.width, window.height, new_point_3d)) {
                     if(new_point_3d.x != arc_ball.last_point_3d.x || new_point_3d.y != arc_ball.last_point_3d.y || new_point_3d.z != arc_ball.last_point_3d.z){
                         glm::vec3 axis =
                                 glm::mat3(model) * glm::normalize(glm::cross(new_point_3d, arc_ball.last_point_3d));
@@ -415,8 +417,8 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemCameraInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemCameraInternal::on_shutdown>();
         auto &camera = Engine::Context().get<Camera>();
-        auto &window_config = Engine::Context().get<StartupWindowConfig>();
-        camera.set_perspective_parameters({45.0f, window_config.get_aspect<float>(), 0.1f, 100.0f});
+        auto &window = Engine::Context().get<Window>();
+        camera.set_perspective_parameters({45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
         camera.set_position(glm::vec3(0.0f, 0.0f, 3.0f));
         camera.set_target(glm::vec3(0.0f, 0.0f, 0.0f));
         camera.set_worldup(glm::vec3(0.0f, 1.0f, 0.0f));

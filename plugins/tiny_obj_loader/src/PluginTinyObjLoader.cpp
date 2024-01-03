@@ -6,11 +6,14 @@
 #include "tiny_obj_loader.h"
 #include "PluginTinyObjLoader.h"
 #include "Commands.h"
-#include "Components.h"
 #include "Events.h"
 #include "Engine.h"
 #include "fmt/core.h"
 #include "OpenGLUtils.h"
+#include "GlmUtils.h"
+#include "components/Input.h"
+#include "components/AABB.h"
+#include "components/TriMesh.h"
 
 namespace Bcg {
     namespace PluginTinyObjLoaderInternal {

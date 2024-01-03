@@ -6,11 +6,13 @@
 #include "OpenGLUtils.h"
 #include "Engine.h"
 #include "Events.h"
-#include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
 #include "glad/gl.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "components/Camera.h"
+#include "components/TriMesh.h"
+#include "GlmUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

@@ -8,9 +8,9 @@
 #include "Commands.h"
 #include "Events.h"
 #include "OpenGLUtils.h"
-#include <regex>
 #include <fstream>
 #include <filesystem>
+#include "components/FileWatcher.h"
 
 namespace Bcg {
 

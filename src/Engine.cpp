@@ -4,10 +4,13 @@
 
 #include "Engine.h"
 #include "Commands.h"
-#include "Components.h"
 #include "Systems.h"
 #include "Events.h"
 #include "fmt/core.h"
+#include "components/Input.h"
+#include "components/Time.h"
+#include "components/CommandDoubleBufferSimulation.h"
+#include "components/CommandDoubleBufferRender.h"
 
 namespace Bcg {
     Engine::Engine() {

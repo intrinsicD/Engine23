@@ -5,13 +5,10 @@
 #include "SystemParallelProcessing.h"
 #include "Engine.h"
 #include "Events.h"
-#include <thread>
-#include <queue>
 #include <sstream>
-#include <condition_variable>
-#include "Components.h"
 #include "Commands.h"
 #include "imgui.h"
+#include "components/WorkerPool.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
