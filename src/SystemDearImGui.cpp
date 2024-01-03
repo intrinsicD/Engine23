@@ -124,7 +124,7 @@ namespace Bcg {
 
         auto &style = ImGui::GetStyle();
         style.WindowRounding = 0;
-        io.FontGlobalScale = Engine::Context().get<WindowConfig>().dpi;
+        //io.FontGlobalScale = Engine::Context().get<WindowConfig>().dpi;
         ImGui::StyleColorsDark(&style);
         ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), true);
 #ifndef __APPLE__
