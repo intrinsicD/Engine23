@@ -16,6 +16,7 @@
 #include "SystemPlatform.h"
 #include "SystemCommandBuffers.h"
 #include "SystemRendererOpenGL.h"
+#include "SystemEntity.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

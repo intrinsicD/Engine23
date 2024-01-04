@@ -3,7 +3,9 @@
 //
 
 #include "PluginGeometryProcessing.h"
+#include "Engine.h"
 #include "Events.h"
+#include "imgui.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -11,10 +13,6 @@
 
 namespace Bcg {
     namespace PluginGeometryProcessingInternal {
-        static bool show_gui = false;
-
-        void on_render_gui(const Events::Render<Gui> &event);
-
         void on_render_gui_menu(const Events::Render<GuiMenu> &event);
 
         void on_startup(const Events::Startup<Plugin> &event);
@@ -29,12 +27,10 @@ namespace Bcg {
 
 namespace Bcg {
     namespace PluginGeometryProcessingInternal {
-        void on_render_gui(const Events::Render<Gui> &event){
-
-        }
-
         void on_render_gui_menu(const Events::Render<GuiMenu> &event){
-
+            if (ImGui::BeginMenu("Geometry Processing")) {
+                ImGui::EndMenu();
+            }
         }
 
         void on_startup(const Events::Startup<Plugin> &event){

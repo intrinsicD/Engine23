@@ -58,12 +58,12 @@ namespace Bcg::Events{
 
     template<typename T>
     struct Create{
-
+        T *return_value;
     };
 
     template<typename T>
     struct Destroy{
-
+        T *value;
     };
 }
 
