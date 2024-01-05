@@ -17,6 +17,7 @@
 #include "SystemCommandBuffers.h"
 #include "SystemRendererOpenGL.h"
 #include "SystemEntity.h"
+#include "SystemTransform.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

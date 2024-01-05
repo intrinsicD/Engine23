@@ -11,6 +11,7 @@
 #include "glad/gl.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "components/Camera.h"
+#include "components/Transform.h"
 #include "components/TriMesh.h"
 #include "GlmUtils.h"
 
@@ -43,13 +44,15 @@ namespace Bcg {
         void on_render_frame(const Events::Render<Frame> &event) {
             {
                 auto &camera = Engine::Context().get<Camera>();
-                auto view = Engine::State().view<OpenGL::RenderableTriangles>();
+                auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform>();
                 for (const auto &entity_id: view) {
                     auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
+                    auto &transform = view.get<Transform>(entity_id);
                     renderable.program.use();
                     renderable.program.set_vec3("our_color", renderable.our_color);
                     renderable.program.set_mat4("view", glm::value_ptr(camera.get_view()));
                     renderable.program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
+                    renderable.program.set_mat4("model", glm::value_ptr(transform.model));
                     renderable.vao.bind();
                     renderable.draw();
                     renderable.vao.release();

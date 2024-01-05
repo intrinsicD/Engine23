@@ -8,7 +8,10 @@
 #include "imgui.h"
 #include "fmt/core.h"
 #include "Commands.h"
+#include "components/AABB.h"
+#include "components/Transform.h"
 #include "components/Picker.h"
+#include "components/EntityName.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -40,7 +43,9 @@ namespace Bcg {
     namespace SystemEntityInternal {
         void on_create(const Events::Create<entt::entity> &event) {
             if (event.return_value != nullptr) {
+                auto &picker = Engine::Context().get<Picker>();
                 *event.return_value = SystemEntity::create_entity();
+                picker.id.entity =  *event.return_value;
                 Log::Info(fmt::format("Entity created: %zu", static_cast<size_t>(*event.return_value))).enqueue();
             } else {
                 Log::Error("Entity creation failed, event return pointer is nullptr").enqueue();
@@ -62,6 +67,21 @@ namespace Bcg {
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Components")) {
+                    if(Engine::State().all_of<EntityName>(entity)){
+                        if(ImGui::CollapsingHeader("Name")){
+                            ComponentGui<EntityName>::Show(entity);
+                        }
+                    }
+                    if(Engine::State().all_of<AABB>(entity)){
+                        if(ImGui::CollapsingHeader("AABB")){
+                            ComponentGui<AABB>::Show(entity);
+                        }
+                    }
+                    if(Engine::State().all_of<Transform>(entity)){
+                        if(ImGui::CollapsingHeader("Transform")){
+                            ComponentGui<Transform>::Show(entity);
+                        }
+                    }
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Hierarchy")) {
@@ -124,6 +144,7 @@ namespace Bcg {
                 if (ImGui::Button("Create")) {
                     Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&picker.id.entity});
                 }
+                ImGui::SameLine();
                 if (ImGui::Button("Destroy")) {
                     Engine::Instance()->dispatcher.trigger(Events::Destroy<entt::entity>{&picker.id.entity});
                     picker.id.entity = entt::null;
@@ -177,8 +198,11 @@ namespace Bcg {
         Engine::State().destroy(entity);
     }
 
-    void SystemEntity::set_name(entt::entity entity, const std::string &name) {
-        Engine::State().emplace_or_replace<std::string>(entity, name);
+    void SystemEntity::set_name(entt::entity entity, std::string name) {
+        if(Engine::State().all_of<EntityName>(entity)){
+            Engine::State().remove<EntityName>(entity);
+        }
+        Engine::State().emplace<EntityName>(entity, name);
     }
 
     void SystemEntity::pre_init() {

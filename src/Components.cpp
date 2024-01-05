@@ -10,11 +10,18 @@
 #include "components/Camera.h"
 #include "components/Transform.h"
 #include "components/AABB.h"
+#include "components/EntityName.h"
+#include "imgui.h"
+#include "Engine.h"
 
 namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
     // FileWatcher
     //------------------------------------------------------------------------------------------------------------------
+
+    inline double FovyRadians(double fovy_degrees) {
+        return fovy_degrees * std::numbers::pi / double(360.0);
+    }
 
     void FileWatcher::add(std::string filepath, std::function<void()> callback) {
         last_write_times[filepath] = std::filesystem::last_write_time(filepath);
@@ -102,6 +109,30 @@ namespace Bcg {
         model = glm::mat4_cast(glm::quat(glm::vec3(pitch, yaw, roll)));
     }
 
+    void ComponentGui<Transform>::Show(entt::entity entity_id) {
+        if (!Engine::State().all_of<Transform>(entity_id)) {
+            return;
+        }
+        auto &transform = Engine::State().get<Transform>(entity_id);
+        ImGui::Text("position: (%f, %f, %f)", transform.get_position().x, transform.get_position().y,
+                    transform.get_position().z);
+        ImGui::Text("scale:    (%f, %f, %f)", transform.get_scale().x, transform.get_scale().y,
+                    transform.get_scale().z);
+        ImGui::Text("rotation: (%f, %f, %f)", transform.get_euler_angles().x, transform.get_euler_angles().y,
+                    transform.get_euler_angles().z);
+
+        ImGui::Separator();
+
+        ImGui::Text("model matrix: %f %f %f %f\n"
+                    "              %f %f %f %f\n"
+                    "              %f %f %f %f\n"
+                    "              %f %f %f %f\n", transform.model[0][0], transform.model[0][1], transform.model[0][2],
+                    transform.model[0][3],
+                    transform.model[1][0], transform.model[1][1], transform.model[1][2], transform.model[1][3],
+                    transform.model[2][0], transform.model[2][1], transform.model[2][2], transform.model[2][3],
+                    transform.model[3][0], transform.model[3][1], transform.model[3][2], transform.model[3][3]);
+    }
+
     Camera::Camera() : is_orthographic(false) {
         set_worldup(glm::vec3(0.0f, 1.0f, 0.0f));
         set_position(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -127,7 +158,8 @@ namespace Bcg {
                               projection_parameters.orthographic_parameters.near,
                               projection_parameters.orthographic_parameters.far);
         } else {
-            return glm::perspective(projection_parameters.perspective_parameters.fovy,
+            float fovy_radians = FovyRadians(projection_parameters.perspective_parameters.fovy_degrees);
+            return glm::perspective(fovy_radians,
                                     projection_parameters.perspective_parameters.aspect,
                                     projection_parameters.perspective_parameters.near,
                                     projection_parameters.perspective_parameters.far);
@@ -144,7 +176,7 @@ namespace Bcg {
         set_front(target - view_parameters.position);
     }
 
-    void Camera::set_position(const glm::vec3 &position){
+    void Camera::set_position(const glm::vec3 &position) {
         view_parameters.position = position;
     }
 
@@ -154,7 +186,7 @@ namespace Bcg {
         view_parameters.up = glm::normalize(glm::cross(view_parameters.right, view_parameters.front));
     }
 
-    void Camera::set_view_parameters(const ViewParameters &parameters){
+    void Camera::set_view_parameters(const ViewParameters &parameters) {
         view_parameters = parameters;
         view_parameters.right = glm::normalize(glm::cross(view_parameters.front, view_parameters.world_up));
         view_parameters.up = glm::normalize(glm::cross(view_parameters.right, view_parameters.front));
@@ -191,5 +223,22 @@ namespace Bcg {
     void AABB::set(const glm::vec3 &center, const glm::vec3 &extent) {
         min = center - extent / 2.0f;
         max = center + extent / 2.0f;
+    }
+
+    void ComponentGui<AABB>::Show(entt::entity entity_id) {
+        if (!Engine::State().all_of<AABB>(entity_id)) {
+            return;
+        }
+        auto &aabb = Engine::State().get<AABB>(entity_id);
+        ImGui::Text("min: (%f, %f, %f)", aabb.min.x, aabb.min.y, aabb.min.z);
+        ImGui::Text("max: (%f, %f, %f)", aabb.max.x, aabb.max.y, aabb.max.z);
+    }
+
+    void ComponentGui<EntityName>::Show(entt::entity entity_id) {
+        if (!Engine::State().all_of<EntityName>(entity_id)) {
+            return;
+        }
+        auto &name = Engine::State().get<EntityName>(entity_id);
+        ImGui::Text("name: %s", name.c_str());
     }
 }

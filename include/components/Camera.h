@@ -11,7 +11,7 @@ namespace Bcg{
     struct Camera {
         struct ProjectionParameters {
             struct Perspective {
-                float fovy = 45.0f;
+                float fovy_degrees = 45.0f;
                 float aspect = 4.0f / 3.0f;
                 float near;
                 float far;

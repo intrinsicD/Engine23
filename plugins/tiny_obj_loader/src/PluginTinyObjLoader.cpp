@@ -13,6 +13,8 @@
 #include "GlmUtils.h"
 #include "components/Input.h"
 #include "components/AABB.h"
+#include "components/Transform.h"
+#include "components/EntityName.h"
 #include "components/TriMesh.h"
 
 namespace Bcg {
@@ -137,9 +139,13 @@ namespace Bcg {
                 mesh.vertices.normals[i] = glm::normalize(mesh.vertices.normals[i]);
             }
 
-            entt::entity hello_triangle_id = Engine::State().create();
-            auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(
-                    hello_triangle_id);
+            entt::entity entity_id;
+            Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&entity_id});
+            auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id);
+            Engine::State().emplace<AABB>(entity_id, aabb);
+            Engine::State().emplace<Transform>(entity_id);
+            Engine::State().emplace<EntityName>(entity_id, filepath);
+
             renderable_triangles = OpenGL::RenderableTriangles::Create();
             renderable_triangles.vbo = OpenGL::VertexBufferObject::Static();
             renderable_triangles.ebo = OpenGL::IndexBufferObject::Static();

@@ -9,6 +9,7 @@ target_sources(Engine23Lib PRIVATE
         SystemWindowGLFW.cpp
         SystemCamera.cpp
         SystemEntity.cpp
+        SystemTransform.cpp
         SystemTimer.cpp
         SystemParallelProcessing.cpp
         SystemPlugins.cpp

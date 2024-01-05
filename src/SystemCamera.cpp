@@ -167,14 +167,14 @@ namespace Bcg {
                     } else {
                         Camera::ProjectionParameters::Perspective perspective = camera.projection_parameters.perspective_parameters;
                         if (!edit) {
-                            ImGui::Text("Fovy: %f", perspective.fovy);
+                            ImGui::Text("Fovy: %f", perspective.fovy_degrees);
                             ImGui::Text("Aspect: %f", perspective.aspect);
                             ImGui::Text("Near##Orthographic: %f", perspective.near);
                             ImGui::Text("Far##Orthographic: %f", perspective.far);
                         } else {
                             static bool changed_perspective = false;
                             static Camera::ProjectionParameters::Perspective perspective_new = perspective;
-                            changed_perspective |= ImGui::InputFloat("Fovy", &perspective_new.fovy);
+                            changed_perspective |= ImGui::InputFloat("Fovy", &perspective_new.fovy_degrees);
                             changed_perspective |= ImGui::InputFloat("Aspect", &perspective_new.aspect);
                             changed_perspective |= ImGui::InputFloat("Near##Perspective", &perspective_new.near);
                             changed_perspective |= ImGui::InputFloat("Far##Perspective", &perspective_new.far);
@@ -225,7 +225,7 @@ namespace Bcg {
                                                     camera.projection_parameters.orthographic_parameters.near,
                                                     camera.projection_parameters.orthographic_parameters.far});
             } else {
-                camera.set_perspective_parameters({camera.projection_parameters.perspective_parameters.fovy,
+                camera.set_perspective_parameters({camera.projection_parameters.perspective_parameters.fovy_degrees,
                                                    window.get_aspect<float>(),
                                                    camera.projection_parameters.perspective_parameters.near,
                                                    camera.projection_parameters.perspective_parameters.far});
@@ -292,8 +292,12 @@ namespace Bcg {
                 orthographic_parameters.right += scroll.x * delta;
             } else {
                 auto &perspective_parameters = camera.projection_parameters.perspective_parameters;
-                auto delta = float(time.mainloop.duration) * camera.sensitivity.zoom;
-                perspective_parameters.fovy -= scroll.y * delta;
+                perspective_parameters.fovy_degrees -= scroll.y * camera.sensitivity.zoom;
+                if(perspective_parameters.fovy_degrees < 1.0f){
+                    perspective_parameters.fovy_degrees = 1.0f;
+                }else if(perspective_parameters.fovy_degrees > 90.0f){
+                    perspective_parameters.fovy_degrees = 90.0f;
+                }
             }
         }
 

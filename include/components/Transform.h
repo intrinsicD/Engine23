@@ -6,10 +6,11 @@
 #define ENGINE23_TRANSFORM_H
 
 #include "glm/glm.hpp"
+#include "ComponentGui.h"
 
 namespace Bcg{
     struct Transform {
-        glm::mat4 model;
+        glm::mat4 model = glm::mat4(1.0f);
 
         glm::vec3 get_position() const;
 
@@ -38,6 +39,11 @@ namespace Bcg{
         void set_rotation(const glm::vec3 &euler_angles);
 
         void set_rotation(float pitch, float yaw, float roll);
+    };
+
+    template<>
+    struct ComponentGui<Transform> {
+        static void Show(entt::entity entity_id);
     };
 }
 

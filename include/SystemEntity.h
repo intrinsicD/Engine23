@@ -20,7 +20,7 @@ namespace Bcg {
 
         static void destroy_entity(entt::entity entity);
 
-        static void set_name(entt::entity entity, const std::string &name);
+        static void set_name(entt::entity entity, std::string name);
 
     protected:
         friend Engine;
