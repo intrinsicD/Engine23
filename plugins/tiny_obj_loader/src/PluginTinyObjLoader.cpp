@@ -11,11 +11,13 @@
 #include "fmt/core.h"
 #include "OpenGLUtils.h"
 #include "GlmUtils.h"
+#include "glm/gtc/type_ptr.hpp"
 #include "components/Input.h"
 #include "components/AABB.h"
 #include "components/Transform.h"
 #include "components/EntityName.h"
 #include "components/TriMesh.h"
+#include "components/Camera.h"
 
 namespace Bcg {
     namespace PluginTinyObjLoaderInternal {
@@ -145,6 +147,23 @@ namespace Bcg {
             Engine::State().emplace<AABB>(entity_id, aabb);
             Engine::State().emplace<Transform>(entity_id);
             Engine::State().emplace<EntityName>(entity_id, filepath);
+            RenderCommand render_command;
+            render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id](){
+                auto &camera = Engine::Context().get<Camera>();
+                auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
+                auto &transform = Engine::State().get<Transform>(entity_id);
+                renderable.program.use();
+                renderable.program.set_vec3("our_color", renderable.our_color);
+                renderable.program.set_mat4("view", glm::value_ptr(camera.get_view()));
+                renderable.program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
+                renderable.program.set_mat4("model", glm::value_ptr(transform.model));
+                renderable.vao.bind();
+                renderable.draw();
+                renderable.vao.release();
+               return 1;
+            }));
+            Engine::State().emplace<RenderCommand>(entity_id, render_command);
+
 
             renderable_triangles = OpenGL::RenderableTriangles::Create();
             renderable_triangles.vbo = OpenGL::VertexBufferObject::Static();
@@ -166,9 +185,13 @@ namespace Bcg {
 
             renderable_triangles.vao.set_float_attribute(0, dims(mesh.vertices.positions[0]), false, (void *) 0);
             renderable_triangles.vao.set_float_attribute(1, dims(mesh.vertices.normals[0]), false,
-                                                         (void *) (mesh.vertices.positions.size() *
-                                                                   dims(mesh.vertices.positions[0]) *
-                                                                   sizeof(mesh.vertices.positions[0].x)));
+                                                         (void *) (mesh.vertices.normals.size() *
+                                                                   dims(mesh.vertices.normals[0]) *
+                                                                   sizeof(mesh.vertices.normals[0].x)));
+            renderable_triangles.vao.set_float_attribute(2, dims(mesh.vertices.normals[0]), false,
+                                                         (void *) (mesh.vertices.normals.size() *
+                                                                   dims(mesh.vertices.normals[0]) *
+                                                                   sizeof(mesh.vertices.normals[0].x)));
 
             renderable_triangles.vbo.release();
             renderable_triangles.vao.release();

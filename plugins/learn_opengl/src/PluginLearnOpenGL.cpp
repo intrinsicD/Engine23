@@ -42,7 +42,7 @@ namespace Bcg {
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
         void on_render_frame(const Events::Render<Frame> &event) {
-            {
+/*            {
                 auto &camera = Engine::Context().get<Camera>();
                 auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform>();
                 for (const auto &entity_id: view) {
@@ -57,7 +57,7 @@ namespace Bcg {
                     renderable.draw();
                     renderable.vao.release();
                 }
-            }
+            }*/
         }
 
         void on_render_gui(const Events::Render<Gui> &event) {

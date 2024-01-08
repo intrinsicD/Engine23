@@ -84,6 +84,12 @@ namespace Bcg {
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            auto view = Engine::State().view<RenderCommand>();
+            for (auto entity_id: view) {
+                auto &render_command = view.get<RenderCommand>(entity_id);
+                auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
+                double_buffer.enqueue_next(std::make_shared<RenderCommand>(render_command));
+            }
         }
 
         void on_render_frame(const Events::Render<Frame> &event) {
