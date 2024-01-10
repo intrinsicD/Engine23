@@ -18,6 +18,7 @@
 #include "SystemRendererOpenGL.h"
 #include "SystemEntity.h"
 #include "SystemTransform.h"
+#include "SystemTriMesh.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

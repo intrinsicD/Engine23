@@ -1,18 +1,20 @@
 target_sources(Engine23Lib PRIVATE
-        Engine.cpp
         Commands.cpp
         Components.cpp
-        Plugins.cpp
+        Engine.cpp
         ImGuiUtils.cpp
-        SystemLogger.cpp
-        SystemUserInput.cpp
-        SystemDearImGui.cpp
-        SystemWindowGLFW.cpp
+        Plugins.cpp
         SystemCamera.cpp
-        SystemEntity.cpp
-        SystemTransform.cpp
-        SystemTimer.cpp
-        SystemParallelProcessing.cpp
-        SystemPlugins.cpp
         SystemCommandBuffers.cpp
-        SystemPlatform.cpp)
+        SystemDearImGui.cpp
+        SystemEntity.cpp
+        SystemLogger.cpp
+        SystemParallelProcessing.cpp
+        SystemPlatform.cpp
+        SystemPlugins.cpp
+        SystemTimer.cpp
+        SystemTransform.cpp
+        SystemTriMesh.cpp
+        SystemUserInput.cpp
+        SystemWindowGLFW.cpp
+)

@@ -95,7 +95,6 @@ namespace Bcg {
                 }
             }
             ImGui::End();
-
         }
 
         void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
