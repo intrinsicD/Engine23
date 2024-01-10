@@ -147,6 +147,7 @@ namespace Bcg {
             Engine::State().emplace<AABB>(entity_id, aabb);
             Engine::State().emplace<Transform>(entity_id);
             Engine::State().emplace<EntityName>(entity_id, filepath);
+            Engine::State().emplace<TriMesh>(entity_id, mesh);
             RenderCommand render_command;
             render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id](){
                 auto &camera = Engine::Context().get<Camera>();

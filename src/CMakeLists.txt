@@ -3,6 +3,7 @@ target_sources(Engine23Lib PRIVATE
         Commands.cpp
         Components.cpp
         Plugins.cpp
+        ImGuiUtils.cpp
         SystemLogger.cpp
         SystemUserInput.cpp
         SystemDearImGui.cpp
