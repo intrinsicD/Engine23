@@ -13,7 +13,6 @@ namespace Bcg {
             *out_text = vector.at(idx).c_str();
             return true;
         };
-
         static auto GlmVec2Getter = [](void *vec, int idx, const char **out_text) {
             auto &vector = *static_cast<std::vector<glm::vec2> *>(vec);
             if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
@@ -113,7 +112,5 @@ namespace Bcg {
         bool Combo(const char *label, int *current_item, const std::vector<glm::uvec4> &items) {
             return ComboBox(label, current_item, items);
         }
-
-
     }
 }

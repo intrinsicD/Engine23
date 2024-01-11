@@ -41,6 +41,7 @@ namespace Bcg {
         SystemCamera::pre_init();
         SystemEntity::pre_init();
         SystemTransform::pre_init();
+        SystemTriMesh::pre_init();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
@@ -58,6 +59,7 @@ namespace Bcg {
         SystemCamera::init();
         SystemEntity::init();
         SystemTransform::init();
+        SystemTriMesh::init();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info(fmt::format("Engine: Constructor took {} seconds",
@@ -67,6 +69,7 @@ namespace Bcg {
 
     Engine::~Engine() {
 /*
+        SystemTriMesh::remove();
         SystemTransform::remove();
         SystemEntity::remove();
         SystemCamera::remove();
