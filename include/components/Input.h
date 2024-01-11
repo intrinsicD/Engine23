@@ -29,9 +29,11 @@ namespace Bcg {
             Position last_drag_pos;
             Scroll scroll;
             Button button;
+            bool gui_capture = false;
         } mouse;
         struct Keyboard {
             std::vector<bool> keys;
+            bool gui_capture = false;
         } keyboard;
         struct Drop {
             std::vector<std::string> paths;

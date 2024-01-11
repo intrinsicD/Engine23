@@ -77,7 +77,7 @@ namespace Bcg {
             center.y /= mesh.vertices.positions.size();
             center.z /= mesh.vertices.positions.size();
 
-            for(auto &v: mesh.vertices.positions) {
+            for (auto &v: mesh.vertices.positions) {
                 v.x = (v.x - center.x) / scaling;
                 v.y = (v.y - center.y) / scaling;
                 v.z = (v.z - center.z) / scaling;
@@ -111,7 +111,7 @@ namespace Bcg {
                     }
                     if (vertices[0] != vertices[1] && vertices[0] != vertices[2] &&
                         vertices[1] != vertices[2]) {
-                        mesh.faces.vertices.push_back(vertices);
+                        mesh.faces.indices.push_back(vertices);
                     }
                     if (normals[0] != normals[1] && normals[0] != normals[2] &&
                         normals[1] != normals[2]) {
@@ -127,13 +127,13 @@ namespace Bcg {
 
             //compute the normals from the vertices and faces
             mesh.vertices.normals.resize(mesh.vertices.positions.size());
-            for (size_t i = 0; i < mesh.faces.vertices.size(); i++) {
-                auto v0 = mesh.vertices.positions[mesh.faces.vertices[i][0]];
-                auto v1 = mesh.vertices.positions[mesh.faces.vertices[i][1]];
-                auto v2 = mesh.vertices.positions[mesh.faces.vertices[i][2]];
+            for (size_t i = 0; i < mesh.faces.indices.size(); i++) {
+                auto v0 = mesh.vertices.positions[mesh.faces.indices[i][0]];
+                auto v1 = mesh.vertices.positions[mesh.faces.indices[i][1]];
+                auto v2 = mesh.vertices.positions[mesh.faces.indices[i][2]];
                 auto normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
                 for (size_t j = 0; j < 3; j++) {
-                    mesh.vertices.normals[mesh.faces.vertices[i][j]] += normal;
+                    mesh.vertices.normals[mesh.faces.indices[i][j]] += normal;
                 }
             }
 
@@ -149,7 +149,7 @@ namespace Bcg {
             Engine::State().emplace<EntityName>(entity_id, filepath);
             Engine::State().emplace<TriMesh>(entity_id, mesh);
             RenderCommand render_command;
-            render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id](){
+            render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
                 auto &camera = Engine::Context().get<Camera>();
                 auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
                 auto &transform = Engine::State().get<Transform>(entity_id);
@@ -161,7 +161,7 @@ namespace Bcg {
                 renderable.vao.bind();
                 renderable.draw();
                 renderable.vao.release();
-               return 1;
+                return 1;
             }));
             Engine::State().emplace<RenderCommand>(entity_id, render_command);
 
@@ -176,13 +176,23 @@ namespace Bcg {
 
             renderable_triangles.vao.bind();
             renderable_triangles.vbo.bind();
-            renderable_triangles.vbo.set_data(nullptr, 2 * mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) * sizeof(mesh.vertices.positions[0].x));
+            renderable_triangles.vbo.set_data(nullptr,
+                                              2 * mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) *
+                                              sizeof(mesh.vertices.positions[0].x));
             //renderable_triangles.vbo.set_data(mesh.vertices.positions.data(), mesh.vertices.positions.size() * mesh.vertices.positions[0].dims() * sizeof(mesh.vertices.positions[0].x));
-            renderable_triangles.vbo.set_sub_data(mesh.vertices.positions.data(), mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) * sizeof(mesh.vertices.positions[0].x), 0);
-            renderable_triangles.vbo.set_sub_data(mesh.vertices.normals.data(), mesh.vertices.normals.size() * dims(mesh.vertices.normals[0]) * sizeof(mesh.vertices.normals[0].x), mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) * sizeof(mesh.vertices.positions[0].x));
+            renderable_triangles.vbo.set_sub_data(mesh.vertices.positions.data(),
+                                                  mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) *
+                                                  sizeof(mesh.vertices.positions[0].x), 0);
+            renderable_triangles.vbo.set_sub_data(mesh.vertices.normals.data(),
+                                                  mesh.vertices.normals.size() * dims(mesh.vertices.normals[0]) *
+                                                  sizeof(mesh.vertices.normals[0].x),
+                                                  mesh.vertices.positions.size() * dims(mesh.vertices.positions[0]) *
+                                                  sizeof(mesh.vertices.positions[0].x));
 
             renderable_triangles.ebo.bind();
-            renderable_triangles.ebo.set_data(mesh.faces.vertices.data(), mesh.faces.vertices.size() * dims(mesh.faces.vertices[0]) * sizeof(mesh.faces.vertices[0].x));
+            renderable_triangles.ebo.set_data(mesh.faces.indices.data(),
+                                              mesh.faces.indices.size() * dims(mesh.faces.indices[0]) *
+                                              sizeof(mesh.faces.indices[0].x));
 
             renderable_triangles.vao.set_float_attribute(0, dims(mesh.vertices.positions[0]), false, (void *) 0);
             renderable_triangles.vao.set_float_attribute(1, dims(mesh.vertices.normals[0]), false,
@@ -199,7 +209,7 @@ namespace Bcg {
             renderable_triangles.ebo.release();
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
             renderable_triangles.program = programs["learn_opengl"];
-            renderable_triangles.count = dims(mesh.faces.vertices[0]) * mesh.faces.vertices.size();
+            renderable_triangles.count = dims(mesh.faces.indices[0]) * mesh.faces.indices.size();
             renderable_triangles.offset = 0;
             renderable_triangles.our_color[0] = 1.0f;
             renderable_triangles.our_color[1] = 0.5f;

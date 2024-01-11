@@ -76,7 +76,7 @@ namespace Bcg {
                                                    {0.5f,  -0.5f, 0.0f},
                                                    {-0.5f, -0.5f, 0.0f},
                                                    {-0.5f, 0.5f,  0.0f}};
-                        mesh.faces.vertices = {{0, 1, 3},
+                        mesh.faces.indices = {{0, 1, 3},
                                                {1, 2, 3}};
 
                         std::array<float, 12> vertices{
@@ -114,9 +114,9 @@ namespace Bcg {
                         renderable_triangles.ebo.bind();
                         //size = 24 = 3 * 2 * 4 = dims * num_triangles * sizeof(type)
                         //renderable_triangles.ebo.set_data(indices.data(), indices.size() * sizeof(indices[0]));
-                        renderable_triangles.ebo.set_data(mesh.faces.vertices.data(),
-                                                          mesh.faces.vertices.size() * dims(mesh.faces.vertices[0]) *
-                                                          sizeof(mesh.faces.vertices[0].x));
+                        renderable_triangles.ebo.set_data(mesh.faces.indices.data(),
+                                                          mesh.faces.indices.size() * dims(mesh.faces.indices[0]) *
+                                                          sizeof(mesh.faces.indices[0].x));
                         //dims = 3
                         //renderable_triangles.vao.set_float_attribute(0, 3, false, (void *) 0);
                         renderable_triangles.vao.set_float_attribute(0, dims(mesh.vertices.positions[0]), false,
@@ -129,7 +129,7 @@ namespace Bcg {
                         renderable_triangles.program = programs["learn_opengl"];
                         //count = 6 = 3 * 2 = dims * num_triangles
                         //renderable_triangles.count = 6;
-                        renderable_triangles.count = dims(mesh.faces.vertices[0]) * mesh.faces.vertices.size();
+                        renderable_triangles.count = dims(mesh.faces.indices[0]) * mesh.faces.indices.size();
                         renderable_triangles.offset = 0;
                         renderable_triangles.our_color[0] = 1.0f;
                         renderable_triangles.our_color[1] = 0.5f;

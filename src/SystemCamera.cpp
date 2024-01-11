@@ -233,6 +233,7 @@ namespace Bcg {
         }
 
         void on_update_input(const Events::Update<Input> &event) {
+            if(ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Input>().keyboard;
             auto &camera = Engine::Context().get<Camera>();
             auto &time = Engine::Context().get<Time>();
@@ -279,6 +280,8 @@ namespace Bcg {
         }
 
         void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event) {
+            if(ImGui::GetIO().WantCaptureMouse) return;
+
             auto &camera = Engine::Context().get<Camera>();
             auto &scroll = Engine::Context().get<Input>().mouse.scroll;
             auto &time = Engine::Context().get<Time>();

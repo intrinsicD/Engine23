@@ -11,7 +11,7 @@
 
 namespace Bcg{
     struct Faces {
-        std::vector<glm::uvec3> vertices;
+        std::vector<glm::uvec3> indices;
         std::vector<glm::uvec3> normals;
         std::vector<glm::uvec3> texcoords;
     };

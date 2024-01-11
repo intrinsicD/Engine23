@@ -68,12 +68,12 @@ namespace Bcg {
 
         template<typename T>
         static bool ComboBox(const char *label, int *current_item_index, const std::vector<T> &items) {
-            auto current_item = ToString(items.at(*current_item_index));
+            auto current_item = std::to_string(*current_item_index) + ": " + ToString(items.at(*current_item_index));
             bool value_changed = false;
             if (ImGui::BeginCombo(label, current_item.c_str())) {
                 for (int n = 0; n < items.size(); n++) {
                     bool is_selected = (*current_item_index == n);
-                    if (ImGui::Selectable(ToString(items[n]).c_str(), is_selected)) {
+                    if (ImGui::Selectable((std::to_string(n)+ ": " + ToString(items[n])).c_str(), is_selected)) {
                         *current_item_index = n;
                         value_changed = true;
                     }

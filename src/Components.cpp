@@ -253,10 +253,14 @@ namespace Bcg {
 
     void ComponentGui<TriMesh>::Show(const char *label, TriMesh &mesh) {
         if(ImGui::CollapsingHeader("Vertices")) {
+            ImGui::Indent();
             ComponentGui<Vertices>::Show("##TriMeshVertices", mesh.vertices);
+            ImGui::Unindent();
         }
         if(ImGui::CollapsingHeader("Faces")) {
+            ImGui::Indent();
             ComponentGui<Faces>::Show("##TriMeshFaces",mesh.faces);
+            ImGui::Unindent();
         }
     }
 
@@ -273,8 +277,8 @@ namespace Bcg {
     }
 
     void ComponentGui<Faces>::Show(const char *label, Faces &faces) {
-        if(!faces.vertices.empty() && ImGui::CollapsingHeader("Vertices")) {
-            ComponentGui<std::vector<glm::uvec3>>::Show("##FacesVertices", faces.vertices);
+        if(!faces.indices.empty() && ImGui::CollapsingHeader("Indices")) {
+            ComponentGui<std::vector<glm::uvec3>>::Show("##FacesIndices", faces.indices);
         }
         if(!faces.normals.empty() && ImGui::CollapsingHeader("Normals")) {
             ComponentGui<std::vector<glm::uvec3>>::Show("##FacesNormals",faces.normals);
