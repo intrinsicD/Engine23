@@ -5,8 +5,8 @@
 #include "ImGuiUtils.h"
 #include "GlmUtils.h"
 
-namespace Bcg{
-    namespace ImGuiUtilsInternal{
+namespace Bcg {
+    namespace ImGuiUtilsInternal {
         static auto StringVectorGetter = [](void *vec, int idx, const char **out_text) {
             auto &vector = *static_cast<std::vector<std::string> *>(vec);
             if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
@@ -67,39 +67,51 @@ namespace Bcg{
             ShowHelpMarker(desc.c_str());
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<std::string> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::StringVectorGetter,
-                                const_cast<std::vector<std::string> *>(&items), items.size());
+        template<typename T>
+        static bool ComboBox(const char *label, int *current_item_index, const std::vector<T> &items) {
+            auto current_item = ToString(items.at(*current_item_index));
+            bool value_changed = false;
+            if (ImGui::BeginCombo(label, current_item.c_str())) {
+                for (int n = 0; n < items.size(); n++) {
+                    bool is_selected = (*current_item_index == n);
+                    if (ImGui::Selectable(ToString(items[n]).c_str(), is_selected)) {
+                        *current_item_index = n;
+                        value_changed = true;
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            return value_changed;
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::vec2> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmVec2Getter,
-                                const_cast<std::vector<glm::vec2> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<std::string> &items) {
+            return ComboBox(label, current_item, items);
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::vec3> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmVec3Getter,
-                                const_cast<std::vector<glm::vec3> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<glm::vec2> &items) {
+            return ComboBox(label, current_item, items);
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::vec4> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmVec4Getter,
-                                const_cast<std::vector<glm::vec4> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<glm::vec3> &items) {
+            return ComboBox(label, current_item, items);
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec2> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmUVec2Getter,
-                                const_cast<std::vector<glm::uvec2> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<glm::vec4> &items) {
+            return ComboBox(label, current_item, items);
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec3> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmUVec3Getter,
-                                const_cast<std::vector<glm::uvec3> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec2> &items) {
+            return ComboBox(label, current_item, items);
         }
 
-        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec4> &items){
-            return ImGui::Combo(label, current_item, ImGuiUtilsInternal::GlmUVec4Getter,
-                                const_cast<std::vector<glm::uvec4> *>(&items), items.size());
+        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec3> &items) {
+            return ComboBox(label, current_item, items);
+        }
+
+        bool Combo(const char *label, int *current_item, const std::vector<glm::uvec4> &items) {
+            return ComboBox(label, current_item, items);
         }
 
 
