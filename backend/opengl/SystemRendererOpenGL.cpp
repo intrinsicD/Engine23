@@ -19,6 +19,8 @@
 #include "components/OpenGLInfo.h"
 #include "components/CommandDoubleBufferRender.h"
 #include "components/Renderable.h"
+#include "components/Picker.h"
+#include "OpenGLUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -26,9 +28,10 @@
 
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
-        void on_update_viewport(const Events::Update<Viewport> &event);
-
         static bool show_gui = false;
+        static bool show_gui_renderable_triangles = false;
+
+        void on_update_viewport(const Events::Update<Viewport> &event);
 
         void on_render_gui(const Events::Render<Gui> &event);
 
@@ -73,10 +76,29 @@ namespace Bcg {
             ImGui::End();
         }
 
+        void on_render_gui_renderable_triangles(const Events::Render<Gui> &event){
+            if (!show_gui_renderable_triangles) {
+                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_renderable_triangles>();
+                return;
+            }
+
+            auto &picker = Engine::Context().get<Picker>();
+            if (ImGui::Begin("RenderableTriangles", &show_gui_renderable_triangles)) {
+                if(picker.id.entity != entt::null) {
+                    auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(picker.id.entity);
+                    ComponentGui<OpenGL::RenderableTriangles>::Show(renderable);
+                }
+            }
+            ImGui::End();
+        }
+
         void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
             if (ImGui::BeginMenu("Renderer")) {
                 if (ImGui::MenuItem("Info", nullptr, &show_gui)) {
                     Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemRendererOpenGLInternal::on_render_gui>();
+                }
+                if(ImGui::MenuItem("RenderableTriangles", nullptr, &show_gui_renderable_triangles)){
+                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemRendererOpenGLInternal::on_render_gui_renderable_triangles>();
                 }
                 ImGui::EndMenu();
             }

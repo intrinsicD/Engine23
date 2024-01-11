@@ -9,6 +9,7 @@
 #include <fstream>
 #include <filesystem>
 #include <regex>
+#include "imgui.h"
 
 namespace Bcg::OpenGL {
     void AssertNoOglError() {
@@ -772,21 +773,21 @@ namespace Bcg::OpenGL {
 
     void ShaderProgram::set_vec3(const std::string &name, float r, float g, float b) const {
         auto location = glGetUniformLocation(id, name.c_str());
-        if(location == -1) return;
+        if (location == -1) return;
         glUniform3f(location, r, g, b);
         OpenGL::AssertNoOglError();
     }
 
     void ShaderProgram::set_vec3(const std::string &name, const float *value) const {
         auto location = glGetUniformLocation(id, name.c_str());
-        if(location == -1) return;
+        if (location == -1) return;
         glUniform3fv(location, 1, value);
         OpenGL::AssertNoOglError();
     }
 
     void ShaderProgram::set_mat4(const std::string &name, const float *value) const {
         auto location = glGetUniformLocation(id, name.c_str());
-        if(location == -1) return;
+        if (location == -1) return;
         glUniformMatrix4fv(location, 1, GL_FALSE, value);
         OpenGL::AssertNoOglError();
     }
@@ -957,5 +958,152 @@ namespace Bcg::OpenGL {
     void RenderablePoints::draw() {
         glDrawArrays(mode, offset, count);
         OpenGL::AssertNoOglError();
+    }
+}
+
+
+namespace Bcg {
+
+    void ComponentGui<OpenGL::Shader>::Show(OpenGL::Shader &shader) {
+        ImGui::Text("Type: %s", OpenGL::TypeToString(shader.type).c_str());
+        ImGui::Text("Filepath: %s", shader.filepath.c_str());
+        if (ImGui::CollapsingHeader(("Source##Shader" + std::to_string(shader.id)).c_str())) {
+            ImGui::Text("%s", shader.source.c_str());
+            ImGui::Separator();
+        }
+        if (!shader.error_message.empty()) {
+            ImGui::Text("Error: %s", shader.error_message.c_str());
+        }
+    }
+
+    void ComponentGui<OpenGL::ShaderProgram>::Show(OpenGL::ShaderProgram &program) {
+        ImGui::Text("Id: %d", program.id);
+        if (!program.error_message.empty()) {
+            ImGui::Text("Error: %s", program.error_message.c_str());
+        }
+        if (ImGui::CollapsingHeader("Shaders")) {
+            if (program.v_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.v_shader);
+            }
+            if (program.f_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.f_shader);
+            }
+            if (program.g_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.g_shader);
+            }
+            if (program.tc_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.tc_shader);
+            }
+            if (program.te_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.te_shader);
+            }
+            if (program.c_shader.id) {
+                ComponentGui<OpenGL::Shader>::Show(program.c_shader);
+            }
+        }
+    }
+
+    void ComponentGui<OpenGL::ShaderPrograms>::Show(OpenGL::ShaderPrograms &programs) {
+        for (auto &program: programs) {
+            ComponentGui<OpenGL::ShaderProgram>::Show(program.second);
+        }
+    }
+
+    void ComponentGui<OpenGL::BufferObject>::Show(OpenGL::BufferObject &buffer) {
+        ImGui::Text("Name: %s", buffer.name.c_str());
+        ImGui::Text("Id: %d", buffer.id);
+        ImGui::Text("Type: %s", OpenGL::TypeToString(buffer.type).c_str());
+        ImGui::Text("Size: %d", buffer.size);
+        ImGui::Text("Usage: %s", OpenGL::TypeToString(buffer.usage).c_str());
+    }
+
+    void ComponentGui<OpenGL::VertexBufferObject>::Show(OpenGL::VertexBufferObject &buffer) {
+        ImGui::Text("Vertexbuffer:");
+        ImGui::Separator();
+        ComponentGui<OpenGL::BufferObject>::Show(buffer);
+    }
+
+    void ComponentGui<OpenGL::IndexBufferObject>::Show(OpenGL::IndexBufferObject &buffer) {
+        ImGui::Text("Indexbuffer:");
+        ImGui::Separator();
+        ComponentGui<OpenGL::BufferObject>::Show(buffer);
+    }
+
+    void ComponentGui<OpenGL::DoubleBuffer>::Show(OpenGL::DoubleBuffer &buffer) {
+        ImGui::Text("Doublebuffer:");
+        ImGui::Text("next_is_dirty: %d", buffer.next_is_dirty);
+        ImGui::Text("current_id: %d", buffer.current_id());
+        ImGui::Separator();
+        ComponentGui<OpenGL::BufferObject>::Show(buffer.buffers[0]);
+        ImGui::Separator();
+        ComponentGui<OpenGL::BufferObject>::Show(buffer.buffers[1]);
+    }
+
+    void ComponentGui<OpenGL::VertexAttribute>::Show(OpenGL::VertexAttribute &attribute) {
+        ImGui::Text("Index: %d", attribute.index);
+        ImGui::Text("Size: %d", attribute.size);
+        ImGui::Text("Type: %s", OpenGL::TypeToString(attribute.type).c_str());
+        ImGui::Text("Normalized: %d", attribute.normalized);
+        ImGui::Text("Stride: %d", attribute.stride);
+        ImGui::Text("Pointer: %d", attribute.pointer);
+    }
+
+    void ComponentGui<OpenGL::VertexAttributeLayout>::Show(OpenGL::VertexAttributeLayout &layout) {
+        ImGui::Text("Stride: %d", layout.stride);
+        ImGui::Text("Attributes:");
+        for (auto &attribute: layout.attributes) {
+            if (ImGui::CollapsingHeader(("Attribute " + std::to_string(attribute.index)).c_str())) {
+                ImGui::Indent();
+                ComponentGui<OpenGL::VertexAttribute>::Show(attribute);
+                ImGui::Unindent();
+            }
+        }
+    }
+
+    void ComponentGui<OpenGL::VertexArrayObject>::Show(OpenGL::VertexArrayObject &vao) {
+        ImGui::Text("Name: %s", vao.name.c_str());
+        ImGui::Text("Id: %d", vao.id);
+        ImGui::Separator();
+        ComponentGui<OpenGL::VertexAttributeLayout>::Show(vao.layout);
+    }
+
+    void ComponentGui<OpenGL::Renderable>::Show(OpenGL::Renderable &renderable) {
+        ImGui::Text("Mode: %s", OpenGL::TypeToString(renderable.mode).c_str());
+        ImGui::Text("Count: %d", renderable.count);
+        ImGui::Text("Type: %s", OpenGL::TypeToString(renderable.type).c_str());
+        ImGui::Text("Offset: %d", renderable.offset);
+        ImGui::ColorEdit3("Color", &renderable.our_color[0]);
+        if (ImGui::CollapsingHeader("VertexArrayObject")) {
+            ImGui::Indent();
+            ComponentGui<OpenGL::VertexArrayObject>::Show(renderable.vao);
+            ImGui::Unindent();
+        }
+        if (ImGui::CollapsingHeader("VertexBufferObject")) {
+            ImGui::Indent();
+            ComponentGui<OpenGL::VertexBufferObject>::Show(renderable.vbo);
+            ImGui::Unindent();
+        }
+        if (ImGui::CollapsingHeader("IndexBufferObject")) {
+            ImGui::Indent();
+            ComponentGui<OpenGL::IndexBufferObject>::Show(renderable.ebo);
+            ImGui::Unindent();
+        }
+        if (ImGui::CollapsingHeader("ShaderProgram")) {
+            ImGui::Indent();
+            ComponentGui<OpenGL::ShaderProgram>::Show(renderable.program);
+            ImGui::Unindent();
+        }
+    }
+
+    void ComponentGui<OpenGL::RenderableTriangles>::Show(OpenGL::RenderableTriangles &renderable) {
+        ComponentGui<OpenGL::Renderable>::Show(renderable);
+    }
+
+    void ComponentGui<OpenGL::RenderableLines>::Show(OpenGL::RenderableLines &renderable) {
+        ComponentGui<OpenGL::Renderable>::Show(renderable);
+    }
+
+    void ComponentGui<OpenGL::RenderablePoints>::Show(OpenGL::RenderablePoints &renderable) {
+        ComponentGui<OpenGL::Renderable>::Show(renderable);
     }
 }

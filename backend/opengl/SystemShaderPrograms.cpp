@@ -8,13 +8,63 @@
 #include "Commands.h"
 #include "Events.h"
 #include "OpenGLUtils.h"
-#include <fstream>
 #include <filesystem>
 #include "components/FileWatcher.h"
+#include "imgui.h"
+
+//----------------------------------------------------------------------------------------------------------------------
+// Predefines for better overview
+//----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-
     namespace SystemShaderProgramsInternal {
+        static bool show_gui = false;
+
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+
+        void on_render_gui(const Events::Render<Gui> &event);
+
+        void on_begin_frame(const Events::Begin<Frame> &event);
+
+        void on_startup(const Events::Startup<Engine> &event);
+
+        void on_shutdown(const Events::Shutdown<Engine> &event);
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation hidden internal functions
+//----------------------------------------------------------------------------------------------------------------------
+
+namespace Bcg {
+    namespace SystemShaderProgramsInternal {
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+            if (ImGui::BeginMenu("Menu")) {
+                if (ImGui::MenuItem("ShaderPrograms", nullptr, &show_gui)) {
+                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                }
+                ImGui::EndMenu();
+            }
+        }
+
+        void on_render_gui(const Events::Render<Gui> &event) {
+            if (!show_gui) {
+                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                return;
+            }
+
+            if (ImGui::Begin("ShaderPrograms", &show_gui)) {
+                auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
+                for (auto &program : programs) {
+                    if (ImGui::TreeNode(program.first.c_str())) {
+                        ComponentGui<OpenGL::ShaderProgram>::Show(program.second);
+                        ImGui::TreePop();
+                    }
+                }
+            }
+            ImGui::End();
+        }
+
         void on_begin_frame(const Events::Begin<Frame> &event) {
             auto &watcher = Engine::Context().get<FileWatcher>();
             watcher.check();
@@ -23,8 +73,10 @@ namespace Bcg {
         void on_startup(const Events::Startup<Engine> &event) {
             Log::Info(SystemShaderPrograms::name() + ": Startup").enqueue();;
             auto point_cloud_program = SystemShaderPrograms::load_program(
-                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) / "programs/point_cloud/point_cloud_vs.glsl",
-                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) / "programs/point_cloud/point_cloud_fs.glsl");
+                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                    "programs/point_cloud/point_cloud_vs.glsl",
+                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                    "programs/point_cloud/point_cloud_fs.glsl");
             auto name = "point_cloud";
             point_cloud_program.name = name;
 
@@ -33,15 +85,23 @@ namespace Bcg {
             SystemShaderPrograms::add_to_watcher(programs[name]);
 
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemShaderProgramsInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_render_gui_menu>();
         }
-
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_render_gui_menu>();
             Log::Info(SystemShaderPrograms::name() + ": Shutdown").enqueue();
         }
     }
+}
 
+//----------------------------------------------------------------------------------------------------------------------
+// Implementation of public functions
+//----------------------------------------------------------------------------------------------------------------------
+
+
+namespace Bcg {
     OpenGL::Shader SystemShaderPrograms::load_shader(std::string filepath, unsigned int type) {
         OpenGL::Shader shader;
         shader.type = type;
@@ -196,7 +256,7 @@ namespace Bcg {
         return "../backend/glsl/";
     }
 
-    std::string SystemShaderPrograms::name()  {
+    std::string SystemShaderPrograms::name() {
         return "SystemShaderPrograms";
     }
 

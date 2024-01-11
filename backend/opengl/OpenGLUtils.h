@@ -10,6 +10,7 @@
 #include <exception>
 #include <unordered_map>
 #include <vector>
+#include "components/ComponentGui.h"
 
 namespace Bcg::OpenGL {
     void AssertNoOglError();
@@ -38,6 +39,7 @@ namespace Bcg::OpenGL {
 
         bool check_compile_status();
     };
+
 
     struct ShaderProgram {
         unsigned int id = 0;
@@ -211,6 +213,78 @@ namespace Bcg::OpenGL {
         static RenderablePoints Create();
 
         void draw() override;
+    };
+}
+
+namespace Bcg{
+    template<>
+    struct ComponentGui<OpenGL::Shader> {
+        static void Show(OpenGL::Shader &shader);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::ShaderProgram> {
+        static void Show(OpenGL::ShaderProgram &program);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::ShaderPrograms> {
+        static void Show(OpenGL::ShaderPrograms &programs);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::BufferObject> {
+        static void Show(OpenGL::BufferObject &buffer);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::VertexBufferObject> {
+        static void Show(OpenGL::VertexBufferObject &buffer);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::IndexBufferObject> {
+        static void Show(OpenGL::IndexBufferObject &buffer);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::DoubleBuffer> {
+        static void Show(OpenGL::DoubleBuffer &buffer);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::VertexAttribute> {
+        static void Show(OpenGL::VertexAttribute &attribute);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::VertexAttributeLayout> {
+        static void Show(OpenGL::VertexAttributeLayout &layout);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::VertexArrayObject> {
+        static void Show(OpenGL::VertexArrayObject &vao);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::Renderable> {
+        static void Show(OpenGL::Renderable &renderable);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::RenderableTriangles> {
+        static void Show(OpenGL::RenderableTriangles &renderable);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::RenderableLines> {
+        static void Show(OpenGL::RenderableLines &renderable);
+    };
+
+    template<>
+    struct ComponentGui<OpenGL::RenderablePoints> {
+        static void Show(OpenGL::RenderablePoints &renderable);
     };
 }
 
