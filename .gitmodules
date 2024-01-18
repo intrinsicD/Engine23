@@ -22,3 +22,6 @@
 [submodule "ext/ImGuizmo"]
 	path = ext/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "plugins/tiny_gltf/ext/tinygltf"]
+	path = plugins/tiny_gltf/ext/tinygltf
+	url = https://github.com/syoyo/tinygltf.git

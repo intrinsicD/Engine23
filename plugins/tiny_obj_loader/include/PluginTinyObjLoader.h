@@ -5,7 +5,6 @@
 #ifndef ENGINE23_PLUGINTINYOBJLOADER_H
 #define ENGINE23_PLUGINTINYOBJLOADER_H
 
-
 #include "Plugins.h"
 
 namespace Bcg{

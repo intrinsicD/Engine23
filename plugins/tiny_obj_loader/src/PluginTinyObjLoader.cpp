@@ -19,7 +19,19 @@
 #include "components/TriMesh.h"
 #include "components/Camera.h"
 
-namespace Bcg {
+namespace Bcg{
+    namespace PluginTinyObjLoaderInternal {
+        bool load_obj(const std::string &filepath);
+
+        void on_update(const Events::Update<Input::Drop> &event);
+
+        void on_startup(const Events::Startup<Plugin> &event);
+
+        void on_shutdown(const Events::Shutdown<Plugin> &event);
+    }
+}
+
+namespace Bcg{
     namespace PluginTinyObjLoaderInternal {
         bool load_obj(const std::string &filepath) {
             tinyobj::ObjReaderConfig reader_config;
@@ -243,7 +255,9 @@ namespace Bcg {
             Log::Info(PluginTinyObjLoader().name() + ": Shutdown").enqueue();
         }
     }
+}
 
+namespace Bcg {
     PluginTinyObjLoader::PluginTinyObjLoader() : Plugin("tiny_obj_loader") {
 
     }
