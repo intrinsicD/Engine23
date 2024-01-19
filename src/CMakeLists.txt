@@ -8,6 +8,7 @@ target_sources(Engine23Lib PRIVATE
         SystemCommandBuffers.cpp
         SystemDearImGui.cpp
         SystemEntity.cpp
+        SystemHierarchy.cpp
         SystemLogger.cpp
         SystemParallelProcessing.cpp
         SystemPlatform.cpp

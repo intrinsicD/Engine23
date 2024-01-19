@@ -10,6 +10,7 @@
 #include "SystemUserInput.h"
 #include "SystemCamera.h"
 #include "SystemDearImGui.h"
+#include "SystemHierarchy.h"
 #include "SystemTimer.h"
 #include "SystemParallelProcessing.h"
 #include "SystemPlugins.h"

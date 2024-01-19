@@ -6,6 +6,7 @@
 #define ENGINE23_HIERARCHY_H
 
 #include "entt/entt.hpp"
+#include "ComponentGui.h"
 
 namespace Bcg{
     struct Hierarchy{
@@ -14,6 +15,11 @@ namespace Bcg{
         entt::entity prev{entt::null};
         entt::entity next{entt::null};
         entt::entity parent{entt::null};
+    };
+
+    template<>
+    struct ComponentGui<Hierarchy>{
+        static void Show(entt::entity entity_id);
     };
 }
 

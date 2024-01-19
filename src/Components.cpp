@@ -12,6 +12,9 @@
 #include "components/AABB.h"
 #include "components/EntityName.h"
 #include "components/TriMesh.h"
+#include "components/Hierarchy.h"
+#include "components/Picker.h"
+#include "SystemHierarchy.h"
 #include "ImGuiUtils.h"
 #include "Engine.h"
 
@@ -249,6 +252,36 @@ namespace Bcg {
         }
         auto &mesh = Engine::State().get<TriMesh>(entity_id);
         Show("##TriMesh", mesh);
+    }
+
+    void gui_child(std::string name, entt::entity child_id){
+        if(child_id!= entt::null){
+            ImGui::Text("%s: %u", name.c_str(), static_cast<unsigned int>(child_id));
+            ImGui::SameLine();
+            if(ImGui::Button(("Select##"+ name + std::to_string(static_cast<unsigned int>(child_id))).c_str())){
+                auto &picker = Engine::Context().get<Picker>();
+                picker.id.entity = child_id;
+            }
+        }
+    }
+
+    void ComponentGui<Hierarchy>::Show(entt::entity entity_id) {
+        auto *hierarchy = Engine::State().try_get<Hierarchy>(entity_id);
+        if(!hierarchy){
+            if(ImGui::Button("Add Hierarchy Component")){
+                hierarchy = &SystemHierarchy::get_or_add(entity_id);
+            }
+        }else{
+            if(ImGui::Button("Add Destroy Component")){
+                SystemHierarchy::destroy(entity_id);
+            }
+
+            ImGui::Text("Num Children: %zu", hierarchy->children);
+            gui_child("first", hierarchy->first);
+            gui_child("prev", hierarchy->prev);
+            gui_child("next", hierarchy->next);
+            gui_child("parent", hierarchy->parent);
+        }
     }
 
     void ComponentGui<TriMesh>::Show(const char *label, TriMesh &mesh) {
