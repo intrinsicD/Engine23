@@ -27,7 +27,7 @@ namespace Bcg {
 
 namespace Bcg {
     namespace SystemHierarchyInternal {
-        void on_render_gui(const Events::Render<Gui> &event){
+        void on_render_gui(const Events::Render<Gui> &event) {
             if (!show_gui) {
                 Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
                 return;
@@ -40,7 +40,7 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event){
+        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
             if (ImGui::BeginMenu("Entity")) {
                 if (ImGui::MenuItem("Hierarchy", nullptr, &show_gui)) {
                     Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
@@ -50,12 +50,12 @@ namespace Bcg {
         }
 
 
-        void on_startup(const Events::Startup<Engine> &event){
+        void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemHierarchyInternal::on_render_gui_menu>();
             Log::Info(SystemHierarchy::name() + ": Startup").enqueue();
         }
 
-        void on_shutdown(const Events::Shutdown<Engine> &event){
+        void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemHierarchyInternal::on_render_gui_menu>();
             Log::Info(SystemHierarchy::name() + ": Shutdown").enqueue();
         }
@@ -64,6 +64,10 @@ namespace Bcg {
 
 
 namespace Bcg {
+    bool SystemHierarchy::has_component(entt::entity &entity_id) {
+        return Engine::State().all_of<Hierarchy>(entity_id);
+    }
+
     Hierarchy &SystemHierarchy::get_or_add(entt::entity entity_id) {
         return Engine::State().get_or_emplace<Hierarchy>(entity_id);
     }
@@ -72,12 +76,12 @@ namespace Bcg {
         auto *hierarchy = Engine::State().try_get<Hierarchy>(entity_id);
         if (hierarchy) {
             auto children = get_children(entity_id);
-            for(auto child_id : children){
+            for (auto child_id: children) {
                 auto &child_hierarchy = Engine::State().get<Hierarchy>(child_id);
                 child_hierarchy.parent = hierarchy->parent;
             }
 
-            if(hierarchy->parent != entt::null){
+            if (hierarchy->parent != entt::null) {
                 auto &parent_hierarchy = Engine::State().get<Hierarchy>(hierarchy->parent);
                 auto &last_child_hierarchy = Engine::State().get<Hierarchy>(children.back());
                 last_child_hierarchy.next = parent_hierarchy.first;
