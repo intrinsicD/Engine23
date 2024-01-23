@@ -286,6 +286,19 @@ namespace Bcg{
     struct ComponentGui<OpenGL::RenderablePoints> {
         static void Show(OpenGL::RenderablePoints &renderable);
     };
+
+    struct ShaderStage{
+        OpenGL::Shader shader;
+    };
+
+    struct Material{
+
+    };
+
+    struct Pipeline{
+        Material *material;
+        std::vector<ShaderStage*> stages;
+    };
 }
 
 #endif //ENGINE23_OPENGLUTILS_H

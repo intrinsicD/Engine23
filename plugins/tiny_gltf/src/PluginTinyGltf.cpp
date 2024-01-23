@@ -105,7 +105,7 @@ namespace Bcg {
                 return false;
             }
 
-
+            return ret;
         }
 
         bool load_glb(const std::string &filepath){
@@ -128,6 +128,7 @@ namespace Bcg {
                 printf("Failed to parse glTF\n");
                 return false;
             }
+            return ret;
         }
 
         void on_update(const Events::Update<Input::Drop> &event){
