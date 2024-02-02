@@ -294,11 +294,6 @@ namespace Bcg{
     struct Material{
 
     };
-
-    struct Pipeline{
-        Material *material;
-        std::vector<ShaderStage*> stages;
-    };
 }
 
 #endif //ENGINE23_OPENGLUTILS_H

@@ -18,6 +18,7 @@
 #include "components/EntityName.h"
 #include "components/TriMesh.h"
 #include "components/Camera.h"
+#include "FilePath.h"
 
 namespace Bcg{
     namespace PluginTinyObjLoaderInternal {
@@ -35,7 +36,7 @@ namespace Bcg{
     namespace PluginTinyObjLoaderInternal {
         bool load_obj(const std::string &filepath) {
             tinyobj::ObjReaderConfig reader_config;
-            reader_config.mtl_search_path = "./"; // Path to material files
+            reader_config.mtl_search_path = FilePath::Parent(filepath);
 
             tinyobj::ObjReader reader;
 
@@ -63,6 +64,10 @@ namespace Bcg{
             for (size_t s = 0; s < shapes.size(); s++) {
                 Log::Info(fmt::format("# of faces in shape[{}] = {}", s,
                                       shapes[s].mesh.num_face_vertices.size())).enqueue();
+            }
+
+            for(auto &material:materials){
+                material.
             }
 
             //convert to mesh

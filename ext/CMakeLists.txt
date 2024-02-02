@@ -1,5 +1,6 @@
 target_include_directories(Engine23Lib SYSTEM PUBLIC imgui)
 target_include_directories(Engine23Lib SYSTEM PUBLIC ImGuizmo)
+target_include_directories(Engine23Lib SYSTEM PUBLIC soil/include)
 target_compile_definitions(Engine23Lib PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
 add_subdirectory(glfw)
@@ -14,6 +15,10 @@ target_sources(Engine23Lib PRIVATE
         imgui/backends/imgui_impl_glfw.cpp
         imgui/backends/imgui_impl_opengl3.cpp
         ImGuizmo/ImGuizmo.cpp
+        soil/src/soil.c
+        soil/src/image_helper.c
+        soil/src/stb_image_aug.c
+        soil/src/image_dxt.c
 #[[        implot/implot.cpp
         implot/implot_demo.cpp
         implot/implot_items.cpp]]
