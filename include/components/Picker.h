@@ -10,19 +10,23 @@
 #include "glm/glm.hpp"
 #include <set>
 
-namespace Bcg{
-    struct Picker{
-        struct ID{
+namespace Bcg {
+    struct Picker {
+        struct ID {
             entt::entity entity = entt::null;
             size_t vertex{};
             size_t edge{};
             size_t face{};
-        }id;
-        struct Point{
+
+            bool check_entity() const;
+        } id;
+
+        struct Point {
             glm::vec3 object{};
             glm::vec3 world{};
             glm::vec3 view{};
-        }point;
+        } point;
+
         bool is_backgound = false;
 
         float point_selection_radius = 0.00001;

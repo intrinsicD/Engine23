@@ -1,4 +1,6 @@
-add_library(bcg_plugin_geometry_processing SHARED)
+add_library(bcg_plugin_geometry_processing SHARED
+        include/SystemPointCloud.h
+        src/SystemPointCloud.cpp)
 
 add_subdirectory(include)
 add_subdirectory(src)

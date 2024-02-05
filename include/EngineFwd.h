@@ -21,6 +21,7 @@ namespace Bcg{
     struct Renderer;
     struct AABB;
     struct Hierarchy;
+    class PointCloud;
     enum class LogLevel{
         Error = 0, Warn = 1, Info = 2
     };

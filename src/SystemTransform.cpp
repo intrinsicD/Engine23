@@ -90,6 +90,8 @@ namespace Bcg {
                 case ImGuizmo::SCALE:
                     ImGui::InputFloat("Scale Snap", &snap.x);
                     break;
+                default:
+                    break;
             }
             ImGuiIO &io = ImGui::GetIO();
             ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
