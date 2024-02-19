@@ -8,12 +8,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+include(Dependencies.cmake)
+
 #A custom target to build all the libraries and executables
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED
-        src/Picker.cpp)
+add_library(Engine23Lib SHARED)
 
 add_subdirectory(app)
 add_subdirectory(platform)

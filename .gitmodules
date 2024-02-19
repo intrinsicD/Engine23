@@ -16,9 +16,6 @@
 [submodule "ext/glm"]
 	path = ext/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "ext/bcg_geometry_processing"]
-	path = ext/bcg_geometry_processing
-	url = https://github.com/intrinsicD/bcg_geometry_processing.git
 [submodule "ext/ImGuizmo"]
 	path = ext/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git

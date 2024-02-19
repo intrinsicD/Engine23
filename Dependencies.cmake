@@ -1,0 +1,1 @@
+set(CMAKE_PREFIX_PATH "path/to/dependency")
