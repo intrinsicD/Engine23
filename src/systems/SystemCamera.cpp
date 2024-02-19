@@ -2,7 +2,7 @@
 // Created by alex on 15.12.23.
 //
 
-#include "SystemCamera.h"
+#include "systems/SystemCamera.h"
 #include "Engine.h"
 #include "Commands.h"
 #include "Events.h"

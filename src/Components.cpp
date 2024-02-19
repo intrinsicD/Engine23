@@ -9,12 +9,12 @@
 #include "components/FileWatcher.h"
 #include "components/Camera.h"
 #include "components/Transform.h"
-#include "components/AABB.h"
+
 #include "components/EntityName.h"
 #include "components/TriMesh.h"
 #include "components/Hierarchy.h"
 #include "components/Picker.h"
-#include "SystemHierarchy.h"
+#include "systems/SystemHierarchy.h"
 #include "ImGuiUtils.h"
 #include "Engine.h"
 
@@ -204,38 +204,6 @@ namespace Bcg {
     void Camera::set_orthographic_parameters(const ProjectionParameters::Orthographic &orthographic_parameters) {
         projection_parameters.orthographic_parameters = orthographic_parameters;
         is_orthographic = true;
-    }
-
-    void AABB::grow(const glm::vec3 &point) {
-        min = glm::min(min, point);
-        max = glm::max(max, point);
-    }
-
-    void AABB::merge(const AABB &aabb) {
-        min = glm::min(min, aabb.min);
-        max = glm::max(max, aabb.max);
-    }
-
-    glm::vec3 AABB::get_center() const {
-        return (min + max) / 2.0f;
-    }
-
-    glm::vec3 AABB::get_extent() const {
-        return max - min;
-    }
-
-    void AABB::set(const glm::vec3 &center, const glm::vec3 &extent) {
-        min = center - extent / 2.0f;
-        max = center + extent / 2.0f;
-    }
-
-    void ComponentGui<AABB>::Show(entt::entity entity_id) {
-        if (!Engine::State().all_of<AABB>(entity_id)) {
-            return;
-        }
-        auto &aabb = Engine::State().get<AABB>(entity_id);
-        ImGui::Text("min: (%f, %f, %f)", aabb.min.x, aabb.min.y, aabb.min.z);
-        ImGui::Text("max: (%f, %f, %f)", aabb.max.x, aabb.max.y, aabb.max.z);
     }
 
     void ComponentGui<EntityName>::Show(entt::entity entity_id) {

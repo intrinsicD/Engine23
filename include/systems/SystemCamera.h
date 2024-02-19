@@ -6,7 +6,6 @@
 #define ENGINE23_SYSTEMCAMERA_H
 
 #include "EngineFwd.h"
-#include "MathTypes.h"
 
 namespace Bcg{
     class SystemCamera {

@@ -14,7 +14,20 @@ include(Dependencies.cmake)
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED)
+add_library(Engine23Lib SHARED
+        include/AABB/AABB.h
+        include/AABB/AABBGui.h
+        src/AABB/AABBGui.cpp
+        include/Property/Property.h
+        include/EigenUtils/IsEigenType.h
+        include/Property/HandleBase.h
+        include/Property/AbstractProperty.h
+        include/Property/PropertyVector.h
+        include/Property/PropertyUtils.h
+        include/Property/PropertyContainer.h
+        include/Property/PropertyIterator.h
+        include/Property/VertexContainer.h
+        src/Property/VertexContainer.cpp)
 
 add_subdirectory(app)
 add_subdirectory(platform)

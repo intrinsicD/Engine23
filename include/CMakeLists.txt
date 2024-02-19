@@ -1,1 +1,5 @@
 target_include_directories(Engine23Lib PUBLIC .)
+add_subdirectory(AABB)
+add_subdirectory(EigenUtils)
+add_subdirectory(systems)
+add_subdirectory(Property)

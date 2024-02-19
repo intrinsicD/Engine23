@@ -2,12 +2,12 @@
 // Created by alex on 27.11.23.
 //
 
-#include "SystemWindowGLFW.h"
+#include "systems/SystemWindowGLFW.h"
 #include "Engine.h"
 #include "Events.h"
 #include "GLFW/glfw3.h"
 #include "Commands.h"
-#include "SystemDearImGui.h"
+#include "systems/SystemDearImGui.h"
 #include "components/Window.h"
 #include "components/Viewport.h"
 #include "components/Input.h"

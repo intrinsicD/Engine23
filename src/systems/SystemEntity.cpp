@@ -2,13 +2,13 @@
 // Created by alex on 04.01.24.
 //
 
-#include "SystemEntity.h"
+#include "systems/SystemEntity.h"
 #include "Engine.h"
 #include "Events.h"
 #include "imgui.h"
 #include "fmt/core.h"
 #include "Commands.h"
-#include "components/AABB.h"
+#include "AABBGui.h"
 #include "components/Transform.h"
 #include "components/Picker.h"
 #include "components/EntityName.h"
@@ -72,9 +72,9 @@ namespace Bcg {
                             ComponentGui<EntityName>::Show(entity);
                         }
                     }
-                    if(Engine::State().all_of<AABB>(entity)){
+                    if(Engine::State().all_of<AABB3>(entity)){
                         if(ImGui::CollapsingHeader("AABB")){
-                            ComponentGui<AABB>::Show(entity);
+                            ComponentGui<AABB3>::Show(entity);
                         }
                     }
                     if(Engine::State().all_of<Transform>(entity)){

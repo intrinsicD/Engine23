@@ -8,6 +8,7 @@
 #include "entt/fwd.hpp"
 
 namespace Bcg{
+    using real_t = double;
     class Engine;
     struct Frame;
     struct CommandBuffer;
@@ -19,7 +20,8 @@ namespace Bcg{
     struct GuiMenu;
     struct Plugin;
     struct Renderer;
-    struct AABB;
+    template<typename T, int N>
+    class AABB;
     struct Hierarchy;
     class PointCloud;
     enum class LogLevel{

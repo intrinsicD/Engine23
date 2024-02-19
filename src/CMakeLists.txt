@@ -4,18 +4,7 @@ target_sources(Engine23Lib PRIVATE
         Engine.cpp
         ImGuiUtils.cpp
         Plugins.cpp
-        SystemCamera.cpp
-        SystemCommandBuffers.cpp
-        SystemDearImGui.cpp
-        SystemEntity.cpp
-        SystemHierarchy.cpp
-        SystemLogger.cpp
-        SystemParallelProcessing.cpp
-        SystemPlatform.cpp
-        SystemPlugins.cpp
-        SystemTimer.cpp
-        SystemTransform.cpp
-        SystemTriMesh.cpp
-        SystemUserInput.cpp
-        SystemWindowGLFW.cpp
 )
+add_subdirectory(AABB)
+add_subdirectory(systems)
+add_subdirectory(Property)

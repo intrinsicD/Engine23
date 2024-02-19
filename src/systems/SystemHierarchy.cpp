@@ -2,7 +2,7 @@
 // Created by alex on 19.01.24.
 //
 
-#include "SystemHierarchy.h"
+#include "systems/SystemHierarchy.h"
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"

@@ -2,7 +2,7 @@
 // Created by alex on 04.12.23.
 //
 
-#include "SystemPlatform.h"
+#include "systems/SystemPlatform.h"
 #include "Events.h"
 #include "Engine.h"
 #include "Commands.h"

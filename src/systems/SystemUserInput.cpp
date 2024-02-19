@@ -2,7 +2,7 @@
 // Created by alex on 27.11.23.
 //
 
-#include "SystemUserInput.h"
+#include "systems/SystemUserInput.h"
 #include "Events.h"
 #include "Engine.h"
 #include "Commands.h"

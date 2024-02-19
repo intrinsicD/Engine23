@@ -2,7 +2,7 @@
 // Created by alex on 10.01.24.
 //
 
-#include "SystemTriMesh.h"
+#include "systems/SystemTriMesh.h"
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"

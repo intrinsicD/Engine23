@@ -55,7 +55,6 @@ namespace Bcg{
         auto &picker = Engine::Context().get<Picker>();
         auto entity = Entity(Engine::State(), picker.id.entity);
         if(!entity.is_valid()) return;
-        if(entity.)
 
     }
 }
