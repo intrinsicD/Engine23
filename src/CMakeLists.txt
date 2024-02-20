@@ -2,10 +2,14 @@ target_sources(Engine23Lib PRIVATE
         Commands.cpp
         Components.cpp
         Engine.cpp
+        FilePath.cpp
+        StringUtils.cpp
         ImGuiUtils.cpp
         Plugins.cpp
 )
 add_subdirectory(AABB)
-add_subdirectory(systems)
+add_subdirectory(Graph)
+add_subdirectory(Mesh)
 add_subdirectory(Property)
 add_subdirectory(PointCloud)
+add_subdirectory(systems)

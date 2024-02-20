@@ -49,8 +49,8 @@ namespace Bcg {
 
         VertexHandle new_vertex();
 
-        template<class VectorType>
-        VertexHandle add_vertex(const VectorType &point, Property<VectorType> &positions){
+        template<typename T, int N>
+        VertexHandle add_vertex(const Eigen::Vector<T, N> &point, Property<Eigen::Vector<T, N>> &positions) {
             auto v = new_vertex();
             positions[v] = point;
             return v;

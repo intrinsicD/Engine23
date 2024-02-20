@@ -1,10 +1,10 @@
 //
 // Created by alex on 20.02.24.
 //
-
 #include "PointCloud.h"
 
 namespace Bcg {
+
     PointCloud::PointCloud() : PointCloud(VertexContainer(), "PointCloud") {}
 
     PointCloud::PointCloud(const VertexContainer &vertices_, std::string name) :
@@ -15,19 +15,38 @@ namespace Bcg {
         assert(deleted_vertices);
     }
 
-    PointCloud &PointCloud::copy(const PointCloud &other) {
-        //all properties are linked (pointers are the same)
+    PointCloud &PointCloud::copy(const Bcg::PointCloud &other) {
+        //copy positions and deleted_vertices (pointers are not the same, but values are)
+        //all other properties are not copied
         if (this != &other) {
-            vertices = other.vertices;
-            deleted_vertices = vertices.get<bool>("v_deleted");
+            vertices = VertexContainer();
+
+            vertices.resize(other.vertices.get_size());
+
+            deleted_vertices.storage() = other.deleted_vertices.storage();
+
+            // how many elements are deleted?
             m_num_deleted_vertices = other.m_num_deleted_vertices;
+
             assert(deleted_vertices);
         }
         return *this;
     }
 
-    PointCloud &PointCloud::operator=(const PointCloud &other){
+    PointCloud &PointCloud::operator=(const PointCloud &other) {
+        //all properties are linked (pointers are the same)
+        if (this != &other) {
+            vertices = other.vertices;
+            m_name = other.m_name;
 
+            deleted_vertices = vertices.get_or_add<bool>("v_deleted");
+
+            // how many elements are deleted?
+            m_num_deleted_vertices = other.m_num_deleted_vertices;
+
+            assert(deleted_vertices);
+        }
+        return *this;
     }
 
     const std::string &PointCloud::get_name() const { return m_name; }
@@ -40,6 +59,7 @@ namespace Bcg {
         vertices.clear();
         vertices.free_unused_memory();
         deleted_vertices = vertices.get_or_add<bool>("v_deleted", false);
+
         m_num_deleted_vertices = 0;
         assert(deleted_vertices);
     }
@@ -79,6 +99,7 @@ namespace Bcg {
         vertices.push_back();
         return vertices.get_size() - 1;
     }
+
 
     void PointCloud::delete_vertex(const VertexHandle &v) {
         mark_vertex_deleted(v);

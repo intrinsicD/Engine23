@@ -243,11 +243,11 @@ namespace Bcg {
         m_sptr->set_column_names(column_names);
     }
     template<typename T>
-    Property<T>::Storage_t &Property<T>::storage(){
+    typename Property<T>::Storage_t &Property<T>::storage(){
         return m_sptr->storage();
     }
     template<typename T>
-    const Property<T>::Storage_t &Property<T>::storage() const{
+    const typename Property<T>::Storage_t &Property<T>::storage() const{
         return get_const_sptr()->storage();
     }
 

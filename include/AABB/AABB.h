@@ -16,14 +16,21 @@ namespace Bcg {
 
         AABB(const Eigen::Vector <T, N> &min, const Eigen::Vector <T, N> &max) : min(min), max(max) {}
 
-        AABB &grow(const Eigen::Vector <T, N> &point) {
-            min = (min, point).cwiseMin();
-            max = (max, point).cwiseMax();
+        template<int M = -1>
+        AABB &grow(const Eigen::Matrix <T, M,  N> &points) {
+            min = min.cwiseMin(points.colwise().minCoeff());
+            max = max.cwiseMax(points.colwise().maxCoeff());
+        }
+
+        template<int M = -1>
+        AABB &fit(const Eigen::Matrix<T, M, N> &points){
+            min = points.colwise().minCoeff();
+            max = points.colwise().maxCoeff();
         }
 
         AABB &merge(const AABB<T, N> &other) {
-            min = (min, other.min).cwiseMin();
-            max = (max, other.max).cwiseMax();
+            min = min.cwiseMin(other.min);
+            max = max.cwiseMax(other.max);
         }
 
         [[nodiscard]] Eigen::Vector <T, N> center() const {

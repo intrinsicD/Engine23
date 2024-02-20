@@ -13,7 +13,7 @@ namespace Bcg {
     class Graph : public PointCloud {
     public:
         struct VertexConnectivity {
-            const HalfedgeHandle &h;
+            HalfedgeHandle h;
 
             friend std::ostream &operator<<(std::ostream &stream, const VertexConnectivity &value) {
                 stream << value.h.idx;
@@ -22,7 +22,7 @@ namespace Bcg {
         };
 
         struct HalfedgeConnectivity {
-            const VertexHandle &v;
+            VertexHandle v;
             HalfedgeHandle nh;
             HalfedgeHandle ph;
 
@@ -49,7 +49,7 @@ namespace Bcg {
                        std::string name = "GraphHalfedge");
 
         Graph &copy(const Graph &other);
-        
+
         Graph &operator=(const Graph &other);
 
         operator bool() const override;
@@ -120,15 +120,21 @@ namespace Bcg {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        double get_length(const EdgeHandle &e) const;
+        template<typename T, int N>
+        double get_length(const EdgeHandle &e, const Property<Eigen::Vector<T, N>> &positions) const {
+            return (positions[get_vertex(e, 1)] - positions[get_vertex(e, 0)]).norm();
+        }
 
-        double get_squared_length(const EdgeHandle &e) const;
+        template<typename T, int N>
+        double get_squared_length(const EdgeHandle &e, const Property<Eigen::Vector<T, N>> &positions) const {
+            return (positions[get_vertex(e, 1)] - positions[get_vertex(e, 0)]).squaredNorm();
+        }
 
         //--------------------------------------------------------------------------------------------------------------
 
         struct VertexAroundVertexCirculator {
             const Graph *ds;
-            const HalfedgeHandle &halfedge;
+            HalfedgeHandle halfedge;
             bool active;
 
             explicit VertexAroundVertexCirculator(const Graph *ds = nullptr, const VertexHandle &v = VertexHandle());
@@ -156,7 +162,7 @@ namespace Bcg {
 
         struct HalfedgeAroundVertexCirculator {
             const Graph *ds;
-            const HalfedgeHandle &halfedge;
+            HalfedgeHandle halfedge;
             bool active;
 
             explicit HalfedgeAroundVertexCirculator(const Graph *ds = nullptr, const VertexHandle &v = VertexHandle());

@@ -117,6 +117,11 @@ namespace Bcg {
         return size_t(1);
     }
 
+    template<typename T, std::enable_if_t<!std::is_fundamental_v<T> && !IsEigenType<T>, size_t> = 0>
+    inline size_t GetDimsensions(const T &) {
+        return size_t(1);
+    }
+
     template<typename T, std::enable_if_t<IsEigenType<T>, size_t> = 0>
     inline size_t GetDimsensions(const Eigen::EigenBase<T> &value) {
         return size_t(value.size());
@@ -135,6 +140,11 @@ namespace Bcg {
     template<typename T, std::enable_if_t<std::is_fundamental_v<T>, size_t> = 0>
     inline size_t GetDimsensionsBytes(const T &value) {
         return sizeof(value);
+    }
+
+    template<typename T, std::enable_if_t<!std::is_fundamental_v<T> && !IsEigenType<T>, size_t> = 0>
+    inline size_t GetDimsensionsBytes(const T &value) {
+        return size_t(1);
     }
 
     template<typename T>
@@ -276,12 +286,12 @@ namespace Bcg {
     }
 
     template<typename T>
-    PropertyVector<T>::Storage_t &PropertyVector<T>::storage() {
+    typename PropertyVector<T>::Storage_t &PropertyVector<T>::storage() {
         return m_storage;
     }
 
     template<typename T>
-    const PropertyVector<T>::Storage_t &PropertyVector<T>::storage() const {
+    const typename PropertyVector<T>::Storage_t &PropertyVector<T>::storage() const {
         return m_storage;
     }
 

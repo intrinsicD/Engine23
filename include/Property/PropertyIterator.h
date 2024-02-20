@@ -7,7 +7,7 @@
 
 #include <iterator>
 
-template<typename Container, typename HandleType = size_t>
+template<typename Container, typename HandleType>
 struct PropertyIterator {
     using iterator_category = std::bidirectional_iterator_tag;
 
@@ -54,22 +54,22 @@ HandleType PropertyIterator<Container, HandleType>::operator*() const {
 
 template<typename Container, typename HandleType>
 bool PropertyIterator<Container, HandleType>::operator==(PropertyIterator rhs) const {
-    return m_handle == rhs.handle;
+    return m_handle == rhs.m_handle;
 }
 
 template<typename Container, typename HandleType>
 bool PropertyIterator<Container, HandleType>::operator!=(PropertyIterator rhs) const {
-    return m_handle != rhs.handle;
+    return m_handle != rhs.m_handle;
 }
 
 template<typename Container, typename HandleType>
 bool PropertyIterator<Container, HandleType>::operator<(PropertyIterator rhs) const {
-    return m_handle < rhs.handle;
+    return m_handle < rhs.m_handle;
 }
 
 template<typename Container, typename HandleType>
 bool PropertyIterator<Container, HandleType>::operator>(PropertyIterator rhs) const {
-    return m_handle > rhs.handle;
+    return m_handle > rhs.m_handle;
 }
 
 template<typename Container, typename HandleType>
