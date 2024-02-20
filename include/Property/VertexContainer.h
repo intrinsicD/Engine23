@@ -14,30 +14,7 @@ namespace Bcg{
         using HandleBase::HandleBase;
     };
 
-    class VertexIterator {
-    public:
-        using iterator_category = std::bidirectional_iterator_tag;
-
-        explicit VertexIterator(VertexHandle handle, const VertexContainer *container = nullptr);
-
-        VertexHandle operator*() const;
-
-        bool operator==(VertexIterator rhs) const;
-
-        bool operator!=(VertexIterator rhs) const;
-
-        bool operator<(VertexIterator rhs) const;
-
-        bool operator>(VertexIterator rhs) const;
-
-        VertexIterator &operator++();
-
-        VertexIterator &operator--();
-
-    private:
-        VertexHandle m_handle;
-        const VertexContainer *m_container;
-    };
+    using VertexIterator = PropertyIterator<VertexContainer, VertexHandle>;
 
     class VertexContainer : public PropertyContainer {
     public:
@@ -49,9 +26,13 @@ namespace Bcg{
 
         void clear() override;
 
+        VertexIterator begin();
 
-        auto &&indices() { return PropertyContainer::indices<VertexIterator, VertexContainer>(); }
+        VertexIterator end();
 
+        VertexIterator begin() const;
+
+        VertexIterator end() const;
     };
 }
 

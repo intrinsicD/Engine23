@@ -27,7 +27,18 @@ add_library(Engine23Lib SHARED
         include/Property/PropertyContainer.h
         include/Property/PropertyIterator.h
         include/Property/VertexContainer.h
-        src/Property/VertexContainer.cpp)
+        src/Property/VertexContainer.cpp
+        include/Property/HalfedgeContainer.h
+        src/Property/HalfedgeContainer.cpp
+        include/Property/EdgeContainer.h
+        src/Property/EdgeContainer.cpp
+        include/Property/FaceContainer.h
+        src/Property/FaceContainer.cpp
+        src/Property/AbstractProperty.cpp
+        src/Property/PropertyContainer.cpp
+        src/PointCloud/PointCloud.cpp
+        include/Graph/Graph.h
+)
 
 add_subdirectory(app)
 add_subdirectory(platform)

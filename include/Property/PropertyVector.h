@@ -8,7 +8,7 @@
 #include "AbstractProperty.h"
 #include "PropertyUtils.h"
 
-namespace Bcg{
+namespace Bcg {
     template<typename T>
     class PropertyVector : public AbstractProperty {
     public:
@@ -81,6 +81,10 @@ namespace Bcg{
         [[nodiscard]] std::string to_string(size_t idx) const override;
 
         void set_column_names(std::string column_names);
+
+        Storage_t &storage();
+
+        const Storage_t &storage() const;
 
     protected:
         std::string m_column_names;
@@ -269,6 +273,16 @@ namespace Bcg{
             Print(ss, m_storage[i]) << "\n";
         }
         return ss.str();
+    }
+
+    template<typename T>
+    PropertyVector<T>::Storage_t &PropertyVector<T>::storage() {
+        return m_storage;
+    }
+
+    template<typename T>
+    const PropertyVector<T>::Storage_t &PropertyVector<T>::storage() const {
+        return m_storage;
     }
 
     // specialization for bool properties

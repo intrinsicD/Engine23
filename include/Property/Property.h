@@ -14,6 +14,7 @@ namespace Bcg {
     template<typename T>
     class Property {
     public:
+        using Storage_t = typename PropertyVector<T>::Storage_t;
         using Reference_t = typename PropertyVector<T>::Reference_t;
         using ConstReference_t = typename PropertyVector<T>::ConstReference_t;
         using Iterator_t = typename PropertyVector<T>::Iterator_t;
@@ -98,6 +99,10 @@ namespace Bcg {
         ConstIterator_t end() const;
 
         void set_column_names(std::string column_names);
+
+        Storage_t &storage();
+
+        const Storage_t &storage() const;
 
     protected:
 
@@ -236,6 +241,14 @@ namespace Bcg {
     template<typename T>
     void Property<T>::set_column_names(std::string column_names) {
         m_sptr->set_column_names(column_names);
+    }
+    template<typename T>
+    Property<T>::Storage_t &Property<T>::storage(){
+        return m_sptr->storage();
+    }
+    template<typename T>
+    const Property<T>::Storage_t &Property<T>::storage() const{
+        return get_const_sptr()->storage();
     }
 
     //------------------------------------------------------------------------------------------------------------------

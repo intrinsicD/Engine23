@@ -8,3 +8,4 @@ target_sources(Engine23Lib PRIVATE
 add_subdirectory(AABB)
 add_subdirectory(systems)
 add_subdirectory(Property)
+add_subdirectory(PointCloud)
