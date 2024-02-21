@@ -9,7 +9,6 @@
 #include "Mesh.h"
 
 namespace Bcg {
-
     struct MeshIoFlags {
         MeshIoFlags() = default;
 
@@ -45,10 +44,6 @@ namespace Bcg {
 
         bool read_pmp(Mesh &mesh);
 
-        bool read_xyz(Mesh &mesh);
-
-        bool read_agi(Mesh &mesh);
-
         bool write_off(Mesh &mesh);
 
         bool write_off_binary(Mesh &mesh);
@@ -60,8 +55,6 @@ namespace Bcg {
         bool write_ply(Mesh &mesh);
 
         bool write_pmp(Mesh &mesh);
-
-        bool write_xyz(Mesh &mesh);
 
     private:
         std::string m_filename;

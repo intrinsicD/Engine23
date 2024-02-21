@@ -36,6 +36,30 @@ add_library(Engine23Lib SHARED
         src/Property/PropertyContainer.cpp
         src/PointCloud/PointCloud.cpp
         include/Graph/Graph.h
+        include/Mesh/MeshReader.h
+        include/Mesh/MeshReaderOff.h
+        src/Mesh/MeshReader.cpp
+        src/Mesh/MeshReaderOff.cpp
+        include/Mesh/MeshReaderObj.h
+        src/Mesh/MeshReaderObj.cpp
+        include/Mesh/MeshReaderStl.h
+        src/Mesh/MeshReaderStl.cpp
+        include/Mesh/MeshReaderPly.h
+        src/Mesh/MeshReaderPly.cpp
+        include/Mesh/MeshReaderPmp.h
+        src/Mesh/MeshReaderPmp.cpp
+        include/Mesh/MeshWriter.h
+        include/Mesh/MeshWriterObj.h
+        src/Mesh/MeshWriterObj.cpp
+        include/Mesh/MeshWriterStl.h
+        src/Mesh/MeshWriterStl.cpp
+        include/Mesh/MeshWriterOff.h
+        src/Mesh/MeshWriterOff.cpp
+        include/Mesh/MeshWriterPly.h
+        src/Mesh/MeshWriterPly.cpp
+        include/Mesh/MeshWriterPmp.h
+        src/Mesh/MeshWriterPmp.cpp
+        src/Mesh/MeshWriter.cpp
 )
 
 add_subdirectory(app)
