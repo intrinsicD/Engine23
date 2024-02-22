@@ -876,6 +876,15 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
+
+    void VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride, const void *pointer){
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_FLOAT, normalized, stride,pointer);
+        attribute.enable();
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
+                              attribute.pointer);
+        OpenGL::AssertNoOglError();
+    }
+
     void VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized,
                                                 const void *pointer) {
         auto &attribute = layout.attributes.emplace_back(index, size, GL_FLOAT, normalized, size * sizeof(float),

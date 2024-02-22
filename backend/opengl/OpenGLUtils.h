@@ -172,6 +172,8 @@ namespace Bcg::OpenGL {
 
         void bind();
 
+        void set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride, const void *pointer);
+
         void set_float_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
 
         void set_double_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
