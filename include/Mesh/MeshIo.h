@@ -22,7 +22,7 @@ namespace Bcg {
     };
 
     struct MeshIo {
-        MeshIo(std::string filename, const MeshIoFlags &flags);
+        explicit MeshIo(std::string filename, const MeshIoFlags &flags = MeshIoFlags());
 
         bool read(Mesh &mesh);
 

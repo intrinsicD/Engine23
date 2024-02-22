@@ -1,6 +1,7 @@
 target_sources(Engine23Lib PRIVATE
         Mesh.cpp
         MeshIo.cpp
+        MeshGui.cpp
         MeshReader.cpp
         MeshReaderOff.cpp
         MeshReaderObj.cpp

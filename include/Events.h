@@ -48,12 +48,14 @@ namespace Bcg::Events{
 
     template<typename T>
     struct Load{
-
+        entt::entity entity_id;
+        std::string filepath;
     };
 
     template<typename T>
     struct Save{
-
+        entt::entity entity_id;
+        std::string filepath;
     };
 
     template<typename T>

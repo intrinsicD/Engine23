@@ -5,6 +5,7 @@ target_sources(Engine23Lib PRIVATE
         SystemEntity.cpp
         SystemHierarchy.cpp
         SystemLogger.cpp
+        SystemMesh.cpp
         SystemParallelProcessing.cpp
         SystemPlatform.cpp
         SystemPlugins.cpp
