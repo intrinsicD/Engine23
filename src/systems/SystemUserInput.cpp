@@ -111,8 +111,6 @@ namespace Bcg{
             for(auto &path : input.drop.paths){
                 Log::Info("Dropped: " + path).enqueue();
             }
-
-            input.drop.paths.clear();
         }
 
         void on_startup(const Events::Startup<Engine> &events) {

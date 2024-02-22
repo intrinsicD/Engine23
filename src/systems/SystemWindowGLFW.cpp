@@ -150,6 +150,7 @@ namespace Bcg{
                     input.drop.paths.emplace_back(paths[i]);
                 }
                 engine->dispatcher.trigger(Events::Update<Input::Drop>{});
+                input.drop.paths.clear();
             });
 
             engine->dispatcher.trigger(Events::Startup<Renderer>{});

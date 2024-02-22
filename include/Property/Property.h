@@ -98,6 +98,12 @@ namespace Bcg {
 
         ConstIterator_t end() const;
 
+        [[nodiscard]] std::string info() const;
+
+        [[nodiscard]] std::string to_string() const;
+
+        [[nodiscard]] std::string to_string(size_t idx) const;
+
         void set_column_names(std::string column_names);
 
         Storage_t &storage();
@@ -159,7 +165,7 @@ namespace Bcg {
     const T *Property<T>::get_ptr() const { return get_const_sptr()->get_ptr(); }
 
     template<typename T>
-    const void *Property<T>::get_void_ptr() const { return static_cast<void *>(get_ptr()); }
+    const void *Property<T>::get_void_ptr() const { return static_cast<const void *>(get_ptr()); }
 
     template<typename T>
     void Property<T>::swap(size_t i0, size_t i1) { m_sptr->swap(i0, i1); }
@@ -237,6 +243,20 @@ namespace Bcg {
         return std::const_pointer_cast<const PropertyVector<T>>(m_sptr);
     }
 
+    template<typename T>
+    [[nodiscard]] std::string Property<T>::info() const{
+        return get_const_sptr()->info();
+    }
+
+    template<typename T>
+    [[nodiscard]] std::string Property<T>::to_string() const{
+        return get_const_sptr()->to_string();
+    }
+
+    template<typename T>
+    [[nodiscard]] std::string Property<T>::to_string(size_t idx) const{
+        return get_const_sptr()->to_string(idx);
+    }
 
     template<typename T>
     void Property<T>::set_column_names(std::string column_names) {

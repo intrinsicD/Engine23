@@ -168,7 +168,7 @@ namespace Bcg {
     const T *PropertyVector<T>::get_ptr() const { return m_storage.data(); }
 
     template<typename T>
-    const void *PropertyVector<T>::get_void_ptr() const { return static_cast<const void *>(get_ptr()); }
+    const void *PropertyVector<T>::get_void_ptr() const { return (const void *)(get_ptr()); }
 
     template<typename T>
     void PropertyVector<T>::swap(size_t i0, size_t i1) {
