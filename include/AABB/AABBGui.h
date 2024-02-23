@@ -10,13 +10,11 @@
 #include "AABB.h"
 
 namespace Bcg {
-
     template<>
     struct ComponentGui<AABB3> {
         static void Show(entt::entity entity_id);
         static void Show(AABB3 &aabb);
     };
-
 }
 
 #endif //ENGINE23_AABBGUI_H

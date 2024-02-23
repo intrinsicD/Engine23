@@ -8,10 +8,18 @@ target_sources(Engine23Lib PRIVATE
         MeshReaderStl.cpp
         MeshReaderPly.cpp
         MeshReaderPmp.cpp
+        MeshFaceAreas.cpp
+        MeshFaceAreaVectors.cpp
+        MeshFaceNormals.cpp
+        MeshVertexNormalsUniform.cpp
+        MeshVertexNormalsAreaWeighted.cpp
+        MeshVertexNormalsAngleWeighted.cpp
+        MeshVertexNormalsAreaAngleHybrid.cpp
         MeshWriter.cpp
         MeshWriterOff.cpp
         MeshWriterObj.cpp
         MeshWriterStl.cpp
         MeshWriterPly.cpp
         MeshWriterPmp.cpp
+        SystemMesh.cpp
 )

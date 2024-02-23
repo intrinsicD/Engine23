@@ -4,7 +4,7 @@
 
 #include "MeshReaderObj.h"
 
-namespace Bcg{
+namespace Bcg {
     bool MeshReaderObj::read() {
         if (!MeshReader::read()) return false;
 
@@ -13,8 +13,8 @@ namespace Bcg{
         std::vector<VertexHandle> vertices;
         std::vector<Eigen::Vector<double, 2>> all_tex_coords; //individual texture coordinates
         std::vector<int> halfedge_tex_idx; //texture coordinates sorted for halfedges
-        auto positions = mesh.halfedges.get_or_add<Eigen::Vector<double, 3 >>("v_position");
-        auto normals = mesh.halfedges.get_or_add<Eigen::Vector<double, 3 >>("v_normal");
+        auto positions = mesh.vertices.get_or_add<Eigen::Vector<double, 3 >>("v_position");
+        auto normals = mesh.vertices.get_or_add<Eigen::Vector<double, 3 >>("v_normal");
         auto tex_coords = mesh.halfedges.get_or_add<Eigen::Vector<double, 2 >>("h_texcoord");
         bool with_tex_coord = false;
 
@@ -33,111 +33,114 @@ namespace Bcg{
             // comment
             if (s[0] == '#' || isspace(s[0])) {
                 continue;
-            }
+            } else {
+                v = mesh.add_vertex(Eigen::Vector<double, 3>(), positions);
 
-                // vertex
-            else if (strncmp(s, "v ", 2) == 0) {
-                if (sscanf(s, "v %lf %lf %lf", &x, &y, &z) == 3) {
-                    v = mesh.add_vertex(Eigen::Vector<double, 3>(x, y, z), positions);
-                }
-            }
-
-                // normal
-            else if (strncmp(s, "vn ", 3) == 0) {
-                if (sscanf(s, "vn %lf %lf %lf", &x, &y, &z) == 3) {
-                    // problematic as it can be either a vertex Property when interpolated
-                    // or a halfedge Property for hard edges
-                    normals[v] = Eigen::Vector<double, 3>(x, y, z);
-                }
-            }
-
-                // texture coordinate
-            else if (strncmp(s, "vt ", 3) == 0) {
-                auto result = sscanf(s, "vt %lf %lf", &x, &y);
-                if (result == 2) {
-                    all_tex_coords.emplace_back(x, y);
-                }
-            }
-
-                // face
-            else if (strncmp(s, "f ", 2) == 0) {
-                int component(0);
-                bool end_of_vertex(false);
-                char *p0, *p1(s + 1);
-
-                vertices.clear();
-                halfedge_tex_idx.clear();
-
-                // skip white-spaces
-                while (*p1 == ' ') {
-                    ++p1;
+                //vertex
+                if (strncmp(s, "v ", 2) == 0) {
+                    if (sscanf(s, "v %lf %lf %lf", &x, &y, &z) == 3) {
+                        positions[v] = Eigen::Vector<double, 3>(x, y, z);
+                    }
                 }
 
-                while (p1) {
-                    p0 = p1;
+                    // normal
+                else if (strncmp(s, "vn ", 3) == 0) {
+                    if (sscanf(s, "vn %lf %lf %lf", &x, &y, &z) == 3) {
+                        // problematic as it can be either a vertex Property when interpolated
+                        // or a halfedge Property for hard edges
+                        normals[v] = Eigen::Vector<double, 3>(x, y, z);
+                    }
+                }
 
-                    // overwrite next separator
+                    // texture coordinate
+                else if (strncmp(s, "vt ", 3) == 0) {
+                    auto result = sscanf(s, "vt %lf %lf", &x, &y);
+                    if (result == 2) {
+                        all_tex_coords.emplace_back(x, y);
+                    }
+                }
 
-                    // skip '/', '\n', ' ', '\0', '\r' <-- don't forget Windows
-                    while (*p1 != '/' && *p1 != '\r' && *p1 != '\n' && *p1 != ' ' && *p1 != '\0') {
+                    // face
+                else if (strncmp(s, "f ", 2) == 0) {
+                    int component(0);
+                    bool end_of_vertex(false);
+                    char *p0, *p1(s + 1);
+
+                    vertices.clear();
+                    halfedge_tex_idx.clear();
+
+                    // skip white-spaces
+                    while (*p1 == ' ') {
                         ++p1;
                     }
 
-                    // detect end of vertex
-                    if (*p1 != '/') {
-                        end_of_vertex = true;
-                    }
+                    while (p1) {
+                        p0 = p1;
 
-                    // replace separator by '\0'
-                    if (*p1 != '\0') {
-                        *p1 = '\0';
-                        p1++; // point to next token
-                    }
+                        // overwrite next separator
 
-                    // detect end of line and break
-                    if (*p1 == '\0' || *p1 == '\n') {
-                        p1 = nullptr;
-                    }
+                        // skip '/', '\n', ' ', '\0', '\r' <-- don't forget Windows
+                        while (*p1 != '/' && *p1 != '\r' && *p1 != '\n' && *p1 != ' ' && *p1 != '\0') {
+                            ++p1;
+                        }
 
-                    // read next vertex component
-                    if (*p0 != '\0') {
-                        switch (component) {
-                            case 0: // vertex
-                            {
-                                vertices.emplace_back(atoi(p0) - 1);
-                                break;
+                        // detect end of vertex
+                        if (*p1 != '/') {
+                            end_of_vertex = true;
+                        }
+
+                        // replace separator by '\0'
+                        if (*p1 != '\0') {
+                            *p1 = '\0';
+                            p1++; // point to next token
+                        }
+
+                        // detect end of line and break
+                        if (*p1 == '\0' || *p1 == '\n') {
+                            p1 = nullptr;
+                        }
+
+                        // read next vertex component
+                        if (*p0 != '\0') {
+                            switch (component) {
+                                case 0: // vertex
+                                {
+                                    vertices.emplace_back(atoi(p0) - 1);
+                                    break;
+                                }
+                                case 1: // texture coord
+                                {
+                                    int idx = atoi(p0) - 1;
+                                    halfedge_tex_idx.push_back(idx);
+                                    with_tex_coord = true;
+                                    break;
+                                }
+                                case 2: // normal
+                                    break;
                             }
-                            case 1: // texture coord
-                            {
-                                int idx = atoi(p0) - 1;
-                                halfedge_tex_idx.push_back(idx);
-                                with_tex_coord = true;
-                                break;
-                            }
-                            case 2: // normal
-                                break;
+                        }
+
+                        ++component;
+
+                        if (end_of_vertex) {
+                            component = 0;
+                            end_of_vertex = false;
                         }
                     }
 
-                    ++component;
+                    FaceHandle f = mesh.add_face(vertices);
 
-                    if (end_of_vertex) {
-                        component = 0;
-                        end_of_vertex = false;
-                    }
-                }
-
-                FaceHandle f = mesh.add_face(vertices);
-
-                // add texture coordinates
-                if (with_tex_coord && f.is_valid()) {
-                    unsigned v_idx = 0;
-                    for (const auto h: mesh.get_halfedges(f)) {
-                        tex_coords[h] = all_tex_coords[halfedge_tex_idx[v_idx]];
-                        ++v_idx;
+                    // add texture coordinates
+                    if (with_tex_coord && f.is_valid()) {
+                        unsigned v_idx = 0;
+                        for (const auto h: mesh.get_halfedges(f)) {
+                            tex_coords[h] = all_tex_coords[halfedge_tex_idx[v_idx]];
+                            ++v_idx;
+                        }
                     }
                 }
             }
+
             // clear line
             memset(&s, 0, 200);
         }

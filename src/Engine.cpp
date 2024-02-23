@@ -43,6 +43,8 @@ namespace Bcg {
         SystemTransform::pre_init();
         SystemTriMesh::pre_init();
         SystemHierarchy::pre_init();
+        SystemAABB::pre_init();
+        SystemMesh::pre_init();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
@@ -62,6 +64,8 @@ namespace Bcg {
         SystemTransform::init();
         SystemTriMesh::init();
         SystemHierarchy::init();
+        SystemAABB::init();
+        SystemMesh::init();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info(fmt::format("Engine: Constructor took {} seconds",

@@ -9,7 +9,7 @@
 
 namespace Bcg{
     void ComponentGui<AABB3>::Show(entt::entity entity_id) {
-        if (Engine::State().all_of<AABB3>(entity_id)) {
+        if (entity_id != entt::null && Engine::State().all_of<AABB3>(entity_id)) {
             ComponentGui<AABB3>::Show(Engine::State().get<AABB3>(entity_id));
         }
     }

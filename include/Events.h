@@ -5,6 +5,8 @@
 #ifndef ENGINE23_EVENTS_H
 #define ENGINE23_EVENTS_H
 
+#include "entt/entity/entity.hpp"
+
 namespace Bcg::Events{
     template<typename T>
     struct Startup{
@@ -18,7 +20,7 @@ namespace Bcg::Events{
 
     template<typename T>
     struct Update{
-
+        entt::entity entity_id = entt::null;
     };
 
     template<typename T>
@@ -48,13 +50,13 @@ namespace Bcg::Events{
 
     template<typename T>
     struct Load{
-        entt::entity entity_id;
+        entt::entity entity_id = entt::null;
         std::string filepath;
     };
 
     template<typename T>
     struct Save{
-        entt::entity entity_id;
+        entt::entity entity_id = entt::null;
         std::string filepath;
     };
 

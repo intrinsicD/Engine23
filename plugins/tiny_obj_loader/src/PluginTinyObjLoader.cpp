@@ -15,6 +15,7 @@
 #include "components/Input.h"
 #include "AABB.h"
 #include "Mesh.h"
+#include "MeshVertexNormalsAreaAngleHybrid.h"
 #include "Eigen/Geometry"
 #include "PropertyEigenMap.h"
 #include "components/Transform.h"
@@ -136,8 +137,6 @@ namespace Bcg {
                     if (vertices[0] != vertices[1] && vertices[0] != vertices[2] &&
                         vertices[1] != vertices[2]) {
                         mesh.faces.indices.push_back(vertices);
-                        Log::Info(
-                                fmt::format("f[{}]: ({}, {}, {})", f, vertices[0], vertices[1], vertices[2])).enqueue();
                     }
                     if (normals[0] != normals[1] && normals[0] != normals[2] &&
                         normals[1] != normals[2]) {
@@ -166,6 +165,7 @@ namespace Bcg {
             for (size_t i = 0; i < mesh.vertices.normals.size(); i++) {
                 mesh.vertices.normals[i] = glm::normalize(mesh.vertices.normals[i]);
             }
+
 
             entt::entity entity_id;
             Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&entity_id});
@@ -268,11 +268,6 @@ namespace Bcg {
             auto &shapes = reader.GetShapes();
             auto &materials = reader.GetMaterials();
 
-            Log::Info(fmt::format("# of vertices  = {}", attrib.vertices.size() / 3)).enqueue();
-            Log::Info(fmt::format("# of normals   = {}", attrib.normals.size() / 3)).enqueue();
-            Log::Info(fmt::format("# of texcoords = {}", attrib.texcoords.size() / 2)).enqueue();
-            Log::Info(fmt::format("# of shapes    = {}", shapes.size())).enqueue();
-            Log::Info(fmt::format("# of materials = {}", materials.size())).enqueue();
             //print number of faces
             for (size_t s = 0; s < shapes.size(); s++) {
                 Log::Info(fmt::format("# of faces in shape[{}] = {}", s,
@@ -284,22 +279,13 @@ namespace Bcg {
             auto positions = mesh.vertices.get_or_add<Eigen::Vector<double, 3>>("v_position");
             auto normals = mesh.vertices.get_or_add<Eigen::Vector<double, 3>>("v_normal");
             auto colors = mesh.vertices.get_or_add<Eigen::Vector<double, 3>>("v_color");
-            AABB3 aabb;
+
             mesh.vertices.reserve(attrib.vertices.size() / 3);
 
             for (size_t i = 0; i < attrib.vertices.size() / 3; i++) {
                 auto point = Eigen::Vector<double, 3>(attrib.vertices[3 * i + 0], attrib.vertices[3 * i + 1],
                                                       attrib.vertices[3 * i + 2]);
                 mesh.add_vertex(point, positions);
-
-                aabb.grow(point);
-            }
-
-            auto scaling = aabb.max.cwiseMax(-aabb.min).maxCoeff();
-
-            auto center = aabb.center();
-            for (auto v: mesh.vertices) {
-                positions[v] = (positions[v] - center) / scaling;
             }
 
             for (size_t i = 0; i < attrib.normals.size() / 3; i++) {
@@ -344,30 +330,26 @@ namespace Bcg {
 
             //compute the normals from the vertices and faces
             auto triangles = mesh.get_triangles();
-            for (auto f: mesh.faces) {
-                auto v0 = positions[triangles[f][0]];
-                auto v1 = positions[triangles[f][1]];
-                auto v2 = positions[triangles[f][2]];
-                auto normal = (v1 - v0).cross(v2 - v0).normalized();
 
-                for (size_t v = 0; v < 3; v++) {
-                    normals[triangles[f][v]] += normal;
-                }
-            }
-
-            for (auto v: mesh.vertices) {
-                normals[v].normalize();
-            }
-            Log::Info(fmt::format("{}\n{}", positions.info(), positions.to_string())).enqueue();
-            Log::Info(fmt::format("{}\n{}", triangles.info(), triangles.to_string())).enqueue();
+            normals = MeshVertexNormalsAreaAngleHybrid(mesh);
 
             entt::entity entity_id;
             Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&entity_id});
+            Engine::State().emplace<Mesh>(entity_id, mesh);
+            Engine::Instance()->dispatcher.trigger(Events::Update<AABB3>{entity_id});
+            auto &aabb = Engine::State().get<AABB3>(entity_id);
+            auto scaling = aabb.max.cwiseMax(-aabb.min).maxCoeff();
+
+            auto center = aabb.center();
+            for (auto v: mesh.vertices) {
+                positions[v] = (positions[v] - center) / scaling;
+            }
+
             auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id);
-            Engine::State().emplace<AABB3>(entity_id, aabb);
+
             Engine::State().emplace<Transform>(entity_id);
             Engine::State().emplace<EntityName>(entity_id, filepath);
-            Engine::State().emplace<Mesh>(entity_id, mesh);
+
             RenderCommand render_command;
             render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
                 auto &camera = Engine::Context().get<Camera>();
@@ -400,7 +382,6 @@ namespace Bcg {
             Eigen::Matrix<float, 3, -1> normals_float = Map(normals).transpose().cast<float>();
             unsigned int size_in_bytes = positions_float.size() * sizeof(float);
             renderable_triangles.vbo.set_data(nullptr, 2 * size_in_bytes);
-            Log::Info(fmt::format("pos size_in_bytes: {}", size_in_bytes)).enqueue();
 
             renderable_triangles.vbo.set_sub_data(positions_float.data(), size_in_bytes, 0);
             renderable_triangles.vbo.set_sub_data(normals_float.data(), size_in_bytes, size_in_bytes);
@@ -414,8 +395,6 @@ namespace Bcg {
 
             renderable_triangles.ebo.bind();
             renderable_triangles.ebo.set_data(triangles.get_void_ptr(), triangles.get_size_bytes());
-
-            Log::Info(fmt::format("tris size_in_bytes: {}", triangles.get_size_bytes())).enqueue();
 
             renderable_triangles.vao.set_float_attribute(0, positions.get_dims(), false, (void *) 0);
             renderable_triangles.vao.set_float_attribute(1, normals.get_dims(), false, (void *) (size_in_bytes));

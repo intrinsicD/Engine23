@@ -20,7 +20,7 @@ namespace Bcg{
     struct GuiMenu;
     struct Plugin;
     struct Renderer;
-    template<typename T, int N>
+    template<typename T=double, int N = 3>
     class AABB;
     struct Hierarchy;
     class PointCloud;

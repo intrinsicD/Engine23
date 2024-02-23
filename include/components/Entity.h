@@ -6,6 +6,7 @@
 #define ENGINE23_ENTITY_H
 
 #include "ComponentGui.h"
+#include "Mesh.h"
 #include "entt/entity/registry.hpp"
 
 namespace Bcg {
@@ -33,6 +34,11 @@ namespace Bcg {
         }
 
         template<typename T>
+        T &replace(T &&t) {
+            return registry.replace<T>(id, std::forward<T>(t));
+        }
+
+        template<typename T>
         T &get() {
             return registry.get<T>(id);
         }
@@ -46,6 +52,47 @@ namespace Bcg {
         T &remove() {
             return registry.remove<T>(id);
         }
+
+        [[nodiscard]] VertexContainer *vertices() const {
+            if (Engine::State().all_of<Mesh>(id)) {
+                return &Engine::State().get<Mesh>(id).vertices;
+            } else if (Engine::State().all_of<Graph>(id)) {
+                return &Engine::State().get<Graph>(id).vertices;
+            } else if (Engine::State().all_of<PointCloud>(id)) {
+                return &Engine::State().get<PointCloud>(id).vertices;
+            } else {
+                return nullptr;
+            }
+        }
+
+        [[nodiscard]] HalfedgeContainer *halfedges() const {
+            if (Engine::State().all_of<Mesh>(id)) {
+                return &Engine::State().get<Mesh>(id).halfedges;
+            } else if (Engine::State().all_of<Graph>(id)) {
+                return &Engine::State().get<Graph>(id).halfedges;
+            } else {
+                return nullptr;
+            }
+        }
+
+        [[nodiscard]] EdgeContainer *edges() const {
+            if (Engine::State().all_of<Mesh>(id)) {
+                return &Engine::State().get<Mesh>(id).edges;
+            } else if (Engine::State().all_of<Graph>(id)) {
+                return &Engine::State().get<Graph>(id).edges;
+            } else {
+                return nullptr;
+            }
+        }
+
+        [[nodiscard]] FaceContainer *faces() const {
+            if (Engine::State().all_of<Mesh>(id)) {
+                return &Engine::State().get<Mesh>(id).faces;
+            } else {
+                return nullptr;
+            }
+        }
+
     };
 
     template<>

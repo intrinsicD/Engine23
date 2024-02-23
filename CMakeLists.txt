@@ -60,6 +60,25 @@ add_library(Engine23Lib SHARED
         include/Mesh/MeshWriterPmp.h
         src/Mesh/MeshWriterPmp.cpp
         src/Mesh/MeshWriter.cpp
+        include/AABB/SystemAABB.h
+        src/AABB/SystemAABB.cpp
+        include/Mesh/MeshVertexNormalsUniform.h
+        src/Mesh/MeshVertexNormalsUniform.cpp
+        include/Mesh/MeshFaceAreaVectors.h
+        src/Mesh/MeshFaceAreaVectors.cpp
+        include/Mesh/MeshFaceNormals.h
+        src/Mesh/MeshFaceNormals.cpp
+        include/Mesh/MeshVertexNormalsAreaWeighted.h
+        src/Mesh/MeshVertexNormalsAreaWeighted.cpp
+        include/Mesh/MeshFaceAreas.h
+        src/Mesh/MeshFaceAreas.cpp
+        include/Mesh/MeshVertexNormalsAngleWeighted.h
+        src/Mesh/MeshVertexNormalsAngleWeighted.cpp
+        include/SafeAcos.h
+        src/SafeAcos.cpp
+        include/SafeAngle.h
+        include/Mesh/MeshVertexNormalsAreaAngleHybrid.h
+        src/Mesh/MeshVertexNormalsAreaAngleHybrid.cpp
 )
 
 add_subdirectory(app)

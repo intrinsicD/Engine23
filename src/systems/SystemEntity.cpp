@@ -46,7 +46,7 @@ namespace Bcg {
                 auto &picker = Engine::Context().get<Picker>();
                 *event.return_value = SystemEntity::create_entity();
                 picker.id.entity =  *event.return_value;
-                Log::Info(fmt::format("Entity created: %zu", static_cast<size_t>(*event.return_value))).enqueue();
+                Log::Info(fmt::format("Entity {} created", static_cast<size_t>(*event.return_value))).enqueue();
             } else {
                 Log::Error("Entity creation failed, event return pointer is nullptr").enqueue();
             }
@@ -54,7 +54,7 @@ namespace Bcg {
 
         void on_destroy(const Events::Destroy<entt::entity> &event) {
             SystemEntity::destroy_entity(*event.value);
-            Log::Info(fmt::format("Entity destroyed: %zu", static_cast<size_t>(*event.value))).enqueue();
+            Log::Info(fmt::format("Entity {} destroyed", static_cast<size_t>(*event.value))).enqueue();
         }
 
         void show_gui_entity(entt::entity entity) {

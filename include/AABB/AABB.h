@@ -9,7 +9,7 @@
 #include <limits>
 
 namespace Bcg {
-    template<typename T=double, int N = 3>
+    template<typename T, int N>
     class AABB {
     public:
         AABB() = default;
@@ -17,24 +17,23 @@ namespace Bcg {
         AABB(const Eigen::Vector <T, N> &min, const Eigen::Vector <T, N> &max) : min(min), max(max) {}
 
         template<int M = -1>
-        AABB &grow(const Eigen::Matrix <T, M,  N> &points) {
+        AABB &grow(const Eigen::Matrix <T, M, N> &points) {
             min = min.cwiseMin(points.colwise().minCoeff());
             max = max.cwiseMax(points.colwise().maxCoeff());
             return *this;
         }
 
         template<int M = -1>
-        AABB &grow(const Eigen::Matrix <T, N,  M> &points) {
+        AABB &grow(const Eigen::Matrix <T, N, M> &points) {
             min = min.cwiseMin(points.rowwise().minCoeff());
             max = max.cwiseMax(points.rowwise().maxCoeff());
             return *this;
         }
 
-
-        template<int M = -1>
-        AABB &fit(const Eigen::Matrix<T, M, N> &points){
-            min = points.colwise().minCoeff();
-            max = points.colwise().maxCoeff();
+        template<typename Derived>
+        AABB &fit(const Eigen::EigenBase <Derived> &points) {
+            min = points.derived().colwise().minCoeff();
+            max = points.derived().colwise().maxCoeff();
             return *this;
         }
 
@@ -53,13 +52,13 @@ namespace Bcg {
         }
 
         void set_center(const Eigen::Vector <T, N> &center) {
-            Eigen::Vector <T, N> halfextent = this->halfextent();
+            Eigen::Vector<T, N> halfextent = this->halfextent();
             min = center - halfextent;
             max = center + halfextent;
         }
 
         void set_halfextent(const Eigen::Vector <T, N> &halfextent) {
-            Eigen::Vector <T, N> center = this->center();
+            Eigen::Vector<T, N> center = this->center();
             min = center - halfextent;
             max = center + halfextent;
         }
