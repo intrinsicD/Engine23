@@ -52,12 +52,12 @@ namespace Bcg {
 
         void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemHierarchyInternal::on_render_gui_menu>();
-            Log::Info(SystemHierarchy::name() + ": Startup").enqueue();
+            Log::Info(SystemHierarchy::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemHierarchyInternal::on_render_gui_menu>();
-            Log::Info(SystemHierarchy::name() + ": Shutdown").enqueue();
+            Log::Info(SystemHierarchy::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -199,10 +199,10 @@ namespace Bcg {
     void SystemHierarchy::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemHierarchyInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemHierarchyInternal::on_shutdown>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemHierarchy::remove() {
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

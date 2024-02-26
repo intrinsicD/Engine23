@@ -143,7 +143,7 @@ namespace Bcg {
                 opengl_config.renderer = (const char *) glGetString(GL_RENDERER);
                 opengl_config.version = (const char *) glGetString(GL_VERSION);
                 opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-                Log::Info(SystemRendererOpenGL::name() + ": Startup").enqueue();
+                Log::Info(SystemRendererOpenGL::name() , "Startup").enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL version:      " + opengl_config.version).enqueue();
@@ -171,7 +171,7 @@ namespace Bcg {
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
-            Log::Info(SystemRendererOpenGL::name() + ": Shutdown").enqueue();
+            Log::Info(SystemRendererOpenGL::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -213,7 +213,7 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().connect<&SystemRendererOpenGLInternal::on_startup_renderer>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().connect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
 
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
         SystemShaderPrograms().init();
         SystemBuffers().init();
     }
@@ -225,7 +225,7 @@ namespace Bcg {
                 Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<
                 Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 
 }

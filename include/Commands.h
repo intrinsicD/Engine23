@@ -106,7 +106,6 @@ namespace Bcg {
             virtual void enqueue();
 
             int execute() override;
-
         };
 
         struct Always : public Message {
@@ -119,6 +118,8 @@ namespace Bcg {
 
         struct Info : public Message {
             explicit Info(std::string message);
+
+            explicit Info(std::string action, std::string message);
 
             ~Info() override = default;
 

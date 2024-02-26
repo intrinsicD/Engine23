@@ -172,7 +172,8 @@ namespace Bcg::OpenGL {
 
         void bind();
 
-        void set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride, const void *pointer);
+        void set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride,
+                                 const void *pointer);
 
         void set_float_attribute(unsigned int index, unsigned int size, bool normalized, const void *pointer);
 
@@ -218,7 +219,7 @@ namespace Bcg::OpenGL {
     };
 }
 
-namespace Bcg{
+namespace Bcg {
     template<>
     struct ComponentGui<OpenGL::Shader> {
         static void Show(OpenGL::Shader &shader);
@@ -289,11 +290,11 @@ namespace Bcg{
         static void Show(OpenGL::RenderablePoints &renderable);
     };
 
-    struct ShaderStage{
+    struct ShaderStage {
         OpenGL::Shader shader;
     };
 
-    struct Material{
+    struct Material {
 
     };
 }

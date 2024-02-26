@@ -171,9 +171,11 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemEntityInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
+            Log::Info(SystemEntity::name(), "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
+            Log::Info(SystemEntity::name(), "Shutdown").enqueue();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemEntityInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
@@ -212,12 +214,12 @@ namespace Bcg {
     void SystemEntity::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemEntityInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemEntityInternal::on_shutdown_engine>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemEntity::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemEntityInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemEntityInternal::on_shutdown_engine>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

@@ -42,7 +42,7 @@ namespace Bcg {
             time.engine_run_start = Time::Point::Now();
             time.mainloop.current = Time::Point::Now();
             time.simulationloop.avg_duration = time.simulationloop.min_step_size;
-            Log::Info(SystemTimer::name() + ": Startup").enqueue();
+            Log::Info(SystemTimer::name() , "Startup").enqueue();
         }
 
         void on_begin_simulation_loop(const Events::Begin<SimulationLoop> &event) {
@@ -140,7 +140,7 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().connect<&SystemTimerInternal::on_end_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().connect<&SystemTimerInternal::on_begin_main_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&SystemTimerInternal::on_end_main_loop>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemTimer::remove() {
@@ -150,6 +150,6 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().disconnect<&SystemTimerInternal::on_end_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().disconnect<&SystemTimerInternal::on_begin_main_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().disconnect<&SystemTimerInternal::on_end_main_loop>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

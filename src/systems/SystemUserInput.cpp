@@ -117,14 +117,14 @@ namespace Bcg{
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
-            Log::Info(SystemUserInput::name() + ": Startup").enqueue();
+            Log::Info(SystemUserInput::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &events) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
-            Log::Info(SystemUserInput::name() + ": Shutdown").enqueue();
+            Log::Info(SystemUserInput::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -146,12 +146,12 @@ namespace Bcg {
     void SystemUserInput::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemUserInputInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemUserInputInternal::on_shutdown>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemUserInput::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemUserInputInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemUserInputInternal::on_shutdown>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

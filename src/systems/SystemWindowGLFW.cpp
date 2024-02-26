@@ -73,7 +73,7 @@ namespace Bcg{
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
             if (!Engine::Instance()->state.ctx().find<Window>()) {
-                Log::Info(SystemWindowGLFW::name() + ": Started").enqueue();
+                Log::Info(SystemWindowGLFW::name(), "Startup").enqueue();
                 Engine::Instance()->state.ctx().emplace<Window>();
             }
             auto *engine = Engine::Instance();
@@ -206,7 +206,7 @@ namespace Bcg {
         engine->dispatcher.sink<Events::Shutdown<Engine>>().connect<SystemWindowGLFWInternal::on_shutdown_engine>();
         engine->dispatcher.sink<Events::End<MainLoop>>().connect<SystemWindowGLFWInternal::on_end_main_loop>();
 
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemWindowGLFW::remove() {
@@ -214,7 +214,7 @@ namespace Bcg {
         engine->dispatcher.sink<Events::Startup<Engine>>().disconnect<SystemWindowGLFWInternal::on_startup_engine>();
         engine->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<SystemWindowGLFWInternal::on_shutdown_engine>();
         engine->dispatcher.sink<Events::End<MainLoop>>().disconnect<SystemWindowGLFWInternal::on_end_main_loop>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
 
         glfwTerminate();
     }

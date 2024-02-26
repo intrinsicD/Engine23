@@ -384,7 +384,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
             SystemCamera::make_arc_ball_camera();
-            Log::Info(SystemCamera::name() + ": Startup").enqueue();
+            Log::Info(SystemCamera::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
@@ -394,7 +394,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().disconnect<&on_update_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().disconnect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&on_render_gui_menu>();
-            Log::Info(SystemCamera::name() + ": Shutdown").enqueue();
+            Log::Info(SystemCamera::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -406,7 +406,7 @@ namespace Bcg {
 
 namespace Bcg {
     std::string SystemCamera::name() {
-        return "camera";
+        return "SystemCamera";
     }
 
     void SystemCamera::make_arc_ball_camera() {
@@ -429,9 +429,11 @@ namespace Bcg {
         camera.set_position(glm::vec3(0.0f, 0.0f, 3.0f));
         camera.set_target(glm::vec3(0.0f, 0.0f, 0.0f));
         camera.set_worldup(glm::vec3(0.0f, 1.0f, 0.0f));
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemCamera::remove() {
+        Log::Info("Removed", name()).enqueue();
         //unregister event handlers
         Engine::Instance()->dispatcher.sink<Events::Startup<
                 Engine >>().disconnect<&SystemCameraInternal::on_startup>();

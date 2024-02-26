@@ -74,7 +74,8 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
-/*
+        SystemAABB::remove();
+        SystemAABB::remove();
         SystemHierarchy::remove();
         SystemTriMesh::remove();
         SystemTransform::remove();
@@ -95,7 +96,7 @@ namespace Bcg {
 
         SystemCommandBuffers::remove();
 
-        entt::locator<Engine *>::reset();*/
+        entt::locator<Engine *>::reset();
     }
 
     void Engine::run() {

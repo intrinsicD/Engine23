@@ -54,7 +54,7 @@ namespace Bcg {
             Engine::State().on_construct<Mesh>().connect<&SystemMeshInternal::on_construct>();
             Engine::State().on_update<Mesh>().connect<&SystemMeshInternal::on_update>();
             Engine::State().on_destroy<Mesh>().connect<&SystemMeshInternal::on_destroy>();
-            Log::Info(SystemMesh::name() + ": Startup").enqueue();
+            Log::Info(SystemMesh::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
@@ -64,7 +64,7 @@ namespace Bcg {
             Engine::State().on_construct<Mesh>().disconnect<&SystemMeshInternal::on_construct>();
             Engine::State().on_update<Mesh>().disconnect<&SystemMeshInternal::on_update>();
             Engine::State().on_destroy<Mesh>().disconnect<&SystemMeshInternal::on_destroy>();
-            Log::Info(SystemMesh::name() + ": Shutdown").enqueue();
+            Log::Info(SystemMesh::name() , "Shutdown").enqueue();
         }
 
         void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
@@ -153,12 +153,12 @@ namespace Bcg {
     void SystemMesh::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemMeshInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemMeshInternal::on_shutdown>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemMesh::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemMeshInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemMeshInternal::on_shutdown>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

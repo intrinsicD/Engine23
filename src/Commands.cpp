@@ -103,7 +103,7 @@ namespace Bcg {
 
     namespace Log {
         Message::Message(std::string type, std::string color, std::string message, double time_stamp) : Command(
-                fmt::format("[{}] {}{}\033[0m[{}]", type, color, message, time_stamp)) {}
+                fmt::format("[{}] [{}] {}{}\033[0m", time_stamp, type, color, message)) {}
 
         Message::Message(std::string name) : Command(std::move(name)) {}
 
@@ -118,8 +118,8 @@ namespace Bcg {
         }
 
         Always::Always(std::string message) : Message("Always", "\033[1;32m", message,
-                                                  Time::Point::Now().duration<Time::Unit::seconds>(
-                                                          Engine::State().ctx().get<Time>().engine_constructor_start)) {}
+                                                      Time::Point::Now().duration<Time::Unit::seconds>(
+                                                              Engine::State().ctx().get<Time>().engine_constructor_start)) {}
 
         void Always::enqueue() {
             Message::enqueue();
@@ -128,6 +128,12 @@ namespace Bcg {
         Info::Info(std::string message) : Message("Info", "\033[1;32m", message,
                                                   Time::Point::Now().duration<Time::Unit::seconds>(
                                                           Engine::State().ctx().get<Time>().engine_constructor_start)) {}
+
+        Info::Info(std::string action, std::string message) : Message("Info", "\033[1;32m", action + ": " + message,
+                                                                      Time::Point::Now().duration<Time::Unit::seconds>(
+                                                                              Engine::State().ctx().get<Time>().engine_constructor_start)) {
+
+        }
 
         void Info::enqueue() {
             if (Engine::State().ctx().get<LogLevel>() < LogLevel::Info) return;

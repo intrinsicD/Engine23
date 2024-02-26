@@ -55,12 +55,12 @@ namespace Bcg {
 
         void on_startup_engine(const Events::Startup<Engine> &event){
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemBuffersInternal::on_render_gui_menu>();
-            Log::Info(SystemBuffers::name() + ": Startup").enqueue();
+            Log::Info(SystemBuffers::name() , "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event){
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemBuffersInternal::on_render_gui_menu>();
-            Log::Info(SystemBuffers::name() + ": Shutdown").enqueue();
+            Log::Info(SystemBuffers::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -80,11 +80,11 @@ namespace Bcg {
 
     void SystemBuffers::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemBuffersInternal::on_startup_engine>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemBuffers::remove() {
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemBuffersInternal::on_shutdown_engine>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

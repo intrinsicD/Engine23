@@ -44,11 +44,11 @@ namespace Bcg{
     }
 
     void SystemPointCloud::init(){
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemPointCloud::remove(){
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 
     void ComponentGui<PointCloud>::Show(entt::entity entity_id) {

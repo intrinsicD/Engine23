@@ -61,11 +61,11 @@ namespace Bcg{
         }
 
         void on_startup(const Events::Startup<Engine> &event){
-            Log::Info(SystemCommandBuffers::name() + ": Startup").enqueue();
+            Log::Info(SystemCommandBuffers::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event){
-            Log::Info(SystemCommandBuffers::name() + ": Shutdown").enqueue();
+            Log::Info(SystemCommandBuffers::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -101,7 +101,7 @@ namespace Bcg{
         Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemCommandBuffers::remove(){
@@ -110,6 +110,6 @@ namespace Bcg{
         Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
         Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

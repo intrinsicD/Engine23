@@ -71,7 +71,7 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Log::Info(SystemShaderPrograms::name() + ": Startup").enqueue();;
+            Log::Info(SystemShaderPrograms::name() , "Startup").enqueue();;
             auto point_cloud_program = SystemShaderPrograms::load_program(
                     std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
                     "programs/point_cloud/point_cloud_vs.glsl",
@@ -91,7 +91,7 @@ namespace Bcg {
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_render_gui_menu>();
-            Log::Info(SystemShaderPrograms::name() + ": Shutdown").enqueue();
+            Log::Info(SystemShaderPrograms::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -268,13 +268,13 @@ namespace Bcg {
     void SystemShaderPrograms::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemShaderProgramsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemShaderProgramsInternal::on_shutdown>();
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemShaderPrograms::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemShaderProgramsInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemShaderProgramsInternal::on_shutdown>();
         Engine::Context().erase<OpenGL::ShaderPrograms>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

@@ -64,12 +64,12 @@ namespace Bcg {
 
         void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemPlatformInternal::on_render_gui_menu>();
-            Log::Info(SystemPlatform::name() + ": Startup").enqueue();
+            Log::Info(SystemPlatform::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemPlatformInternal::on_render_gui_menu>();
-            Log::Info(SystemPlatform::name() + ": Shutdown").enqueue();
+            Log::Info(SystemPlatform::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -136,6 +136,6 @@ namespace Bcg {
     void SystemPlatform::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPlatformInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPlatformInternal::on_shutdown>();
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

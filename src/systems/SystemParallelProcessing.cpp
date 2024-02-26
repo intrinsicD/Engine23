@@ -112,13 +112,13 @@ namespace Bcg {
         void on_startup_engine(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_render_gui_menu>();
 
-            Log::Info(SystemParallelProcessing::name() + ": Startup").enqueue();
+            Log::Info(SystemParallelProcessing::name() , "Startup").enqueue();
             SystemParallelProcessing::start(std::thread::hardware_concurrency() - 1);
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             SystemParallelProcessing::stop();
-            Log::Info(SystemParallelProcessing::name() + ": Shutdown").enqueue();
+            Log::Info(SystemParallelProcessing::name() , "Shutdown").enqueue();
         }
     }
 }
@@ -141,14 +141,14 @@ namespace Bcg {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemParallelProcessingInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemParallelProcessingInternal::on_shutdown_engine>();
 
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemParallelProcessing::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemParallelProcessingInternal::on_startup_engine>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemParallelProcessingInternal::on_shutdown_engine>();
 
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 
 

@@ -42,10 +42,10 @@ namespace Bcg {
     }
 
     void SystemVertexArrayObject::init() {
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemVertexArrayObject::remove() {
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }

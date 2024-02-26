@@ -52,10 +52,10 @@ namespace Bcg {
     }
 
     void PluginComputeShaderNormals::init() {
-        Log::Info(name() + ": Initialized").enqueue();
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void PluginComputeShaderNormals::remove() {
-        Log::Info(name() + ": Removed").enqueue();
+        Log::Info("Removed", name()).enqueue();
     }
 }
