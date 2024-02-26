@@ -16,9 +16,9 @@ namespace Bcg {
         std::unordered_map<std::string, std::vector<std::function<void()>>> items;
         std::unordered_map<std::string, std::chrono::file_clock::time_point> last_write_times;
 
-        void add(std::string filepath, std::function<void()> callback);
+        void add(const std::string& filepath, const std::function<void()>& callback);
 
-        void remove(std::string filepath);
+        void remove(const std::string& filepath);
 
         void clear();
 

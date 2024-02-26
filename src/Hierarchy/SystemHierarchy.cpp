@@ -2,11 +2,13 @@
 // Created by alex on 19.01.24.
 //
 
-#include "systems/SystemHierarchy.h"
+#include "SystemHierarchy.h"
+#include "SystemsUtils.h"
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"
-#include "components/Hierarchy.h"
+#include "Hierarchy.h"
+#include "HierarchyGui.h"
 #include "components/Picker.h"
 #include "imgui.h"
 
@@ -52,11 +54,17 @@ namespace Bcg {
 
         void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemHierarchyInternal::on_render_gui_menu>();
+            Engine::State().on_construct<Hierarchy>().connect<&on_construct_component<SystemHierarchy>>();
+            Engine::State().on_update<Hierarchy>().connect<&on_update_component<SystemHierarchy>>();
+            Engine::State().on_destroy<Hierarchy>().connect<&on_destroy_component<SystemHierarchy>>();
             Log::Info(SystemHierarchy::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemHierarchyInternal::on_render_gui_menu>();
+            Engine::State().on_construct<Hierarchy>().disconnect<&on_construct_component<SystemHierarchy>>();
+            Engine::State().on_update<Hierarchy>().disconnect<&on_update_component<SystemHierarchy>>();
+            Engine::State().on_destroy<Hierarchy>().disconnect<&on_destroy_component<SystemHierarchy>>();
             Log::Info(SystemHierarchy::name() , "Shutdown").enqueue();
         }
     }
@@ -190,6 +198,10 @@ namespace Bcg {
 
     std::string SystemHierarchy::name() {
         return "SystemHierarchy";
+    }
+
+    std::string SystemHierarchy::component_name() {
+        return "Hierarchy";
     }
 
     void SystemHierarchy::pre_init() {

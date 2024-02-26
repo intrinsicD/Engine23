@@ -8,7 +8,7 @@
 #include "Commands.h"
 #include "components/Input.h"
 #include "components/TriMesh.h"
-#include "FilePath.h"
+#include "File/FilePath.h"
 
 // Define these only in *one* .cc file.
 #define TINYGLTF_IMPLEMENTATION

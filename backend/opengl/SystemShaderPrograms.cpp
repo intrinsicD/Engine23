@@ -9,7 +9,7 @@
 #include "Events.h"
 #include "OpenGLUtils.h"
 #include <filesystem>
-#include "components/FileWatcher.h"
+#include "File/FileWatcher.h"
 #include "imgui.h"
 
 //----------------------------------------------------------------------------------------------------------------------

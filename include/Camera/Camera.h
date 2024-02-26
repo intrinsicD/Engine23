@@ -5,7 +5,7 @@
 #ifndef ENGINE23_CAMERA_H
 #define ENGINE23_CAMERA_H
 
-#include "glm/glm.hpp"
+#include "../../ext/glm/glm/glm.hpp"
 
 namespace Bcg{
     struct Camera {

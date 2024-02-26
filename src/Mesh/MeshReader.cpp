@@ -3,7 +3,7 @@
 //
 
 #include "MeshReader.h"
-#include "FilePath.h"
+#include "File/FilePath.h"
 
 namespace Bcg{
     MeshReader::MeshReader(std::string filepath, Mesh &mesh) : filepath(std::move(filepath)), mesh(mesh) {}

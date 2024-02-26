@@ -6,7 +6,7 @@
 #define ENGINE23_TRANSFORM_H
 
 #include "glm/glm.hpp"
-#include "ComponentGui.h"
+#include "components/ComponentGui.h"
 
 namespace Bcg{
     struct Transform {
@@ -41,10 +41,6 @@ namespace Bcg{
         void set_rotation(float pitch, float yaw, float roll);
     };
 
-    template<>
-    struct ComponentGui<Transform> {
-        static void Show(entt::entity entity_id);
-    };
 }
 
 #endif //ENGINE23_TRANSFORM_H

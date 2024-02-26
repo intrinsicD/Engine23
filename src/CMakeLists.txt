@@ -9,8 +9,13 @@ target_sources(Engine23Lib PRIVATE
         SafeAcos.cpp
 )
 add_subdirectory(AABB)
+add_subdirectory(Asset)
+add_subdirectory(Camera)
+add_subdirectory(File)
 add_subdirectory(Graph)
+add_subdirectory(Hierarchy)
 add_subdirectory(Mesh)
 add_subdirectory(Property)
 add_subdirectory(PointCloud)
 add_subdirectory(systems)
+add_subdirectory(Transform)

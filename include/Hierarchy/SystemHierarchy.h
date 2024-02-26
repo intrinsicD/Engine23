@@ -16,6 +16,8 @@ namespace Bcg {
 
         static std::string name();
 
+        static std::string component_name();
+
         static bool has_component(entt::entity &entity_id);
 
         static Hierarchy &get_or_add(entt::entity entity_id);

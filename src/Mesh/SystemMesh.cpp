@@ -3,6 +3,7 @@
 //
 
 #include "SystemMesh.h"
+#include "SystemsUtils.h"
 #include "Engine.h"
 #include "Commands.h"
 #include "Events.h"
@@ -32,12 +33,6 @@ namespace Bcg {
         void on_update_input_drop(const Events::Update<Input::Drop> &event);
 
         void on_load_mesh(const Events::Load<Mesh> &event);
-
-        void on_construct(entt::registry &, entt::entity);
-
-        void on_update(entt::registry &, entt::entity);
-
-        void on_destroy(entt::registry &, entt::entity);
     }
 }
 
@@ -51,20 +46,20 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemMeshInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemMeshInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().connect<&SystemMeshInternal::on_load_mesh>();
-            Engine::State().on_construct<Mesh>().connect<&SystemMeshInternal::on_construct>();
-            Engine::State().on_update<Mesh>().connect<&SystemMeshInternal::on_update>();
-            Engine::State().on_destroy<Mesh>().connect<&SystemMeshInternal::on_destroy>();
-            Log::Info(SystemMesh::name() , "Startup").enqueue();
+            Engine::State().on_construct<Mesh>().connect<&on_construct_component<SystemMesh>>();
+            Engine::State().on_update<Mesh>().connect<&on_update_component<SystemMesh>>();
+            Engine::State().on_destroy<Mesh>().connect<&on_destroy_component<SystemMesh>>();
+            Log::Info(SystemMesh::name(), "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemMeshInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&SystemMeshInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().disconnect<&SystemMeshInternal::on_load_mesh>();
-            Engine::State().on_construct<Mesh>().disconnect<&SystemMeshInternal::on_construct>();
-            Engine::State().on_update<Mesh>().disconnect<&SystemMeshInternal::on_update>();
-            Engine::State().on_destroy<Mesh>().disconnect<&SystemMeshInternal::on_destroy>();
-            Log::Info(SystemMesh::name() , "Shutdown").enqueue();
+            Engine::State().on_construct<Mesh>().disconnect<&on_construct_component<SystemMesh>>();
+            Engine::State().on_update<Mesh>().disconnect<&on_update_component<SystemMesh>>();
+            Engine::State().on_destroy<Mesh>().disconnect<&on_destroy_component<SystemMesh>>();
+            Log::Info(SystemMesh::name(), "Shutdown").enqueue();
         }
 
         void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
@@ -108,18 +103,6 @@ namespace Bcg {
             }
             SystemMesh::load(event.filepath, entity_id);
         }
-
-        void on_construct(entt::registry &, entt::entity entity_id){
-            Log::Info(fmt::format("Entity {} constructed component Mesh", static_cast<unsigned int>(entity_id))).enqueue();
-        }
-
-        void on_update(entt::registry &, entt::entity entity_id){
-            Log::Info(fmt::format("Entity {} updated component Mesh", static_cast<unsigned int>(entity_id))).enqueue();
-        }
-
-        void on_destroy(entt::registry &, entt::entity entity_id){
-            Log::Info(fmt::format("Entity {} removed component Mesh", static_cast<unsigned int>(entity_id))).enqueue();
-        }
     }
 }
 
@@ -130,6 +113,10 @@ namespace Bcg {
 namespace Bcg {
     std::string SystemMesh::name() {
         return "SystemMesh";
+    }
+
+    std::string SystemMesh::component_name() {
+        return "Mesh";
     }
 
     bool SystemMesh::load(const std::string &filepath, entt::entity entity) {

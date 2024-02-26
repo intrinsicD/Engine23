@@ -9,9 +9,10 @@
 #include "fmt/core.h"
 #include "Commands.h"
 #include "AABBGui.h"
-#include "components/Transform.h"
+#include "Transform/Transform.h"
 #include "components/Picker.h"
-#include "components/EntityName.h"
+#include "Asset.h"
+#include "AssetGui.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -67,9 +68,9 @@ namespace Bcg {
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Components")) {
-                    if(Engine::State().all_of<EntityName>(entity)){
-                        if(ImGui::CollapsingHeader("Name")){
-                            ComponentGui<EntityName>::Show(entity);
+                    if(Engine::State().all_of<Asset>(entity)){
+                        if(ImGui::CollapsingHeader("Asset")){
+                            ComponentGui<Asset>::Show(entity);
                         }
                     }
                     if(Engine::State().all_of<AABB3>(entity)){
@@ -201,10 +202,12 @@ namespace Bcg {
     }
 
     void SystemEntity::set_name(entt::entity entity, std::string name) {
-        if(Engine::State().all_of<EntityName>(entity)){
-            Engine::State().remove<EntityName>(entity);
+        if(!Engine::State().all_of<Asset>(entity)){
+            Engine::State().emplace<Asset>(entity);
         }
-        Engine::State().emplace<EntityName>(entity, name);
+
+        auto &asset = Engine::State().get<Asset>(entity);
+        asset.name = name;
     }
 
     void SystemEntity::pre_init() {

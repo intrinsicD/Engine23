@@ -10,8 +10,8 @@
 #include "imgui.h"
 #include "glad/gl.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "components/Camera.h"
-#include "components/Transform.h"
+#include "Camera/Camera.h"
+#include "Transform/Transform.h"
 #include "components/TriMesh.h"
 #include "GlmUtils.h"
 

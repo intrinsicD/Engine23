@@ -12,6 +12,7 @@
 #include "PropertyEigenMap.h"
 #include "fmt/core.h"
 #include "components/Picker.h"
+#include "SystemsUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -29,12 +30,6 @@ namespace Bcg {
 
         void on_render_gui(const Events::Render<Gui> &event);
 
-        void on_construct(entt::registry &, entt::entity);
-
-        void on_update(entt::registry &, entt::entity);
-
-        void on_destroy(entt::registry &, entt::entity);
-
         void on_update_aabb(const Events::Update<AABB3> &event);
     }
 }
@@ -48,18 +43,18 @@ namespace Bcg {
         void on_startup(const Events::Startup<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemAABBInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<AABB3>>().connect<&SystemAABBInternal::on_update_aabb>();
-            Engine::State().on_construct<AABB3>().connect<&SystemAABBInternal::on_construct>();
-            Engine::State().on_update<AABB3>().connect<&SystemAABBInternal::on_update>();
-            Engine::State().on_destroy<AABB3>().connect<&SystemAABBInternal::on_destroy>();
+            Engine::State().on_construct<AABB3>().connect<&on_construct_component<SystemAABB>>();
+            Engine::State().on_update<AABB3>().connect<&on_update_component<SystemAABB>>();
+            Engine::State().on_destroy<AABB3>().connect<&on_destroy_component<SystemAABB>>();
             Log::Info(SystemAABB::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemAABBInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<AABB3>>().disconnect<&SystemAABBInternal::on_update_aabb>();
-            Engine::State().on_construct<AABB3>().disconnect<&SystemAABBInternal::on_construct>();
-            Engine::State().on_update<AABB3>().disconnect<&SystemAABBInternal::on_update>();
-            Engine::State().on_destroy<AABB3>().disconnect<&SystemAABBInternal::on_destroy>();
+            Engine::State().on_construct<AABB3>().disconnect<&on_construct_component<SystemAABB>>();
+            Engine::State().on_update<AABB3>().disconnect<&on_update_component<SystemAABB>>();
+            Engine::State().on_destroy<AABB3>().disconnect<&on_destroy_component<SystemAABB>>();
             Log::Info(SystemAABB::name() , "Shutdown").enqueue();
         }
 
@@ -83,19 +78,6 @@ namespace Bcg {
                 ComponentGui<AABB3>::Show(picker.id.entity);
             }
             ImGui::End();
-        }
-
-        void on_construct(entt::registry &registry, entt::entity entity_id) {
-            Log::Info(fmt::format("Entity {} constructed component AABB",
-                                  static_cast<unsigned int>(entity_id))).enqueue();
-        }
-
-        void on_update(entt::registry &, entt::entity entity_id) {
-            Log::Info(fmt::format("Entity {} updated component AABB", static_cast<unsigned int>(entity_id))).enqueue();
-        }
-
-        void on_destroy(entt::registry &, entt::entity entity_id) {
-            Log::Info(fmt::format("Entity {} removed component AABB", static_cast<unsigned int>(entity_id))).enqueue();
         }
 
         void on_update_aabb(const Events::Update<AABB3> &event) {
@@ -135,6 +117,10 @@ namespace Bcg {
 namespace Bcg {
     std::string SystemAABB::name() {
         return "SystemAABB";
+    }
+
+    std::string SystemAABB::component_name(){
+        return "AABB";
     }
 
     void SystemAABB::pre_init() {

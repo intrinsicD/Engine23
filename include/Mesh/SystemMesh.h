@@ -17,6 +17,8 @@ namespace Bcg {
 
         static std::string name();
 
+        static std::string component_name();
+
         static bool load(const std::string &filepath, entt::entity entity);
 
     protected:

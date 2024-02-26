@@ -18,10 +18,10 @@
 #include "MeshVertexNormalsAreaAngleHybrid.h"
 #include "Eigen/Geometry"
 #include "PropertyEigenMap.h"
-#include "components/Transform.h"
-#include "components/EntityName.h"
+#include "Transform.h"
+#include "Asset.h"
 #include "components/TriMesh.h"
-#include "components/Camera.h"
+#include "Camera.h"
 #include "FilePath.h"
 
 namespace Bcg {
@@ -172,7 +172,11 @@ namespace Bcg {
             auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id);
             Engine::State().emplace<AABB3>(entity_id, aabb);
             Engine::State().emplace<Transform>(entity_id);
-            Engine::State().emplace<EntityName>(entity_id, filepath);
+            Asset asset;
+            asset.name = FilePath::Filename(filepath);
+            asset.filepath = filepath;
+            asset.type = "Mesh";
+            Engine::State().emplace<Asset>(entity_id, asset);
             Engine::State().emplace<TriMesh>(entity_id, mesh);
             RenderCommand render_command;
             render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
@@ -348,7 +352,11 @@ namespace Bcg {
             auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id);
 
             Engine::State().emplace<Transform>(entity_id);
-            Engine::State().emplace<EntityName>(entity_id, filepath);
+            Asset asset;
+            asset.name = FilePath::Filename(filepath);
+            asset.filepath = filepath;
+            asset.type = "Mesh";
+            Engine::State().emplace<Asset>(entity_id, asset);
 
             RenderCommand render_command;
             render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {

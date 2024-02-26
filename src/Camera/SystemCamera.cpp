@@ -2,7 +2,8 @@
 // Created by alex on 15.12.23.
 //
 
-#include "systems/SystemCamera.h"
+#include "SystemCamera.h"
+#include "SystemsUtils.h"
 #include "Engine.h"
 #include "Commands.h"
 #include "Events.h"
@@ -13,7 +14,7 @@
 #include "components/Viewport.h"
 #include "components/Input.h"
 #include "components/Time.h"
-#include "components/CameraArcballController.h"
+#include "Camera/CameraArcballParameters.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -194,7 +195,7 @@ namespace Bcg {
                 }
                 ImGui::Separator();
 
-                auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
+                auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
                 ImGui::Text("last_point_ok: %d", arc_ball.last_point_ok);
                 ImGui::Text("last_point_2d: %f %f", arc_ball.last_point_2d.x, arc_ball.last_point_2d.y);
                 ImGui::Text("last_point_3d: %f %f %f", arc_ball.last_point_3d.x, arc_ball.last_point_3d.y,
@@ -329,7 +330,7 @@ namespace Bcg {
         }
 
         void on_end_main_loop(const Events::End<MainLoop> &event) {
-            auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
+            auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
             auto &input = Engine::Context().get<Input>();
             auto &window = Engine::Context().get<Window>();
             arc_ball.last_point_2d = input.mouse.position;
@@ -340,7 +341,7 @@ namespace Bcg {
         }
 
         void on_update_arc_ball_controller(const Events::Update<Input::Mouse::Position> &event) {
-            auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
+            auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
             auto &input = Engine::Context().get<Input>();
             auto &window = Engine::Context().get<Window>();
 
@@ -369,7 +370,7 @@ namespace Bcg {
             }
             if(input.mouse.button.middle){
                 auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * arc_ball.camera.sensitivity.drag;
-                auto &arc_ball = Engine::Context().get<ArcBallCameraController>();
+                auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
                 arc_ball.target += -arc_ball.camera.view_parameters.right * pos_delta.x;
                 arc_ball.target += arc_ball.camera.view_parameters.up * pos_delta.y;
             }
@@ -383,6 +384,9 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
+            Engine::State().on_construct<Camera>().connect<&on_construct_component<SystemCamera>>();
+            Engine::State().on_update<Camera>().connect<&on_update_component<SystemCamera>>();
+            Engine::State().on_destroy<Camera>().connect<&on_destroy_component<SystemCamera>>();
             SystemCamera::make_arc_ball_camera();
             Log::Info(SystemCamera::name() , "Startup").enqueue();
         }
@@ -394,6 +398,9 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().disconnect<&on_update_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().disconnect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&on_render_gui_menu>();
+            Engine::State().on_construct<Camera>().disconnect<&on_construct_component<SystemCamera>>();
+            Engine::State().on_update<Camera>().disconnect<&on_update_component<SystemCamera>>();
+            Engine::State().on_destroy<Camera>().disconnect<&on_destroy_component<SystemCamera>>();
             Log::Info(SystemCamera::name() , "Shutdown").enqueue();
         }
     }
@@ -409,6 +416,10 @@ namespace Bcg {
         return "SystemCamera";
     }
 
+    std::string SystemCamera::component_name() {
+        return "Camera";
+    }
+
     void SystemCamera::make_arc_ball_camera() {
         Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Position>>().connect<&SystemCameraInternal::on_update_arc_ball_controller>();
     }
@@ -416,7 +427,7 @@ namespace Bcg {
     void SystemCamera::pre_init() {
         //register necessary components
         auto &camera = Engine::Context().emplace<Camera>();
-        Engine::Context().emplace<ArcBallCameraController>(camera);
+        Engine::Context().emplace<ArcBallCameraParameters>(camera);
     }
 
     void SystemCamera::init() {
