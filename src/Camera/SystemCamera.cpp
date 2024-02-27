@@ -15,6 +15,8 @@
 #include "components/Input.h"
 #include "components/Time.h"
 #include "Camera/CameraArcballParameters.h"
+#include "ImGuizmo.h"
+#include "glm/gtc/type_ptr.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -271,6 +273,14 @@ namespace Bcg {
 
             if (input.mouse.button.middle) {
                 auto &camera = Engine::Context().get<Camera>();
+
+                    //TODO Figure out how to use ImGuizmo for perfect dragging
+/*                glm::mat4 model(1.0f);
+                glm::mat4 deltaMatrix;
+                ImGuizmo::Manipulate(glm::value_ptr(camera.get_view()), glm::value_ptr(camera.get_projection()),
+                                     ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
+                                     glm::value_ptr(model), glm::value_ptr(deltaMatrix), NULL);
+                camera.view_parameters.position = glm::vec3(glm::inverse(deltaMatrix) * glm::vec4(camera.view_parameters.position, 1.0));*/
 
                 auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
                 camera.view_parameters.position += -camera.view_parameters.right * pos_delta.x;

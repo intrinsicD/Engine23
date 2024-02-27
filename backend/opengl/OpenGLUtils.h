@@ -21,6 +21,32 @@ namespace Bcg::OpenGL {
 
     unsigned int TypeToElementCount(unsigned int type);
 
+    struct DrawCall {
+        unsigned int mode;
+        unsigned int count;
+        unsigned int type;
+        unsigned int offset;
+        unsigned int program;
+        unsigned int vao;
+        std::vector<unsigned int> textures;
+    };
+
+    struct MeshDrawCall : public DrawCall {
+        MeshDrawCall();
+    };
+
+    struct GraphDrawCall : public DrawCall {
+        GraphDrawCall();
+    };
+
+    struct PointCloudDrawCall : public DrawCall {
+        PointCloudDrawCall();
+    };
+
+    struct VectorFieldDrawCall : public DrawCall {
+        VectorFieldDrawCall();
+    };
+
     //------------------------------------------------------------------------------------------------------------------
     // OpenGL Components
     //------------------------------------------------------------------------------------------------------------------
@@ -39,7 +65,6 @@ namespace Bcg::OpenGL {
 
         bool check_compile_status();
     };
-
 
     struct ShaderProgram {
         unsigned int id = 0;
@@ -137,7 +162,6 @@ namespace Bcg::OpenGL {
             }
         }
     };
-
 
     struct VertexAttribute {
         VertexAttribute(unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride,

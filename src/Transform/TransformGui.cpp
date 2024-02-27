@@ -10,7 +10,7 @@
 #include "Camera.h"
 #include "glm/gtc/type_ptr.hpp"
 
-namespace Bcg{
+namespace Bcg {
     static bool show_guizmo = false;
 
     inline void EditTransform(const Camera &camera, glm::mat4 &matrix) {
@@ -67,6 +67,7 @@ namespace Bcg{
         }
         ImGuiIO &io = ImGui::GetIO();
         ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
         ImGuizmo::Manipulate(glm::value_ptr(camera.get_view()), glm::value_ptr(camera.get_projection()),
                              mCurrentGizmoOperation, mCurrentGizmoMode,
                              glm::value_ptr(matrix), NULL, useSnap ? &snap.x : NULL);
@@ -78,14 +79,18 @@ namespace Bcg{
         }
 
         auto &transform = Engine::State().get<Transform>(entity_id);
-        if(ImGui::Checkbox("Guizmo", &show_guizmo)){
-            if(show_guizmo){
+        ComponentGui<Transform>::Show(transform);
+    }
+
+    void ComponentGui<Transform>::Show(Bcg::Transform &transform) {
+        if (ImGui::Checkbox("Guizmo", &show_guizmo)) {
+            if (show_guizmo) {
                 ImGuizmo::Enable(true);
-            }else{
+            } else {
                 ImGuizmo::Enable(false);
             }
         }
-        if(show_guizmo){
+        if (show_guizmo) {
             auto &camera = Engine::Context().get<Camera>();
             EditTransform(camera, transform.model);
         }
@@ -112,5 +117,6 @@ namespace Bcg{
                     transform.model[1][0], transform.model[1][1], transform.model[1][2], transform.model[1][3],
                     transform.model[2][0], transform.model[2][1], transform.model[2][2], transform.model[2][3],
                     transform.model[3][0], transform.model[3][1], transform.model[3][2], transform.model[3][3]);
+
     }
 }

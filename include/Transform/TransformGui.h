@@ -7,12 +7,14 @@
 
 #include "components/ComponentGui.h"
 
-namespace Bcg{
+namespace Bcg {
     struct Transform;
 
     template<>
     struct ComponentGui<Transform> {
         static void Show(entt::entity entity_id);
+
+        static void Show(Transform &transform);
     };
 }
 

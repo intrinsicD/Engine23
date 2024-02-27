@@ -6,7 +6,8 @@
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"
-#include "Transform/Transform.h"
+#include "Transform.h"
+#include "TransformGui.h"
 #include "components/Picker.h"
 #include "imgui.h"
 
