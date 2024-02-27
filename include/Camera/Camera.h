@@ -43,6 +43,13 @@ namespace Bcg{
             float drag = 0.01f;
         }sensitivity;
 
+        struct ArcBallParameters {
+            bool last_point_ok = false;
+            glm::vec3 target = glm::vec3(0.0f);
+            glm::vec2 last_point_2d = glm::vec2(0.0f);
+            glm::vec3 last_point_3d = glm::vec3(0.0f);
+        }arc_ball_parameters;
+
         bool is_orthographic = true;
 
         Camera();

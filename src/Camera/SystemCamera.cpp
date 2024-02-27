@@ -14,8 +14,8 @@
 #include "components/Viewport.h"
 #include "components/Input.h"
 #include "components/Time.h"
-#include "Camera/CameraArcballParameters.h"
-#include "ImGuizmo.h"
+#include "Camera.h"
+#include "SafeAcos.h"
 #include "glm/gtc/type_ptr.hpp"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -43,12 +43,7 @@ namespace Bcg {
         inline bool
         MapToSphere(const glm::vec2 &point, int width, int height, glm::vec3 &result);
 
-        double SafeAcos(double value);
-
-
         void on_end_main_loop(const Events::End<MainLoop> &event);
-
-        void on_update_arc_ball_controller(const Events::Update<Input::Mouse::Position> &event);
 
         void on_startup(const Events::Startup<Engine> &event);
 
@@ -197,13 +192,14 @@ namespace Bcg {
                 }
                 ImGui::Separator();
 
-                auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
-                ImGui::Text("last_point_ok: %d", arc_ball.last_point_ok);
-                ImGui::Text("last_point_2d: %f %f", arc_ball.last_point_2d.x, arc_ball.last_point_2d.y);
-                ImGui::Text("last_point_3d: %f %f %f", arc_ball.last_point_3d.x, arc_ball.last_point_3d.y,
-                            arc_ball.last_point_3d.z);
-                if (ImGui::InputFloat3("target", &arc_ball.target.x)) {
-                    arc_ball.camera.set_target(arc_ball.target);
+                ImGui::Text("last_point_ok: %d", camera.arc_ball_parameters.last_point_ok);
+                ImGui::Text("last_point_2d: %f %f", camera.arc_ball_parameters.last_point_2d.x,
+                            camera.arc_ball_parameters.last_point_2d.y);
+                ImGui::Text("last_point_3d: %f %f %f", camera.arc_ball_parameters.last_point_3d.x,
+                            camera.arc_ball_parameters.last_point_3d.y,
+                            camera.arc_ball_parameters.last_point_3d.z);
+                if (ImGui::InputFloat3("target", &camera.arc_ball_parameters.target.x)) {
+                    camera.set_target(camera.arc_ball_parameters.target);
                 }
 
             }
@@ -236,7 +232,7 @@ namespace Bcg {
         }
 
         void on_update_input(const Events::Update<Input> &event) {
-            if(ImGui::GetIO().WantCaptureKeyboard) return;
+            if (ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Input>().keyboard;
             auto &camera = Engine::Context().get<Camera>();
             auto &time = Engine::Context().get<Time>();
@@ -270,28 +266,49 @@ namespace Bcg {
 
         void on_update_mouse_position(const Events::Update<Input::Mouse::Position> &event) {
             auto &input = Engine::Context().get<Input>();
+            auto &camera = Engine::Context().get<Camera>();
 
             if (input.mouse.button.middle) {
-                auto &camera = Engine::Context().get<Camera>();
-
-                    //TODO Figure out how to use ImGuizmo for perfect dragging
-/*                glm::mat4 model(1.0f);
-                glm::mat4 deltaMatrix;
-                ImGuizmo::Manipulate(glm::value_ptr(camera.get_view()), glm::value_ptr(camera.get_projection()),
-                                     ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
-                                     glm::value_ptr(model), glm::value_ptr(deltaMatrix), NULL);
-                camera.view_parameters.position = glm::vec3(glm::inverse(deltaMatrix) * glm::vec4(camera.view_parameters.position, 1.0));*/
-
                 auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
-                camera.view_parameters.position += -camera.view_parameters.right * pos_delta.x;
-                camera.view_parameters.position += camera.view_parameters.up * pos_delta.y;
+                auto delta = camera.view_parameters.up * pos_delta.y - camera.view_parameters.right * pos_delta.x;
+                camera.view_parameters.position += delta;
+                camera.arc_ball_parameters.target += delta;
 
                 input.mouse.last_drag_pos = input.mouse.position;
             }
+
+            //TODO: implement arc ball camera controller
+            //Rotate the camera around the target_point
+            if (camera.arc_ball_parameters.last_point_ok && input.mouse.button.right) {
+                auto model = camera.get_model();
+                glm::vec3 new_point_3d;
+                auto &window = Engine::Context().get<Window>();
+                if (MapToSphere(input.mouse.position, window.width, window.height, new_point_3d)) {
+                    if (new_point_3d.x != camera.arc_ball_parameters.last_point_3d.x ||
+                        new_point_3d.y != camera.arc_ball_parameters.last_point_3d.y ||
+                        new_point_3d.z != camera.arc_ball_parameters.last_point_3d.z) {
+                        glm::vec3 axis =
+                                glm::mat3(model) *
+                                glm::normalize(glm::cross(new_point_3d, camera.arc_ball_parameters.last_point_3d));
+                        float cos_angle = glm::dot(camera.arc_ball_parameters.last_point_3d, new_point_3d);
+                        float angle = SafeAcos(std::min(1.0f, cos_angle)) * camera.sensitivity.rotate;
+                        auto rot = glm::rotate(glm::mat4(1.0f), angle, axis);
+
+                        auto position = camera.view_parameters.position;
+                        auto direction = position - camera.arc_ball_parameters.target;
+                        direction = glm::vec3(rot * glm::vec4(direction, 0.0f));
+                        //if direction is nan, then dont update
+
+                        camera.set_position(camera.arc_ball_parameters.target + direction);
+                        camera.set_target(camera.arc_ball_parameters.target);
+                    }
+                }
+            }
+
         }
 
         void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event) {
-            if(ImGui::GetIO().WantCaptureMouse) return;
+            if (ImGui::GetIO().WantCaptureMouse) return;
 
             auto &camera = Engine::Context().get<Camera>();
             auto &scroll = Engine::Context().get<Input>().mouse.scroll;
@@ -307,9 +324,9 @@ namespace Bcg {
             } else {
                 auto &perspective_parameters = camera.projection_parameters.perspective_parameters;
                 perspective_parameters.fovy_degrees -= scroll.y * camera.sensitivity.zoom;
-                if(perspective_parameters.fovy_degrees < 1.0f){
+                if (perspective_parameters.fovy_degrees < 1.0f) {
                     perspective_parameters.fovy_degrees = 1.0f;
-                }else if(perspective_parameters.fovy_degrees > 90.0f){
+                } else if (perspective_parameters.fovy_degrees > 90.0f) {
                     perspective_parameters.fovy_degrees = 90.0f;
                 }
             }
@@ -329,61 +346,15 @@ namespace Bcg {
             return false;
         }
 
-        double SafeAcos(double value) {
-            if (value >= 1.0) {
-                return 0;
-            } else if (value <= -1.0) {
-                return std::numbers::pi;
-            } else {
-                return std::acos(value);
-            }
-        }
-
         void on_end_main_loop(const Events::End<MainLoop> &event) {
-            auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
             auto &input = Engine::Context().get<Input>();
             auto &window = Engine::Context().get<Window>();
-            arc_ball.last_point_2d = input.mouse.position;
-            arc_ball.last_point_ok = MapToSphere(arc_ball.last_point_2d,
-                                                 window.width,
-                                                 window.height,
-                                                 arc_ball.last_point_3d);
-        }
-
-        void on_update_arc_ball_controller(const Events::Update<Input::Mouse::Position> &event) {
-            auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
-            auto &input = Engine::Context().get<Input>();
-            auto &window = Engine::Context().get<Window>();
-
-            //TODO: implement arc ball camera controller
-            //Rotate the camera around the target_point
-            if (arc_ball.last_point_ok && input.mouse.button.right) {
-                auto model = arc_ball.camera.get_model();
-                glm::vec3 new_point_3d;
-                if (MapToSphere(input.mouse.position, window.width, window.height, new_point_3d)) {
-                    if(new_point_3d.x != arc_ball.last_point_3d.x || new_point_3d.y != arc_ball.last_point_3d.y || new_point_3d.z != arc_ball.last_point_3d.z){
-                        glm::vec3 axis =
-                                glm::mat3(model) * glm::normalize(glm::cross(new_point_3d, arc_ball.last_point_3d));
-                        float cos_angle = glm::dot(arc_ball.last_point_3d, new_point_3d);
-                        float angle = SafeAcos(std::min(1.0f, cos_angle)) * arc_ball.camera.sensitivity.rotate;
-                        auto rot = glm::rotate(glm::mat4(1.0f), angle, axis);
-
-                        auto position = arc_ball.camera.view_parameters.position;
-                        auto direction = position - arc_ball.target;
-                        direction = glm::vec3(rot * glm::vec4(direction, 0.0f));
-                        //if direction is nan, then dont update
-
-                        arc_ball.camera.set_position(arc_ball.target + direction);
-                        arc_ball.camera.set_target(arc_ball.target);
-                    }
-                }
-            }
-            if(input.mouse.button.middle){
-                auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * arc_ball.camera.sensitivity.drag;
-                auto &arc_ball = Engine::Context().get<ArcBallCameraParameters>();
-                arc_ball.target += -arc_ball.camera.view_parameters.right * pos_delta.x;
-                arc_ball.target += arc_ball.camera.view_parameters.up * pos_delta.y;
-            }
+            auto &camera = Engine::Context().get<Camera>();
+            camera.arc_ball_parameters.last_point_2d = input.mouse.position;
+            camera.arc_ball_parameters.last_point_ok = MapToSphere(camera.arc_ball_parameters.last_point_2d,
+                                                                   window.width,
+                                                                   window.height,
+                                                                   camera.arc_ball_parameters.last_point_3d);
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
@@ -397,8 +368,7 @@ namespace Bcg {
             Engine::State().on_construct<Camera>().connect<&on_construct_component<SystemCamera>>();
             Engine::State().on_update<Camera>().connect<&on_update_component<SystemCamera>>();
             Engine::State().on_destroy<Camera>().connect<&on_destroy_component<SystemCamera>>();
-            SystemCamera::make_arc_ball_camera();
-            Log::Info(SystemCamera::name() , "Startup").enqueue();
+            Log::Info(SystemCamera::name(), "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
@@ -411,7 +381,7 @@ namespace Bcg {
             Engine::State().on_construct<Camera>().disconnect<&on_construct_component<SystemCamera>>();
             Engine::State().on_update<Camera>().disconnect<&on_update_component<SystemCamera>>();
             Engine::State().on_destroy<Camera>().disconnect<&on_destroy_component<SystemCamera>>();
-            Log::Info(SystemCamera::name() , "Shutdown").enqueue();
+            Log::Info(SystemCamera::name(), "Shutdown").enqueue();
         }
     }
 }
@@ -430,14 +400,9 @@ namespace Bcg {
         return "Camera";
     }
 
-    void SystemCamera::make_arc_ball_camera() {
-        Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Position>>().connect<&SystemCameraInternal::on_update_arc_ball_controller>();
-    }
-
     void SystemCamera::pre_init() {
         //register necessary components
         auto &camera = Engine::Context().emplace<Camera>();
-        Engine::Context().emplace<ArcBallCameraParameters>(camera);
     }
 
     void SystemCamera::init() {

@@ -18,7 +18,6 @@ namespace Bcg{
 
         static std::string component_name();
 
-        static void make_arc_ball_camera();
     protected:
         friend Engine;
 
