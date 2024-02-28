@@ -12,7 +12,7 @@ namespace Bcg{
     class Engine;
     struct Frame;
     struct CommandBuffer;
-    struct Command;
+    struct AbstractCommand;
     struct Time;
     struct MainLoop;
     struct SimulationLoop;

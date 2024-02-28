@@ -22,9 +22,9 @@ namespace Bcg {
 
         static void resize(int num_threads);
 
-        static void enqueue(std::shared_ptr<Command> command);
+        static void enqueue(std::shared_ptr<AbstractCommand> command);
 
-        static void enqueue(std::vector<std::shared_ptr<Command>> commands);
+        static void enqueue(std::vector<std::shared_ptr<AbstractCommand>> commands);
 
     protected:
         friend Engine;

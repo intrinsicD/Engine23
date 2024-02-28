@@ -5,12 +5,19 @@
 #include "SystemMesh.h"
 #include "SystemsUtils.h"
 #include "Engine.h"
-#include "Commands.h"
 #include "Events.h"
 #include "imgui.h"
+#include "FilePath.h"
+#include "Asset.h"
+#include "AABB.h"
+#include "PropertyEigenMap.h"
 #include "MeshGui.h"
 #include "MeshIo.h"
-#include "fmt/core.h"
+#include "Transform.h"
+#include "OpenGLUtils.h"
+#include "GLMeshRenderPass.h"
+#include "MeshVertexNormalsAreaAngleHybrid.h"
+#include "components/CommandDoubleBuffer.h"
 #include "components/Input.h"
 #include "components/Picker.h"
 
@@ -91,9 +98,81 @@ namespace Bcg {
             auto &input = Engine::Context().get<Input>();
 
             for (const auto &path: input.drop.paths) {
-                Engine::Instance()->dispatcher.trigger(Events::Load<Mesh>{entt::null, path});
-            }
+                entt::entity entity_id = entt::null;
+                Engine::Dispatcher().trigger(Events::Create<entt::entity>{&entity_id});
+                Engine::Dispatcher().trigger(Events::Load<Mesh>{entity_id, path});
+                CompositeCommand prepare_entity("prepare_entity");
+                prepare_entity.add_task("compute_vertex_normals", [entity_id](){
+                    auto &mesh = Engine::State().get<Mesh>(entity_id);
+                    auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
+                    if(!normals){
+                        normals = MeshVertexNormalsAreaAngleHybrid(mesh);
+                        Log::Info(fmt::format("Entity {} computed vertex normals!", static_cast<unsigned int>(entity_id))).enqueue();
+                    }else{
+                        Log::Info(fmt::format("Entity {} already has vertex normals!", static_cast<unsigned int>(entity_id))).enqueue();
+                    }
+                    return 1;
+                });
 
+                prepare_entity.add_task("upload_to_gpu", [entity_id](){
+                    if(!Engine::State().all_of<Transform>(entity_id)){
+                        Engine::State().emplace<Transform>(entity_id);
+                    }
+
+                    if(!Engine::State().all_of<OpenGL::RenderableTriangles>(entity_id)){
+                        auto &mesh = Engine::State().get<Mesh>(entity_id);
+                        auto positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
+                        auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
+                        auto triangles = mesh.get_triangles();
+
+                        if(!normals){
+                            normals = MeshVertexNormalsAreaAngleHybrid(mesh);
+                        }
+
+                        auto renderable_triangles = OpenGL::RenderableTriangles::Create();
+                        renderable_triangles.vbo = OpenGL::VertexBufferObject::Static();
+                        renderable_triangles.ebo = OpenGL::IndexBufferObject::Static();
+
+                        renderable_triangles.vao.create();
+                        renderable_triangles.vbo.create();
+                        renderable_triangles.ebo.create();
+
+                        renderable_triangles.vao.bind();
+                        renderable_triangles.vbo.bind();
+
+                        Eigen::Matrix<float, 3, -1> positions_float = Map(positions).transpose().cast<float>();
+                        Eigen::Matrix<float, 3, -1> normals_float = Map(normals).transpose().cast<float>();
+                        unsigned int size_in_bytes = positions_float.size() * sizeof(float);
+                        renderable_triangles.vbo.set_data(nullptr, 2 * size_in_bytes);
+
+                        renderable_triangles.vbo.set_sub_data(positions_float.data(), size_in_bytes, 0);
+                        renderable_triangles.vbo.set_sub_data(normals_float.data(), size_in_bytes, size_in_bytes);
+
+                        renderable_triangles.ebo.bind();
+                        renderable_triangles.ebo.set_data(triangles.get_void_ptr(), triangles.get_size_bytes());
+
+                        renderable_triangles.vao.set_float_attribute(0, positions.get_dims(), false, (void *) 0);
+                        renderable_triangles.vao.set_float_attribute(1, normals.get_dims(), false, (void *) (size_in_bytes));
+                        renderable_triangles.vao.set_float_attribute(2, normals.get_dims(), false, (void *) (size_in_bytes));
+
+                        renderable_triangles.vbo.release();
+                        renderable_triangles.vao.release();
+                        renderable_triangles.ebo.release();
+                        auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
+                        renderable_triangles.program = programs["learn_opengl"];
+                        renderable_triangles.count = triangles.get_dims() * triangles.get_size();
+                        renderable_triangles.offset = 0;
+                        renderable_triangles.our_color[0] = 1.0f;
+                        renderable_triangles.our_color[1] = 0.5f;
+                        renderable_triangles.our_color[2] = 0.2f;
+
+                        Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id, renderable_triangles);
+                    }
+                    return 1;
+                });
+                auto &command_buffer = Engine::Context().get<CommandDoubleBuffer>();
+                command_buffer.enqueue_next(std::make_shared<CompositeCommand>(prepare_entity));
+            }
         }
 
         void on_load_mesh(const Events::Load<Mesh> &event) {
@@ -101,7 +180,10 @@ namespace Bcg {
             if (entity_id == entt::null) {
                 entity_id = Engine::State().create();
             }
-            SystemMesh::load(event.filepath, entity_id);
+
+            if(SystemMesh::load(event.filepath, entity_id)){
+                Engine::State().emplace_or_replace<GLMeshRenderPass>(entity_id);
+            }
         }
     }
 }
@@ -119,7 +201,7 @@ namespace Bcg {
         return "Mesh";
     }
 
-    bool SystemMesh::load(const std::string &filepath, entt::entity entity) {
+    bool SystemMesh::load(const std::string &filepath, entt::entity entity_id) {
         MeshIo reader(filepath);
         Mesh mesh;
         if (!reader.read(mesh)) {
@@ -129,7 +211,22 @@ namespace Bcg {
             Log::Info("Loaded mesh from file: " + filepath).enqueue();
         }
 
-        Engine::State().emplace<Mesh>(entity, mesh);
+        Asset asset;
+        asset.name = FilePath::Filename(filepath);
+        asset.filepath = filepath;
+        asset.type = "Mesh";
+        Engine::State().emplace<Asset>(entity_id, asset);
+        auto &aabb = Engine::State().emplace_or_replace<AABB3>(entity_id);
+        auto positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
+        aabb.fit(MapConst(positions));
+        auto scaling = aabb.max.cwiseMax(-aabb.min).maxCoeff();
+
+        auto center = aabb.center();
+        for (auto v: mesh.vertices) {
+            positions[v] = (positions[v] - center) / scaling;
+        }
+
+        Engine::State().emplace<Mesh>(entity_id, mesh);
         return true;
     }
 

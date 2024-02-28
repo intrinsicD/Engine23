@@ -1258,6 +1258,7 @@ namespace Bcg {
 
     Property<Eigen::Vector<unsigned int, 3>> Mesh::get_triangles() {
         auto triangles = faces.get_or_add<Eigen::Vector<unsigned int, 3 >>("triangles");
+
         for (const auto f: faces) {
             std::vector<unsigned int> indices;
             for (const auto &v: get_vertices(f)) {

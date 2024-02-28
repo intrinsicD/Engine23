@@ -39,7 +39,7 @@ namespace Bcg {
         void worker_thread() {
             auto &worker_pool = Engine::Context().get<WorkerPool>();
             while (true) {
-                std::shared_ptr<Command> task;
+                std::shared_ptr<AbstractCommand> task;
                 {
                     std::unique_lock<std::mutex> lock(worker_pool.queueMutex);
                     worker_pool.condition.wait(lock, [&]() {
@@ -180,7 +180,7 @@ namespace Bcg {
         start(num_threads);
     }
 
-    void SystemParallelProcessing::enqueue(std::shared_ptr<Command> command) {
+    void SystemParallelProcessing::enqueue(std::shared_ptr<AbstractCommand> command) {
         auto &worker_pool = Engine::Context().get<WorkerPool>();
         {
             std::unique_lock<std::mutex> lock(worker_pool.queueMutex);
@@ -189,7 +189,7 @@ namespace Bcg {
         worker_pool.condition.notify_one();
     }
 
-    void SystemParallelProcessing::enqueue(std::vector<std::shared_ptr<Command>> commands) {
+    void SystemParallelProcessing::enqueue(std::vector<std::shared_ptr<AbstractCommand>> commands) {
         if (commands.size() == 1) {
             enqueue(commands[0]);
             return;

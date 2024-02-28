@@ -179,7 +179,7 @@ namespace Bcg {
             Engine::State().emplace<Asset>(entity_id, asset);
             Engine::State().emplace<TriMesh>(entity_id, mesh);
             RenderCommand render_command;
-            render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
+            TaskCommand task("forward render", [entity_id]() {
                 auto &camera = Engine::Context().get<Camera>();
                 auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
                 auto &transform = Engine::State().get<Transform>(entity_id);
@@ -192,7 +192,22 @@ namespace Bcg {
                 renderable.draw();
                 renderable.vao.release();
                 return 1;
-            }));
+            });
+            render_command.add_command<TaskCommand>(task);
+            /*render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
+                auto &camera = Engine::Context().get<Camera>();
+                auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
+                auto &transform = Engine::State().get<Transform>(entity_id);
+                renderable.program.use();
+                renderable.program.set_vec3("our_color", renderable.our_color);
+                renderable.program.set_mat4("view", glm::value_ptr(camera.get_view()));
+                renderable.program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
+                renderable.program.set_mat4("model", glm::value_ptr(transform.model));
+                renderable.vao.bind();
+                renderable.draw();
+                renderable.vao.release();
+                return 1;
+            }));*/
             Engine::State().emplace<RenderCommand>(entity_id, render_command);
 
 
@@ -438,14 +453,14 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&on_update>();
-            Log::Info(PluginTinyObjLoader().name() , "Startup").enqueue();
+            //Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&on_update>();
+            Log::Info(PluginTinyObjLoader().name(), "Startup").enqueue();
         }
 
 
         void on_shutdown(const Events::Shutdown<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
-            Log::Info(PluginTinyObjLoader().name() , "Shutdown").enqueue();
+           // Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
+            Log::Info(PluginTinyObjLoader().name(), "Shutdown").enqueue();
         }
     }
 }

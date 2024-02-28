@@ -14,18 +14,23 @@
 
 
 namespace Bcg {
-    Command::Command(std::string name) : name(std::move(name)) {}
+    AbstractCommand::AbstractCommand(std::string name) : name(std::move(name)) {}
 
-    [[nodiscard]] size_t Command::num_commands() const {
+    [[nodiscard]] size_t AbstractCommand::num_commands() const {
         return 1;
     }
 
     //------------------------------------------------------------------------------------------------------------------
 
-    CompositeCommand::CompositeCommand(std::string name) : Command(std::move(name)) {}
+    CompositeCommand::CompositeCommand(std::string name) : AbstractCommand(std::move(name)) {}
 
 
-    CompositeCommand &CompositeCommand::add_command_sptr(std::shared_ptr<Command> command) {
+
+    CompositeCommand &CompositeCommand::add_task(std::string name, std::function<int()> task) {
+        return add_command_sptr(std::make_shared<TaskCommand>(name, std::move(task)));
+    }
+
+    CompositeCommand &CompositeCommand::add_command_sptr(std::shared_ptr<AbstractCommand> command) {
         commands.emplace_back(std::move(command));
         return *this;
     }
@@ -42,7 +47,7 @@ namespace Bcg {
 
     //------------------------------------------------------------------------------------------------------------------
 
-    TaskCommand::TaskCommand(std::string name, std::function<int()> task) : Command(std::move(name)),
+    TaskCommand::TaskCommand(std::string name, std::function<int()> task) : AbstractCommand(std::move(name)),
                                                                             task(std::move(task)) {}
 
     int TaskCommand::execute() {
@@ -102,10 +107,10 @@ namespace Bcg {
     //------------------------------------------------------------------------------------------------------------------
 
     namespace Log {
-        Message::Message(std::string type, std::string color, std::string message, double time_stamp) : Command(
+        Message::Message(std::string type, std::string color, std::string message, double time_stamp) : AbstractCommand(
                 fmt::format("[{}] [{}] {}{}\033[0m", time_stamp, type, color, message)) {}
 
-        Message::Message(std::string name) : Command(std::move(name)) {}
+        Message::Message(std::string name) : AbstractCommand(std::move(name)) {}
 
         void Message::enqueue() {
             auto &double_buffer = Engine::Context().get<CommandDoubleBuffer>();

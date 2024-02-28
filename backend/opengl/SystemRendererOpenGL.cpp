@@ -21,6 +21,7 @@
 #include "components/Renderable.h"
 #include "components/Picker.h"
 #include "OpenGLUtils.h"
+#include "GLMeshRenderPass.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -117,6 +118,8 @@ namespace Bcg {
         void on_render_frame(const Events::Render<Frame> &event) {
             auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
             double_buffer.enqueue_next(forward_render);
+            GLMeshRenderPass meshes;
+            meshes.execute();
         }
 
         void on_startup_renderer(const Events::Startup<Renderer> &event) {

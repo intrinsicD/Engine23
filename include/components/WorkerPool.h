@@ -12,11 +12,11 @@
 #include <condition_variable>
 
 namespace Bcg {
-    struct Command;
+    struct AbstractCommand;
 
     struct WorkerPool {
         std::vector<std::thread> workers;
-        std::queue<std::shared_ptr<Command>> tasks;
+        std::queue<std::shared_ptr<AbstractCommand>> tasks;
 
         std::mutex queueMutex;
         std::condition_variable condition;

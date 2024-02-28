@@ -12,10 +12,10 @@
 #include "EngineFwd.h"
 
 namespace Bcg {
-    struct Command {
-        explicit Command(std::string name);
+    struct AbstractCommand {
+        explicit AbstractCommand(std::string name);
 
-        virtual ~Command() = default;
+        virtual ~AbstractCommand() = default;
 
         virtual int execute() = 0;
 
@@ -24,22 +24,7 @@ namespace Bcg {
         std::string name;
     };
 
-    struct CompositeCommand : public Command {
-        explicit CompositeCommand(std::string name);
-
-        ~CompositeCommand() override = default;
-
-        CompositeCommand &add_command_sptr(std::shared_ptr<Command> command);
-
-        int execute() override;
-
-        [[nodiscard]] size_t num_commands() const override;
-
-    protected:
-        std::vector<std::shared_ptr<Command>> commands;
-    };
-
-    struct TaskCommand : public Command {
+    struct TaskCommand : public AbstractCommand {
         TaskCommand(std::string name, std::function<int()> task);
 
         ~TaskCommand() override = default;
@@ -48,6 +33,29 @@ namespace Bcg {
 
         std::function<int()> task;
     };
+
+    struct CompositeCommand : public AbstractCommand {
+        explicit CompositeCommand(std::string name);
+
+        ~CompositeCommand() override = default;
+
+        CompositeCommand &add_task(std::string name, std::function<int()> task);
+
+        template<typename CommandType>
+        CompositeCommand &add_command(CommandType &command) {
+            return add_command_sptr(std::make_shared<CommandType>(command));
+        }
+
+        CompositeCommand &add_command_sptr(std::shared_ptr<AbstractCommand> command);
+
+        int execute() override;
+
+        [[nodiscard]] size_t num_commands() const override;
+
+    protected:
+        std::vector<std::shared_ptr<AbstractCommand>> commands;
+    };
+
 
     struct ParallelCommands : public CompositeCommand {
         explicit ParallelCommands(std::string name);
@@ -96,7 +104,7 @@ namespace Bcg {
     };
 
     namespace Log {
-        struct Message : public Command {
+        struct Message : public AbstractCommand {
             explicit Message(std::string type, std::string color, std::string message, double time_stamp);
 
             explicit Message(std::string name);

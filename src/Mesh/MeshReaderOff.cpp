@@ -175,6 +175,9 @@ namespace Bcg {
             texcoords = mesh.vertices.get_or_add<Eigen::Vector<double, 2 >>("v_tex");
         }
 
+        char *c = fgets(line, 200, in);
+        assert(c != nullptr);
+
         // #Vertice, #Faces, #Edges
         items = fscanf(in, "%d %d %d\n", (int *) &nv, (int *) &nf, (int *) &ne);
         if (items == 0) {

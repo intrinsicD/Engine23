@@ -19,6 +19,7 @@ namespace Bcg{
     void on_update_component(entt::registry &registry, entt::entity entity_id){
         Log::Info(fmt::format("Entity {} updated component {}",
                               static_cast<unsigned int>(entity_id), System::component_name())).enqueue();
+
     }
 
     template<class System>

@@ -17,12 +17,12 @@ namespace Bcg {
         std::mutex currentMutex;
         std::mutex nextMutex;
 
-        void enqueue_current(std::shared_ptr<Command> command) {
+        void enqueue_current(std::shared_ptr<AbstractCommand> command) {
             std::unique_lock<std::mutex> lock(currentMutex);
             p_current->emplace_back(std::move(command));
         }
 
-        void enqueue_next(std::shared_ptr<Command> command) {
+        void enqueue_next(std::shared_ptr<AbstractCommand> command) {
             std::unique_lock<std::mutex> lock(nextMutex);
             p_next->emplace_back(std::move(command));
         }

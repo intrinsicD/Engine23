@@ -9,6 +9,7 @@ target_sources(Engine23Lib PRIVATE
         SystemVertexArrayObject.cpp
         SystemShaderPrograms.cpp
         SystemRendererOpenGL.cpp
+        GLMeshRenderPass.cpp
 )
 
 target_link_libraries(Engine23Lib PRIVATE ${OPENGL_LIBRARIES})

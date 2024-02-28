@@ -11,11 +11,11 @@
 namespace Bcg {
     struct Command;
 
-    struct CommandBuffer : public std::vector<std::shared_ptr<Command>> {
-        using std::vector<std::shared_ptr<Command>>::vector;
+    struct CommandBuffer : public std::vector<std::shared_ptr<AbstractCommand>> {
+        using std::vector<std::shared_ptr<AbstractCommand>>::vector;
 
         void clear_and_swap() {
-            std::vector<std::shared_ptr<Command>>().swap(*this);
+            std::vector<std::shared_ptr<AbstractCommand>>().swap(*this);
         }
     };
 }

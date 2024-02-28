@@ -31,6 +31,10 @@ namespace Bcg {
             return State().ctx();
         }
 
+        static auto &Dispatcher() {
+            return Instance()->dispatcher;
+        }
+
         entt::registry state;
         entt::dispatcher dispatcher;
         bool is_running = false;

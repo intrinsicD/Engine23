@@ -29,6 +29,7 @@ namespace Bcg {
 
         // parse line by line (currently only supports vertex positions & faces
         VertexHandle v;
+        bool has_normals = false;
         while (in && !feof(in) && fgets(s, 200, in)) {
             // comment
             if (s[0] == '#' || isspace(s[0])) {
@@ -49,6 +50,7 @@ namespace Bcg {
                         // problematic as it can be either a vertex Property when interpolated
                         // or a halfedge Property for hard edges
                         normals[v] = Eigen::Vector<double, 3>(x, y, z);
+                        has_normals = true;
                     }
                 }
 
@@ -148,6 +150,10 @@ namespace Bcg {
         // if there are no textures, delete texture Property!
         if (!with_tex_coord) {
             mesh.halfedges.erase(tex_coords);
+        }
+
+        if(!has_normals){
+            mesh.vertices.erase(normals);
         }
 
         fclose(in);
