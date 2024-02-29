@@ -12,7 +12,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED)
+add_library(Engine23Lib SHARED
+        include/Rendering/RenderSettings.h
+        include/Rendering/RenderSettingsGui.h
+        src/Rendering/RenderSettingsGui.cpp)
 
 add_subdirectory(app)
 add_subdirectory(platform)
