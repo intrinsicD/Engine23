@@ -15,7 +15,8 @@ add_custom_target(Engine23 ALL)
 add_library(Engine23Lib SHARED
         include/Rendering/RenderSettings.h
         include/Rendering/RenderSettingsGui.h
-        src/Rendering/RenderSettingsGui.cpp)
+        src/Rendering/RenderSettingsGui.cpp
+        include/Property/PropertyGui.h)
 
 add_subdirectory(app)
 add_subdirectory(platform)

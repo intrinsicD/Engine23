@@ -7,7 +7,7 @@
 
 namespace Bcg{
     struct RenderSettings{
-        float test;
+        bool hide;
     };
 }
 
