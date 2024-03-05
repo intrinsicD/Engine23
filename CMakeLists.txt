@@ -16,7 +16,13 @@ add_library(Engine23Lib SHARED
         include/Rendering/RenderSettings.h
         include/Rendering/RenderSettingsGui.h
         src/Rendering/RenderSettingsGui.cpp
-        include/Property/PropertyGui.h)
+        include/Property/PropertyGui.h
+        include/Optimizer/Optimizer.h
+        include/Optimizer/Adam.h
+        include/Rotation/Rotation3DCayley.h
+        include/Rotation/RotationSkewSymmetricHelper.h
+        include/Rotation/Rotation3DAngleAxis.h
+)
 
 add_subdirectory(app)
 add_subdirectory(platform)
