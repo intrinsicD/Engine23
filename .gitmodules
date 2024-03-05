@@ -31,6 +31,3 @@
 [submodule "ext/happly"]
 	path = ext/happly
 	url = https://github.com/nmwsharp/happly.git
-[submodule "ext/ensmallen-eigen"]
-	path = ext/ensmallen-eigen
-	url = https://github.com/kilasuelika/ensmallen-eigen.git

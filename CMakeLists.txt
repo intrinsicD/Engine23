@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 project(Engine23)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -12,17 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED
-        include/Rendering/RenderSettings.h
-        include/Rendering/RenderSettingsGui.h
-        src/Rendering/RenderSettingsGui.cpp
-        include/Property/PropertyGui.h
-        include/Optimizer/Optimizer.h
-        include/Optimizer/Adam.h
-        include/Rotation/Rotation3DCayley.h
-        include/Rotation/RotationSkewSymmetricHelper.h
-        include/Rotation/Rotation3DAngleAxis.h
-)
+add_library(Engine23Lib SHARED)
 
 add_subdirectory(app)
 add_subdirectory(platform)
