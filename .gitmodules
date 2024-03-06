@@ -31,3 +31,6 @@
 [submodule "ext/happly"]
 	path = ext/happly
 	url = https://github.com/nmwsharp/happly.git
+[submodule "ext/TinyAD"]
+	path = ext/TinyAD
+	url = https://github.com/patr-schm/TinyAD.git

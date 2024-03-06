@@ -1,8 +1,8 @@
 target_include_directories(Engine23Lib SYSTEM PUBLIC imgui)
 target_include_directories(Engine23Lib SYSTEM PUBLIC ImGuizmo)
 target_include_directories(Engine23Lib SYSTEM PUBLIC soil/include)
-target_include_directories(Engine23Lib SYSTEM PUBLIC eigen)
 target_include_directories(Engine23Lib SYSTEM PUBLIC happly)
+
 target_compile_definitions(Engine23Lib PRIVATE -DIMGUI_IMPL_OPENGL_LOADER_GLAD)
 
 add_subdirectory(glfw)
@@ -31,3 +31,7 @@ add_subdirectory(entt)
 target_link_libraries(Engine23Lib PUBLIC EnTT::EnTT)
 add_subdirectory(fmt)
 target_link_libraries(Engine23Lib PUBLIC fmt::fmt)
+add_subdirectory(eigen)
+target_link_libraries(Engine23Lib PUBLIC Eigen3::Eigen)
+add_subdirectory(TinyAD)
+target_link_libraries(Engine23Lib PUBLIC TinyAD)
