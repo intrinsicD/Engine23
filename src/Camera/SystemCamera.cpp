@@ -9,14 +9,14 @@
 #include "Events.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
-#include "glm/gtc/matrix_transform.hpp"
 #include "components/Window.h"
 #include "components/Viewport.h"
 #include "components/Input.h"
 #include "components/Time.h"
 #include "Camera.h"
 #include "SafeAcos.h"
-#include "glm/gtc/type_ptr.hpp"
+#include "Eigen/Geometry"
+#include "Rotation3DAngleAxis.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -41,7 +41,7 @@ namespace Bcg {
         void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event);
 
         inline bool
-        MapToSphere(const glm::vec2 &point, int width, int height, glm::vec3 &result);
+        MapToSphere(const Eigen::Vector<float, 2> &point, int width, int height, Eigen::Vector<float, 3> &result);
 
         void on_end_main_loop(const Events::End<MainLoop> &event);
 
@@ -70,30 +70,30 @@ namespace Bcg {
                             "      %f %f %f %f\n"
                             "      %f %f %f %f\n"
                             "      %f %f %f %f\n",
-                            model[0][0], model[0][1], model[0][2], model[0][3],
-                            model[1][0], model[1][1], model[1][2], model[1][3],
-                            model[2][0], model[2][1], model[2][2], model[2][3],
-                            model[3][0], model[3][1], model[3][2], model[3][3]);
+                            model(0, 0), model(0, 1), model(0, 2), model(0, 3),
+                            model(1, 0), model(1, 1), model(1, 2), model(1, 3),
+                            model(2, 0), model(2, 1), model(2, 2), model(2, 3),
+                            model(3, 0), model(3, 1), model(3, 2), model(3, 3));
 
                 auto view = camera.get_view();
                 ImGui::Text("View: %f %f %f %f\n"
                             "      %f %f %f %f\n"
                             "      %f %f %f %f\n"
                             "      %f %f %f %f\n",
-                            view[0][0], view[0][1], view[0][2], view[0][3],
-                            view[1][0], view[1][1], view[1][2], view[1][3],
-                            view[2][0], view[2][1], view[2][2], view[2][3],
-                            view[3][0], view[3][1], view[3][2], view[3][3]);
+                            view(0, 0), view(0, 1), view(0, 2), view(0, 3),
+                            view(1, 0), view(1, 1), view(1, 2), view(1, 3),
+                            view(2, 0), view(2, 1), view(2, 2), view(2, 3),
+                            view(3, 0), view(3, 1), view(3, 2), view(3, 3));
 
                 auto proj = camera.get_projection();
                 ImGui::Text("Projection: %f %f %f %f\n"
                             "            %f %f %f %f\n"
                             "            %f %f %f %f\n"
                             "            %f %f %f %f\n",
-                            proj[0][0], proj[0][1], proj[0][2], proj[0][3],
-                            proj[1][0], proj[1][1], proj[1][2], proj[1][3],
-                            proj[2][0], proj[2][1], proj[2][2], proj[2][3],
-                            proj[3][0], proj[3][1], proj[3][2], proj[3][3]);
+                            proj(0, 0), proj(0, 1), proj(0, 2), proj(0, 3),
+                            proj(1, 0), proj(1, 1), proj(1, 2), proj(1, 3),
+                            proj(2, 0), proj(2, 1), proj(2, 2), proj(2, 3),
+                            proj(3, 0), proj(3, 1), proj(3, 2), proj(3, 3));
                 static bool edit = false;
                 ImGui::InputFloat("Mov Speed", &camera.sensitivity.move);
                 ImGui::InputFloat("Zoom Speed", &camera.sensitivity.zoom);
@@ -109,27 +109,27 @@ namespace Bcg {
                     auto world_up = parameters.world_up;
                     auto right = parameters.right;
                     if (!edit) {
-                        ImGui::Text("Position: %f %f %f", position.x, position.y, position.z);
-                        ImGui::Text("Front: %f %f %f", front.x, front.y, front.z);
-                        ImGui::Text("Up: %f %f %f", up.x, up.y, up.z);
-                        ImGui::Text("Right: %f %f %f", right.x, right.y, right.z);
-                        ImGui::Text("World Up: %f %f %f", world_up.x, world_up.y, world_up.z);
+                        ImGui::Text("Position: %f %f %f", position[0], position[1], position[2]);
+                        ImGui::Text("Front: %f %f %f", front[0], front[1], front[2]);
+                        ImGui::Text("Up: %f %f %f", up[0], up[1], up[2]);
+                        ImGui::Text("Right: %f %f %f", right[0], right[1], right[2]);
+                        ImGui::Text("World Up: %f %f %f", world_up[0], world_up[1], world_up[2]);
                     } else {
-                        if (ImGui::InputFloat3("Position", &position.x)) {
+                        if (ImGui::InputFloat3("Position", position.data())) {
                             camera.set_position(position);
                         }
-                        if (ImGui::InputFloat3("Front", &front.x)) {
+                        if (ImGui::InputFloat3("Front", front.data())) {
                             camera.set_front(front);
                         }
-                        if (ImGui::InputFloat3("World Up", &up.x)) {
+                        ImGui::Text("Right: %f %f %f", right[0], right[1], right[2]);
+                        if (ImGui::InputFloat3("World Up", up.data())) {
                             camera.set_worldup(up);
                         }
                     }
-                    ImGui::Text("Right: %f %f %f", right.x, right.y, right.z);
                     if (ImGui::Button("Reset##View")) {
-                        camera.set_position(glm::vec3(0.0f, 0.0f, 3.0f));
-                        camera.set_worldup(glm::vec3(0.0f, 1.0f, 0.0f));
-                        camera.set_target(glm::vec3(0.0f, 0.0f, 0.0f));
+                        camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
+                        camera.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
+                        camera.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
                     }
                 }
                 if (ImGui::CollapsingHeader("Projection Parameters")) {
@@ -193,12 +193,12 @@ namespace Bcg {
                 ImGui::Separator();
 
                 ImGui::Text("last_point_ok: %d", camera.arc_ball_parameters.last_point_ok);
-                ImGui::Text("last_point_2d: %f %f", camera.arc_ball_parameters.last_point_2d.x,
-                            camera.arc_ball_parameters.last_point_2d.y);
-                ImGui::Text("last_point_3d: %f %f %f", camera.arc_ball_parameters.last_point_3d.x,
-                            camera.arc_ball_parameters.last_point_3d.y,
-                            camera.arc_ball_parameters.last_point_3d.z);
-                if (ImGui::InputFloat3("target", &camera.arc_ball_parameters.target.x)) {
+                ImGui::Text("last_point_2d: %f %f", camera.arc_ball_parameters.last_point_2d[0],
+                            camera.arc_ball_parameters.last_point_2d[1]);
+                ImGui::Text("last_point_3d: %f %f %f", camera.arc_ball_parameters.last_point_3d[0],
+                            camera.arc_ball_parameters.last_point_3d[1],
+                            camera.arc_ball_parameters.last_point_3d[2]);
+                if (ImGui::InputFloat3("target", camera.arc_ball_parameters.target.data())) {
                     camera.set_target(camera.arc_ball_parameters.target);
                 }
 
@@ -269,8 +269,8 @@ namespace Bcg {
             auto &camera = Engine::Context().get<Camera>();
 
             if (input.mouse.button.middle) {
-                auto pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
-                auto delta = camera.view_parameters.up * pos_delta.y - camera.view_parameters.right * pos_delta.x;
+                Eigen::Vector<float, 2> pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
+                Eigen::Vector<float, 3> delta = camera.view_parameters.up * pos_delta[1] - camera.view_parameters.right * pos_delta[0];
                 camera.view_parameters.position += delta;
                 camera.arc_ball_parameters.target += delta;
 
@@ -281,22 +281,23 @@ namespace Bcg {
             //Rotate the camera around the target_point
             if (camera.arc_ball_parameters.last_point_ok && input.mouse.button.right) {
                 auto model = camera.get_model();
-                glm::vec3 new_point_3d;
+                Eigen::Vector<float, 3> new_point_3d;
                 auto &window = Engine::Context().get<Window>();
                 if (MapToSphere(input.mouse.position, window.width, window.height, new_point_3d)) {
-                    if (new_point_3d.x != camera.arc_ball_parameters.last_point_3d.x ||
-                        new_point_3d.y != camera.arc_ball_parameters.last_point_3d.y ||
-                        new_point_3d.z != camera.arc_ball_parameters.last_point_3d.z) {
-                        glm::vec3 axis =
-                                glm::mat3(model) *
-                                glm::normalize(glm::cross(new_point_3d, camera.arc_ball_parameters.last_point_3d));
-                        float cos_angle = glm::dot(camera.arc_ball_parameters.last_point_3d, new_point_3d);
+                    if (new_point_3d[0] != camera.arc_ball_parameters.last_point_3d[0] ||
+                        new_point_3d[1] != camera.arc_ball_parameters.last_point_3d[1] ||
+                        new_point_3d[2] != camera.arc_ball_parameters.last_point_3d[2]) {
+                        Eigen::Vector<float, 3> axis =
+                                model.topLeftCorner<3, 3>() *
+                                new_point_3d.cross(camera.arc_ball_parameters.last_point_3d).normalized();
+                        float cos_angle = camera.arc_ball_parameters.last_point_3d.transpose() * new_point_3d;
                         float angle = SafeAcos(std::min(1.0f, cos_angle)) * camera.sensitivity.rotate;
-                        auto rot = glm::rotate(glm::mat4(1.0f), angle, axis);
+                        Rotation3DAngleAxis<float> rot;
+                        rot.m_angle_axis = angle * axis;
 
-                        auto position = camera.view_parameters.position;
-                        auto direction = position - camera.arc_ball_parameters.target;
-                        direction = glm::vec3(rot * glm::vec4(direction, 0.0f));
+                        Eigen::Vector<float, 3> position = camera.view_parameters.position;
+                        Eigen::Vector<float, 3> direction = position - camera.arc_ball_parameters.target;
+                        direction = rot.matrix() * direction;
                         //if direction is nan, then dont update
 
                         camera.set_position(camera.arc_ball_parameters.target + direction);
@@ -317,13 +318,13 @@ namespace Bcg {
             if (camera.is_orthographic) {
                 auto &orthographic_parameters = camera.projection_parameters.orthographic_parameters;
                 auto delta = float(time.mainloop.duration) * camera.sensitivity.zoom;
-                orthographic_parameters.top -= scroll.y * delta;
-                orthographic_parameters.bottom += scroll.y * delta;
-                orthographic_parameters.left -= scroll.x * delta;
-                orthographic_parameters.right += scroll.x * delta;
+                orthographic_parameters.top -= scroll[1] * delta;
+                orthographic_parameters.bottom += scroll[1] * delta;
+                orthographic_parameters.left -= scroll[0] * delta;
+                orthographic_parameters.right += scroll[0] * delta;
             } else {
                 auto &perspective_parameters = camera.projection_parameters.perspective_parameters;
-                perspective_parameters.fovy_degrees -= scroll.y * camera.sensitivity.zoom;
+                perspective_parameters.fovy_degrees -= scroll[1] * camera.sensitivity.zoom;
                 if (perspective_parameters.fovy_degrees < 1.0f) {
                     perspective_parameters.fovy_degrees = 1.0f;
                 } else if (perspective_parameters.fovy_degrees > 90.0f) {
@@ -333,10 +334,10 @@ namespace Bcg {
         }
 
         inline bool
-        MapToSphere(const glm::vec2 &point, int width, int height, glm::vec3 &result) {
+        MapToSphere(const Eigen::Vector<float, 2> &point, int width, int height, Eigen::Vector<float, 3> &result) {
             if ((point[0] >= 0) && (point[0] <= float(width)) && (point[1] >= 0) &&
                 (point[1] <= float(height))) {
-                glm::vec2 ndc({(point[0] / float(width) - 0.5), (0.5 - point[1] / float(height))});
+                Eigen::Vector<float, 2> ndc({(point[0] / float(width) - 0.5), (0.5 - point[1] / float(height))});
                 result[0] = std::sin(std::numbers::pi * ndc[0] * 0.5);
                 result[1] = std::sin(std::numbers::pi * ndc[1] * 0.5);
                 float sinx2siny2 = result[0] * result[0] + result[1] * result[1];
@@ -412,9 +413,9 @@ namespace Bcg {
         auto &camera = Engine::Context().get<Camera>();
         auto &window = Engine::Context().get<Window>();
         camera.set_perspective_parameters({45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
-        camera.set_position(glm::vec3(0.0f, 0.0f, 3.0f));
-        camera.set_target(glm::vec3(0.0f, 0.0f, 0.0f));
-        camera.set_worldup(glm::vec3(0.0f, 1.0f, 0.0f));
+        camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
+        camera.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
+        camera.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
         Log::Info("Initialized", name()).enqueue();
     }
 

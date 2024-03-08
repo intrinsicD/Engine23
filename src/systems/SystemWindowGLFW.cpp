@@ -116,17 +116,17 @@ namespace Bcg{
             glfwSetCursorPosCallback(h_window, [](GLFWwindow *h_window, double xpos, double ypos) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
-                input.mouse.position_delta.x = xpos - input.mouse.position.x;
-                input.mouse.position_delta.y = ypos - input.mouse.position.y;
-                input.mouse.position.x = xpos;
-                input.mouse.position.y = ypos;
+                input.mouse.position_delta[0] = xpos - input.mouse.position[0];
+                input.mouse.position_delta[1] = ypos - input.mouse.position[1];
+                input.mouse.position[0] = xpos;
+                input.mouse.position[1] = ypos;
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Position>{});
             });
             glfwSetScrollCallback(h_window, [](GLFWwindow *h_window, double xoffset, double yoffset) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
-                input.mouse.scroll.x = xoffset;
-                input.mouse.scroll.y = yoffset;
+                input.mouse.scroll[0] = xoffset;
+                input.mouse.scroll[1] = yoffset;
                 engine->dispatcher.trigger(Events::Update<Input::Mouse::Scroll>{});
             });
             glfwSetKeyCallback(h_window, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {

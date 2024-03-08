@@ -83,7 +83,7 @@ namespace Bcg {
 
     void SystemTransform::set_identity(entt::entity entity) {
         auto &transform = Engine::State().get<Transform>(entity);
-        transform.model = glm::mat4(1.0f);
+        transform.model.setIdentity();
     }
 
     void SystemTransform::pre_init() {

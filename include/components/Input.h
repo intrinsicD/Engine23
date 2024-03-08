@@ -5,21 +5,21 @@
 #ifndef ENGINE23_INPUT_H
 #define ENGINE23_INPUT_H
 
-#include "glm/glm.hpp"
+#include "Eigen/Core"
 #include <vector>
 #include <string>
 
 namespace Bcg {
     struct Input {
         struct Mouse {
-            struct Position : public glm::vec2 {
+        struct Position : public Eigen::Vector<float, 2> {
             };
             struct Button {
                 bool left = false;
                 bool right = false;
                 bool middle = false;
             };
-            struct Scroll : public glm::vec2 {
+            struct Scroll : public Eigen::Vector<float, 2> {
             };
             Position position;
             Position position_delta;

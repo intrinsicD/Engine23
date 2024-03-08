@@ -5,7 +5,7 @@
 #ifndef ENGINE23_CAMERA_H
 #define ENGINE23_CAMERA_H
 
-#include "../../ext/glm/glm/glm.hpp"
+#include "Eigen/Core"
 
 namespace Bcg{
     struct Camera {
@@ -28,11 +28,11 @@ namespace Bcg{
             } orthographic_parameters;
         } projection_parameters;
         struct ViewParameters{
-            glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
-            glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f);
-            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-            glm::vec3 right = glm::vec3(1.0f, 0.0f, 0.0f);
-            glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+            Eigen::Vector<float, 3> position = Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f);
+            Eigen::Vector<float, 3> front = Eigen::Vector<float, 3>(0.0f, 0.0f, -1.0f);
+            Eigen::Vector<float, 3> up = Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f);
+            Eigen::Vector<float, 3> right = Eigen::Vector<float, 3>(1.0f, 0.0f, 0.0f);
+            Eigen::Vector<float, 3> world_up = Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f);
             bool dirty;
         }view_parameters;
 
@@ -45,28 +45,28 @@ namespace Bcg{
 
         struct ArcBallParameters {
             bool last_point_ok = false;
-            glm::vec3 target = glm::vec3(0.0f);
-            glm::vec2 last_point_2d = glm::vec2(0.0f);
-            glm::vec3 last_point_3d = glm::vec3(0.0f);
+            Eigen::Vector<float, 3> target = Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f);
+            Eigen::Vector<float, 2> last_point_2d = Eigen::Vector<float, 2>(0.0f, 0.0f);
+            Eigen::Vector<float, 3> last_point_3d = Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f);
         }arc_ball_parameters;
 
         bool is_orthographic = true;
 
         Camera();
 
-        glm::mat4 get_model() const;
+        Eigen::Matrix<float, 4, 4> get_model() const;
 
-        glm::mat4 get_view() const;
+        Eigen::Matrix<float, 4, 4> get_view() const;
 
-        glm::mat4 get_projection() const;
+        Eigen::Matrix<float, 4, 4> get_projection() const;
 
-        void set_front(const glm::vec3 &front);
+        void set_front(const Eigen::Vector<float, 3> &front);
 
-        void set_target(const glm::vec3 &target);
+        void set_target(const Eigen::Vector<float, 3> &target);
 
-        void set_position(const glm::vec3 &position);
+        void set_position(const Eigen::Vector<float, 3> &position);
 
-        void set_worldup(const glm::vec3 &world_up);
+        void set_worldup(const Eigen::Vector<float, 3> &world_up);
 
         void set_view_parameters(const ViewParameters &parameters);
 

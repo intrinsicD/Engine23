@@ -5,40 +5,30 @@
 #ifndef ENGINE23_TRANSFORM_H
 #define ENGINE23_TRANSFORM_H
 
-#include "glm/glm.hpp"
+#include "Eigen/Geometry"
 #include "components/ComponentGui.h"
 
 namespace Bcg{
     struct Transform {
-        glm::mat4 model = glm::mat4(1.0f);
+        Eigen::Transform<float, 3, Eigen::Affine> model = Eigen::Transform<float, 3, Eigen::Affine>::Identity();
 
-        glm::vec3 get_position() const;
+        Eigen::Vector<float, 3> get_position() const;
 
-        glm::vec3 get_scale() const;
+        Eigen::Vector<float, 3> get_scale() const;
 
-        glm::quat get_rotation() const;
+        Eigen::Vector<float, 3> get_angles_axis() const;
 
-        glm::vec3 get_euler_angles() const;
+        Eigen::Vector<float, 3> get_x_axis() const;
 
-        glm::vec3 get_angles_axis() const;
+        Eigen::Vector<float, 3> get_y_axis() const;
 
-        glm::vec3 get_x_axis() const;
+        Eigen::Vector<float, 3> get_z_axis() const;
 
-        glm::vec3 get_y_axis() const;
+        void set_position(const Eigen::Vector<float, 3> &position);
 
-        glm::vec3 get_z_axis() const;
+        void set_scale(const Eigen::Vector<float, 3> &scale);
 
-        void set_position(const glm::vec3 &position);
-
-        void set_scale(const glm::vec3 &scale);
-
-        void set_rotation(const glm::quat &rotation);
-
-        void set_rotation(const glm::vec3 &axis, float angle);
-
-        void set_rotation(const glm::vec3 &euler_angles);
-
-        void set_rotation(float pitch, float yaw, float roll);
+        void set_rotation(const Eigen::Vector<float, 3> &axis, float angle);
     };
 
 }

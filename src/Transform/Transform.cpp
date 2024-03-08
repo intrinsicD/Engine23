@@ -3,66 +3,55 @@
 //
 
 #include "Transform.h"
-#include "glm/gtx/euler_angles.hpp"
+#include "Rotation3DAngleAxis.h"
 
 namespace Bcg{
 
-    glm::vec3 Transform::get_position() const {
-        return glm::vec3(model[3]);
+    Eigen::Vector<float, 3> Transform::get_position() const {
+        return model.translation();
     }
 
-    glm::vec3 Transform::get_scale() const {
-        return glm::vec3(glm::length(glm::vec3(model[0])), glm::length(glm::vec3(model[1])),
-                         glm::length(glm::vec3(model[2])));
+    Eigen::Vector<float, 3> Transform::get_scale() const {
+        auto linear = model.linear();
+        return Eigen::Vector<float, 3>(linear.col(0).norm(), linear.col(1).norm(), linear.col(2).norm());
     }
 
-    glm::quat Transform::get_rotation() const {
-        return glm::quat_cast(model);
+    Eigen::Vector<float, 3> Transform::get_angles_axis() const {
+        Rotation3DAngleAxis<float> angleAxis;
+        angleAxis.from_matrix(model.rotation().matrix());
+        return angleAxis.m_angle_axis;
     }
 
-    glm::vec3 Transform::get_euler_angles() const {
-        return glm::eulerAngles(get_rotation());
+    Eigen::Vector<float, 3> Transform::get_x_axis() const {
+        auto linear = model.linear();
+        return linear.col(0);
     }
 
-    glm::vec3 Transform::get_angles_axis() const {
-        return glm::axis(get_rotation());
+    Eigen::Vector<float, 3> Transform::get_y_axis() const {
+        auto linear = model.linear();
+        return linear.col(1);
     }
 
-    glm::vec3 Transform::get_x_axis() const {
-        return glm::vec3(model[0]);
+    Eigen::Vector<float, 3> Transform::get_z_axis() const {
+        auto linear = model.linear();
+        return linear.col(2);
     }
 
-    glm::vec3 Transform::get_y_axis() const {
-        return glm::vec3(model[1]);
+    void Transform::set_position(const Eigen::Vector<float, 3> &position) {
+        model.translation() = position;
     }
 
-    glm::vec3 Transform::get_z_axis() const {
-        return glm::vec3(model[2]);
+    void Transform::set_scale(const Eigen::Vector<float, 3> &scale) {
+        auto linear = model.linear();
+        linear *= get_scale().asDiagonal().inverse() * scale.asDiagonal();
     }
 
-    void Transform::set_position(const glm::vec3 &position) {
-        model[3] = glm::vec4(position, 1.0f);
-    }
+    void Transform::set_rotation(const Eigen::Vector<float, 3> &axis, float angle) {
+       auto scale = get_scale();
+       Rotation3DAngleAxis<float> rot;
+       rot.m_angle_axis = axis * angle;
 
-    void Transform::set_scale(const glm::vec3 &scale) {
-        model[0] = glm::vec4(glm::normalize(glm::vec3(model[0])) * scale.x, 0.0f);
-        model[1] = glm::vec4(glm::normalize(glm::vec3(model[1])) * scale.y, 0.0f);
-        model[2] = glm::vec4(glm::normalize(glm::vec3(model[2])) * scale.z, 0.0f);
-    }
-
-    void Transform::set_rotation(const glm::quat &rotation) {
-        model = glm::mat4_cast(rotation);
-    }
-
-    void Transform::set_rotation(const glm::vec3 &axis, float angle) {
-        model = glm::rotate(glm::mat4(1.0f), angle, axis);
-    }
-
-    void Transform::set_rotation(const glm::vec3 &euler_angles) {
-        model = glm::mat4_cast(glm::quat(euler_angles));
-    }
-
-    void Transform::set_rotation(float pitch, float yaw, float roll) {
-        model = glm::mat4_cast(glm::quat(glm::vec3(pitch, yaw, roll)));
+       model.linear().setIdentity();
+       model.linear() *= rot.matrix() * get_scale().asDiagonal();
     }
 }

@@ -40,8 +40,8 @@ namespace Bcg {
 namespace Bcg{
     namespace SystemUserInputInternal {
         void RenderGuiMouse(const Input::Mouse &mouse) {
-            ImGui::Text("Position: (%f, %f)", mouse.position.x, mouse.position.y);
-            ImGui::Text("Scroll: (%f, %f)", mouse.scroll.x, mouse.scroll.y);
+            ImGui::Text("Position: (%f, %f)", mouse.position[0], mouse.position[1]);
+            ImGui::Text("Scroll: (%f, %f)", mouse.scroll[0], mouse.scroll[1]);
             ImGui::Text("Buttons: (%d, %d, %d)", mouse.button.left, mouse.button.middle,
                         mouse.button.right);
         }

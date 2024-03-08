@@ -5,23 +5,32 @@
 #ifndef ENGINE23_ROTATION3DCAYLEY_H
 #define ENGINE23_ROTATION3DCAYLEY_H
 
-#include "RotationSkewSymmetricHelper.h"
+#include "CrossProductMatrix.h"
 
 namespace Bcg {
     template<typename T>
     class Rotation3DCayley {
+    public:
         Eigen::Vector<T, 3> m_z;
 
-        Eigen::Vector<T, 3> angle_axis_from_cayley(const Eigen::Vector<T, 3> &z) const {
+        T get_angle() const {
+            return 2 * std::atan(m_z.norm());
+        }
+
+        Eigen::Vector<T, 3> get_axis() const{
+            return m_z.normalized();
+        }
+
+        Eigen::Vector<T, 3> angle_axis_from_cayley() const {
             T length = m_z.norm();
             T angle = 2 * std::atan(length);
             return angle * m_z / length;
         }
 
         Eigen::Matrix<T, 3, 3> matrix() const {
-            Eigen::Matrix<T, 3, 3> K = skew_symmetric_helper(m_z);
-            Eigen::Matrix<T, 3, 3> I = Eigen::Matrix<T, 3, 3>::Identity();
-            return (I + K) * (I - K).inverse();
+            Eigen::Matrix<T, 3, 3> K = CrossProductMatrix(m_z);
+            Eigen::Matrix<T, 3, 3> Id = Eigen::Matrix<T, 3, 3>::Identity();
+            return (Id - K) * (Id + K).inverse();
         }
 
         Rotation3DCayley<T> from_matrix(const Eigen::Matrix<T, 3, 3> &rot) {

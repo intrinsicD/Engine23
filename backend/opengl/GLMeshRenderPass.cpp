@@ -11,7 +11,6 @@
 #include "MeshVertexNormalsAreaAngleHybrid.h"
 #include "PropertyEigenMap.h"
 #include "OpenGLUtils.h"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace Bcg{
 
@@ -82,14 +81,14 @@ namespace Bcg{
         auto program = programs["learn_opengl"];
 
         program.use();
-        program.set_mat4("view", glm::value_ptr(camera.get_view()));
-        program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
+        program.set_mat4("view", camera.get_view().data());
+        program.set_mat4("projection", camera.get_projection().data());
 
         for(auto entity_id : view){
             auto &transform = view.get<Transform>(entity_id);
             auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
             program.set_vec3("our_color", renderable.our_color);
-            program.set_mat4("model", glm::value_ptr(transform.model));
+            program.set_mat4("model", transform.model.data());
             renderable.vao.bind();
             renderable.draw();
             renderable.vao.release();

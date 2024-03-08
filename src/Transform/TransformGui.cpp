@@ -8,12 +8,11 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "Camera.h"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace Bcg {
     static bool show_guizmo = false;
 
-    inline void EditTransform(const Camera &camera, glm::mat4 &matrix) {
+    inline void EditTransform(const Camera &camera, Eigen::Matrix<float, 4, 4> &matrix) {
         static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
         static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 
@@ -28,18 +27,18 @@ namespace Bcg {
         if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE)) {
             mCurrentGizmoOperation = ImGuizmo::SCALE;
         }
-        glm::vec3 translation, rotation, scale;
-        ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(matrix),
-                                              glm::value_ptr(translation),
-                                              glm::value_ptr(rotation),
-                                              glm::value_ptr(scale));
-        ImGui::InputFloat3("Tr", glm::value_ptr(translation));
-        ImGui::InputFloat3("Rt", glm::value_ptr(rotation));
-        ImGui::InputFloat3("Sc", glm::value_ptr(scale));
-        ImGuizmo::RecomposeMatrixFromComponents(glm::value_ptr(translation),
-                                                glm::value_ptr(rotation),
-                                                glm::value_ptr(scale),
-                                                glm::value_ptr(matrix));
+        Eigen::Vector<float, 3> translation, rotation, scale;
+        ImGuizmo::DecomposeMatrixToComponents(matrix.data(),
+                                              translation.data(),
+                                              rotation.data(),
+                                              scale.data());
+        ImGui::InputFloat3("Tr", translation.data());
+        ImGui::InputFloat3("Rt", rotation.data());
+        ImGui::InputFloat3("Sc", scale.data());
+        ImGuizmo::RecomposeMatrixFromComponents(translation.data(),
+                                                rotation.data(),
+                                                scale.data(),
+                                                matrix.data());
 
         if (mCurrentGizmoOperation != ImGuizmo::SCALE) {
             if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
@@ -51,16 +50,16 @@ namespace Bcg {
         static bool useSnap(false);
         ImGui::Checkbox("use_snap", &useSnap);
         ImGui::SameLine();
-        static glm::vec3 snap = glm::vec3(1.0f);
+        static Eigen::Vector<float, 3> snap = Eigen::Vector<float, 3>::Ones();
         switch (mCurrentGizmoOperation) {
             case ImGuizmo::TRANSLATE:
-                ImGui::InputFloat3("Snap", &snap.x);
+                ImGui::InputFloat3("Snap", snap.data());
                 break;
             case ImGuizmo::ROTATE:
-                ImGui::InputFloat("Angle Snap", &snap.x);
+                ImGui::InputFloat("Angle Snap", snap.data());
                 break;
             case ImGuizmo::SCALE:
-                ImGui::InputFloat("Scale Snap", &snap.x);
+                ImGui::InputFloat("Scale Snap", snap.data());
                 break;
             default:
                 break;
@@ -68,9 +67,9 @@ namespace Bcg {
         ImGuiIO &io = ImGui::GetIO();
         ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-        ImGuizmo::Manipulate(glm::value_ptr(camera.get_view()), glm::value_ptr(camera.get_projection()),
+        ImGuizmo::Manipulate(camera.get_view().data(), camera.get_projection().data(),
                              mCurrentGizmoOperation, mCurrentGizmoMode,
-                             glm::value_ptr(matrix), NULL, useSnap ? &snap.x : NULL);
+                             matrix.data(), NULL, useSnap ? snap.data() : NULL);
     }
 
     void ComponentGui<Transform>::Show(entt::entity entity_id) {
@@ -92,31 +91,32 @@ namespace Bcg {
         }
         if (show_guizmo) {
             auto &camera = Engine::Context().get<Camera>();
-            EditTransform(camera, transform.model);
+            EditTransform(camera, transform.model.matrix());
         }
         ImGui::Separator();
 
         if (ImGui::Button("Reset")) {
-            transform.model = glm::mat4(1.0f);
+            transform.model.setIdentity();
         }
 
-        ImGui::Text("position: (%f, %f, %f)", transform.get_position().x, transform.get_position().y,
-                    transform.get_position().z);
-        ImGui::Text("scale:    (%f, %f, %f)", transform.get_scale().x, transform.get_scale().y,
-                    transform.get_scale().z);
-        ImGui::Text("rotation: (%f, %f, %f)", transform.get_euler_angles().x, transform.get_euler_angles().y,
-                    transform.get_euler_angles().z);
+
+        ImGui::Text("position: (%f, %f, %f)", transform.get_position()[0], transform.get_position()[1],
+                    transform.get_position()[2]);
+        ImGui::Text("scale:    (%f, %f, %f)", transform.get_scale()[0], transform.get_scale()[1],
+                    transform.get_scale()[2]);
+        Eigen::Vector<float, 3> angle_axis = transform.get_angles_axis();
+        ImGui::Text("rotation: (%f, %f, %f)", angle_axis[0], angle_axis[1], angle_axis[2]);
 
         ImGui::Separator();
 
         ImGui::Text("model matrix: %f %f %f %f\n"
                     "              %f %f %f %f\n"
                     "              %f %f %f %f\n"
-                    "              %f %f %f %f\n", transform.model[0][0], transform.model[0][1], transform.model[0][2],
-                    transform.model[0][3],
-                    transform.model[1][0], transform.model[1][1], transform.model[1][2], transform.model[1][3],
-                    transform.model[2][0], transform.model[2][1], transform.model[2][2], transform.model[2][3],
-                    transform.model[3][0], transform.model[3][1], transform.model[3][2], transform.model[3][3]);
+                    "              %f %f %f %f\n",
+                    transform.model(0, 0), transform.model(0, 1), transform.model(0, 2), transform.model(0, 3),
+                    transform.model(1, 0), transform.model(1, 1), transform.model(1, 2), transform.model(1, 3),
+                    transform.model(2, 0), transform.model(2, 1), transform.model(2, 2), transform.model(2, 3),
+                    transform.model(3, 0), transform.model(3, 1), transform.model(3, 2), transform.model(3, 3));
 
     }
 }
