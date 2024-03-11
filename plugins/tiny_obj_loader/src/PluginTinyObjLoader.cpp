@@ -40,7 +40,7 @@ namespace Bcg {
 
 namespace Bcg {
     namespace PluginTinyObjLoaderInternal {
-        bool load_obj_glm(const std::string &filepath) {
+        /*bool load_obj_glm(const std::string &filepath) {
             tinyobj::ObjReaderConfig reader_config;
             reader_config.mtl_search_path = FilePath::Parent(filepath);
 
@@ -194,7 +194,7 @@ namespace Bcg {
                 return 1;
             });
             render_command.add_command<TaskCommand>(task);
-            /*render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
+            *//*render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
                 auto &camera = Engine::Context().get<Camera>();
                 auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
                 auto &transform = Engine::State().get<Transform>(entity_id);
@@ -207,7 +207,7 @@ namespace Bcg {
                 renderable.draw();
                 renderable.vao.release();
                 return 1;
-            }));*/
+            }));*//*
             Engine::State().emplace<RenderCommand>(entity_id, render_command);
 
 
@@ -264,7 +264,7 @@ namespace Bcg {
             renderable_triangles.our_color[1] = 0.5f;
             renderable_triangles.our_color[2] = 0.2f;
             return true;
-        }
+        }*/
 
         bool load_obj_eigen(const std::string &filepath) {
             tinyobj::ObjReaderConfig reader_config;
@@ -380,9 +380,9 @@ namespace Bcg {
                 auto &transform = Engine::State().get<Transform>(entity_id);
                 renderable.program.use();
                 renderable.program.set_vec3("our_color", renderable.our_color);
-                renderable.program.set_mat4("view", glm::value_ptr(camera.get_view()));
-                renderable.program.set_mat4("projection", glm::value_ptr(camera.get_projection()));
-                renderable.program.set_mat4("model", glm::value_ptr(transform.model));
+                renderable.program.set_mat4("view", camera.get_view().data()); //TODO should be transposed first and then uploaded
+                renderable.program.set_mat4("projection", camera.get_projection().data()); //TODO should be transposed first and then uploaded
+                renderable.program.set_mat4("model", transform.model.data()); //TODO should be transposed first and then uploaded
                 renderable.vao.bind();
                 renderable.draw();
                 renderable.vao.release();
