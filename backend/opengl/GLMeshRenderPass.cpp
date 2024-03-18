@@ -88,7 +88,7 @@ namespace Bcg{
             auto &transform = view.get<Transform>(entity_id);
             auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
             program.set_vec3("our_color", renderable.our_color);
-            program.set_mat4("model", transform.model.data());
+            program.set_mat4("model", transform.model.matrix().data());
             renderable.vao.bind();
             renderable.draw();
             renderable.vao.release();
