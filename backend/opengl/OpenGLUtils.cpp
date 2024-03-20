@@ -646,6 +646,10 @@ namespace Bcg::OpenGL {
         return result;
     }
 
+    ShaderProgram::operator unsigned int() const{
+        return id;
+    }
+
     void ShaderProgram::load_shaders() {
         if (!v_shader.filepath.empty()) {
             v_shader.load_sources();

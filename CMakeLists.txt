@@ -20,7 +20,13 @@ add_library(Engine23Lib SHARED
         include/Camera/LookAtRH.h
         include/Camera/OrthoRH_NO.h
         include/Camera/PerspectiveRH_NO.h
-        include/Visibility/VisibilityComponent.h)
+        include/Visibility/VisibilityComponent.h
+        include/Rendering/RenderPass.h
+        include/Rendering/DefaultMeshRenderPass.h
+        src/Rendering/RenderPass.cpp
+        src/Rendering/DefaultMeshRenderPass.cpp
+        include/EnumAsBitmask.h
+)
 
 
 add_subdirectory(app)

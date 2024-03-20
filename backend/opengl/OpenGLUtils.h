@@ -77,6 +77,8 @@ namespace Bcg::OpenGL {
         Shader te_shader;
         Shader c_shader;
 
+        operator unsigned int() const;
+
         void load_shaders();
 
         void compile_from_sources();

@@ -380,9 +380,9 @@ namespace Bcg {
                 auto &transform = Engine::State().get<Transform>(entity_id);
                 renderable.program.use();
                 renderable.program.set_vec3("our_color", renderable.our_color);
-                renderable.program.set_mat4("view", camera.get_view().data()); //TODO should be transposed first and then uploaded
-                renderable.program.set_mat4("projection", camera.get_projection().data()); //TODO should be transposed first and then uploaded
-                renderable.program.set_mat4("model", transform.model.data()); //TODO should be transposed first and then uploaded
+                renderable.program.set_mat4("view", camera.get_view().data());
+                renderable.program.set_mat4("projection", camera.get_projection().data());
+                renderable.program.set_mat4("model", transform.model.data());
                 renderable.vao.bind();
                 renderable.draw();
                 renderable.vao.release();
