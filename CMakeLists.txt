@@ -13,7 +13,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED)
+add_library(Engine23Lib SHARED
+        include/CommandGraph.h
+        src/CommandGraph.cpp
+        include/DynamicBitset.h)
 
 
 add_subdirectory(app)
