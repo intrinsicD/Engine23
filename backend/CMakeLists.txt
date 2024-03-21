@@ -1,3 +1,4 @@
+target_include_directories(Engine23Lib PUBLIC .)
 # Detect operating systems
 if (WIN32)
     add_subdirectory(opengl)
