@@ -18,18 +18,18 @@ namespace Bcg {
         }
     };
 
-    TEST(CommandGraphTest, AddCommand) {
-        CommandGraph graph;
+    TEST(CommandGraphAdjTest, AddCommand) {
+        CommandGraphAdj graph;
         auto command = std::make_shared<MockCommand>();
-        auto node = graph.add_command(command);
+        auto node_id = graph.add_command(command);
 
         // Check that the command was added correctly
-        ASSERT_NE(node, nullptr); // Node should not be null
-        EXPECT_EQ(node->command, command); // The node's command should be the one we added
+        ASSERT_NE(node_id, -1); // Node should not be null
+        EXPECT_EQ(graph.commands[node_id], command); // The node's command should be the one we added
     }
 
-    TEST(CommandGraphTest, AddDependency) {
-        CommandGraph graph;
+    TEST(CommandGraphAdjTest, AddDependency) {
+        CommandGraphAdj graph;
         auto command1 = std::make_shared<MockCommand>();
         auto command2 = std::make_shared<MockCommand>();
 
@@ -39,45 +39,18 @@ namespace Bcg {
         graph.add_dependency(node1, node2);
 
         // Check that the dependency was added correctly
-        ASSERT_FALSE(node1->dependencies.empty()); // Node1 should have a dependency
-        EXPECT_EQ(node1->dependencies.front().lock(), node2); // The dependency should be node2
-        EXPECT_EQ(node2->dependents.front().lock(), node1); // Node2 should list node1 as a dependent
+        ASSERT_FALSE(graph.dependencies[node1].empty()); // Node1 should have a dependency
+        EXPECT_EQ(graph.dependencies[node1].front(), node2); // The dependency should be node2
+        EXPECT_EQ(graph.dependents[node2].front(), node1); // Node2 should list node1 as a dependent
     }
 
-    TEST(CommandGraphTest, RemoveDependency) {
-        CommandGraph graph;
-        auto command1 = std::make_shared<MockCommand>();
-        auto command2 = std::make_shared<MockCommand>();
 
-        auto node1 = graph.add_command(command1);
-        auto node2 = graph.add_command(command2);
-
-        graph.add_dependency(node1, node2);
-        graph.remove_dependency(node1, node2);
-
-        // Check that the dependency was removed correctly
-        EXPECT_TRUE(node1->dependencies.empty()); // Node1's dependencies should be empty
-        EXPECT_TRUE(node2->dependents.empty()); // Node2's dependents should be empty
-    }
-
-    TEST(CommandGraphTest, RemoveCommand) {
-        CommandGraph graph;
-        auto command = std::make_shared<MockCommand>();
-        auto node = graph.add_command(command);
-
-        graph.remove_command(command);
-
-        // Assuming CommandGraph provides a way to check if a node exists
-        // For this test, you might need to add functionality to CommandGraph or adjust the test logic
-        EXPECT_FALSE(graph.contains(node)); // The node should no longer exist in the graph
-    }
-
-    TEST(CommandGraphTest, TopologicalSort) {
+    TEST(CommandGraphAdjTest, TopologicalSort) {
         // This test would create a small graph with known dependencies, perform topological_sort,
         // and then verify the order of nodes matches the expected topological order.
         // Implementing this requires a specific setup and might depend on how your graph is structured.
 
-        CommandGraph graph;
+        CommandGraphAdj graph;
         auto nodeA = graph.add_command(std::make_shared<MockCommand>("A"));
         auto nodeB = graph.add_command(std::make_shared<MockCommand>("B"));
         auto nodeC = graph.add_command(std::make_shared<MockCommand>("C"));
@@ -97,11 +70,8 @@ namespace Bcg {
 
         // Convert sorted nodes to their IDs for easier comparison
         std::vector<std::string> sortedNodeIds;
-        for (const auto &node: sortedNodes) {
-            auto command = std::dynamic_pointer_cast<MockCommand>(node->command);
-            if (command) {
-                sortedNodeIds.push_back(command->name);
-            }
+        for (auto node_id: sortedNodes) {
+            sortedNodeIds.push_back(graph.commands[node_id]->name);
         }
 
         // Verify the order
@@ -119,12 +89,12 @@ namespace Bcg {
         EXPECT_TRUE(correctOrder);
     }
 
-    TEST(CommandGraphTest, TopologicalSortCycle) {
+    TEST(CommandGraphAdjTest, TopologicalSortCycle) {
         // This test would create a small graph with known dependencies, perform topological_sort,
         // and then verify the order of nodes matches the expected topological order.
         // Implementing this requires a specific setup and might depend on how your graph is structured.
 
-        CommandGraph graph;
+        CommandGraphAdj graph;
         auto nodeA = graph.add_command(std::make_shared<MockCommand>("A"));
         auto nodeB = graph.add_command(std::make_shared<MockCommand>("B"));
         auto nodeC = graph.add_command(std::make_shared<MockCommand>("C"));
@@ -145,9 +115,9 @@ namespace Bcg {
     }
 
 
-    TEST(CommandGraphPerformanceTest, TopologicalSortPerformance) {
-        CommandGraph graph;
-        const size_t numCommands = 10000; // Adjust based on your performance testing needs
+    TEST(CommandGraphAdjPerformanceTest, TopologicalSortPerformance) {
+        CommandGraphAdj graph;
+        const size_t numCommands = 100000; // Adjust based on your performance testing needs
 
         // Create and add a large number of commands
         for (size_t i = 0; i < numCommands; ++i) {
@@ -170,7 +140,7 @@ namespace Bcg {
         auto end = std::chrono::high_resolution_clock::now();
 
         auto duration = duration_cast<std::chrono::milliseconds>(end - start).count();
-        std::cout << "Topological sort of " << numCommands << " commands took " << duration << " ms\n";
+        std::cout << "CommandGraphAdj: Topological sort of " << numCommands << " commands took " << duration << " ms\n";
 
         // Optionally, assert on duration if you have a performance requirement
         // EXPECT_LT(duration, expectedMaxDuration);

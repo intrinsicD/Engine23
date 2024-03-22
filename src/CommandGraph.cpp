@@ -228,4 +228,123 @@ namespace Bcg {
         // Execute each level, utilizing ParallelCommands for parallel execution within a level
         execute_levels(groups);
     }
+
+    //------------------------------------------------------------------------------------------------------------------
+
+    size_t CommandGraphAdj::contains(const std::shared_ptr<AbstractCommand> &command) {
+        auto iter = std::find_if(commands.begin(), commands.end(), [&command](const auto &other) {
+            return other == command;
+        });
+        if (iter != commands.end()) {
+            return std::distance(commands.begin(), iter);
+        }
+        return -1;
+    }
+
+    size_t CommandGraphAdj::add_command(const std::shared_ptr<AbstractCommand> &command) {
+        std::lock_guard<std::mutex> lock(graph_mutex);
+        push_back();
+        commands.back() = command;
+        return commands.size() - 1;
+    }
+
+    void CommandGraphAdj::add_dependency(size_t node_id, size_t dependency_id) {
+        std::lock_guard<std::mutex> lock(graph_mutex);
+        dependencies[node_id].push_back(dependency_id);
+        dependents[dependency_id].push_back(node_id);
+    }
+
+    std::vector<size_t> &CommandGraphAdj::topological_sort(bool *graph_has_cycle) {
+        std::lock_guard<std::mutex> lock(graph_mutex);
+        std::vector<size_t> inDegrees(commands.size(), 0);
+        std::queue<size_t> queue;
+
+        // Calculate in-degree (number of incoming edges) for each node
+        for (size_t node_id = 0; node_id < commands.size(); ++node_id) {
+            const auto &deps = dependencies[node_id];
+            for (const auto &dep: deps) {
+                inDegrees[node_id]++;
+            }
+        }
+
+        // Enqueue all nodes with in-degree 0
+        for (size_t node_id = 0; node_id < commands.size(); ++node_id) {
+            if (inDegrees[node_id] == 0) {
+                queue.push(node_id);
+            }
+        }
+
+        ordering.resize(0);
+        ordering.reserve(commands.size());
+        while (!queue.empty()) {
+            auto u = queue.front();
+            queue.pop();
+            ordering.push_back(u);
+
+            const auto &deps = dependents[u];
+            for (const auto &dep: deps) {
+                if (--inDegrees[dep] == 0) {
+                    queue.push(dep);
+                }
+            }
+        }
+
+        // Verify if topological sort is possible (DAG)
+        if (ordering.size() != commands.size()) {
+            if (graph_has_cycle != nullptr) {
+                *graph_has_cycle = true;
+            }
+        }
+
+        return ordering;
+    }
+
+    std::pair<std::unordered_map<size_t, int>, std::unordered_map<int, std::vector<size_t>>>
+    CommandGraphAdj::assign_and_group_levels(const std::vector<size_t> &sortedNodes) {
+        std::unordered_map<size_t, int> levels;
+        std::unordered_map<int, std::vector<size_t>> levelGroups;
+
+        for (const auto &node_id: sortedNodes) {
+            int level = 0;
+            const auto &deps = dependencies[node_id];
+            for (const auto &dep: deps) {
+                int depLevel = levels[dep] + 1;
+                level = std::max(level, depLevel);
+            }
+            levels[node_id] = level;
+            levelGroups[level].push_back(node_id);
+        }
+        return {levels, levelGroups};
+    }
+
+    void
+    CommandGraphAdj::execute_levels(const std::unordered_map<int, std::vector<size_t>> &levelGroups) {
+        for (const auto &[level, nodes]: levelGroups) {
+            if (nodes.size() > 1) {
+                auto parallelCmds = std::make_shared<ParallelCommands>("Parallel Level " + std::to_string(level));
+                for (const auto &node_id: nodes) {
+                    parallelCmds->add_command_sptr(commands[node_id]); // Assuming addCommand exists and works as described
+                }
+                parallelCmds->execute();
+            } else if (!nodes.empty()) {
+                commands[nodes.front()]->execute();
+            }
+        }
+    }
+
+    void CommandGraphAdj::execute() {
+        // Perform topological sort and level assignment
+        topological_sort();
+        auto [levels, groups] = assign_and_group_levels(ordering);
+        // Group nodes by levels
+        // Execute each level, utilizing ParallelCommands for parallel execution within a level
+        execute_levels(groups);
+    }
+
+    void CommandGraphAdj::push_back() {
+        ordering.push_back(ordering.size());
+        commands.emplace_back();
+        dependencies.emplace_back();
+        dependents.emplace_back();
+    }
 }

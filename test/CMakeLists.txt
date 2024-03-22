@@ -7,4 +7,5 @@ target_link_libraries(Engine23Test PUBLIC Engine23Lib gtest gtest_main)
 
 target_sources(Engine23Test PRIVATE
         TestCommandGraph.cpp
+        TestCommandGraphAdj.cpp
 )

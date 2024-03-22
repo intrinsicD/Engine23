@@ -147,7 +147,7 @@ namespace Bcg {
 
     TEST(CommandGraphPerformanceTest, TopologicalSortPerformance) {
         CommandGraph graph;
-        const size_t numCommands = 10000; // Adjust based on your performance testing needs
+        const size_t numCommands = 100000; // Adjust based on your performance testing needs
 
         // Create and add a large number of commands
         for (size_t i = 0; i < numCommands; ++i) {
