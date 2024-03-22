@@ -10,7 +10,7 @@
 #include "Commands.h"
 #include "AABBGui.h"
 #include "Transform/Transform.h"
-#include "components/Picker.h"
+#include "Picker.h"
 #include "Asset.h"
 #include "AssetGui.h"
 

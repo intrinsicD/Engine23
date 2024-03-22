@@ -6,7 +6,7 @@
 #include "Hierarchy.h"
 #include "Engine.h"
 #include "imgui.h"
-#include "components/Picker.h"
+#include "Picker.h"
 
 namespace Bcg {
     void gui_child(std::string name, entt::entity child_id) {

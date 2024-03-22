@@ -5,7 +5,7 @@
 #ifndef ENGINE23_TRANSFORMGUI_H
 #define ENGINE23_TRANSFORMGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg {
     struct Transform;

@@ -5,7 +5,7 @@
 #ifndef ENGINE23_RENDERSETTINGSGUI_H
 #define ENGINE23_RENDERSETTINGSGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg {
     class RenderSettings;

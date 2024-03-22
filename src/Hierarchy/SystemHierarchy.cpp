@@ -9,7 +9,7 @@
 #include "Commands.h"
 #include "Hierarchy.h"
 #include "HierarchyGui.h"
-#include "components/Picker.h"
+#include "Picker.h"
 #include "imgui.h"
 
 namespace Bcg {

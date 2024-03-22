@@ -12,7 +12,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "Camera/Camera.h"
 #include "Transform/Transform.h"
-#include "components/TriMesh.h"
+#include "TriMesh.h"
 #include "GlmUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------

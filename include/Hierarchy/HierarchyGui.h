@@ -5,7 +5,7 @@
 #ifndef ENGINE23_HIERARCHYGUI_H
 #define ENGINE23_HIERARCHYGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg{
     struct Hierarchy;

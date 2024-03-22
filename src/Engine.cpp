@@ -7,10 +7,10 @@
 #include "systems/Systems.h"
 #include "Events.h"
 #include "fmt/core.h"
-#include "components/Input.h"
-#include "components/Time.h"
-#include "components/CommandDoubleBufferSimulation.h"
-#include "components/CommandDoubleBufferRender.h"
+#include "Input.h"
+#include "Time.h"
+#include "CommandDoubleBufferSimulation.h"
+#include "CommandDoubleBufferRender.h"
 
 namespace Bcg {
     Engine::Engine() {

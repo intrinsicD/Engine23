@@ -5,7 +5,7 @@
 #ifndef ENGINE23_PROPERTYGUI_H
 #define ENGINE23_PROPERTYGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 #include "Property.h"
 #include "imgui.h"
 

@@ -2,7 +2,7 @@
 // Created by alex on 05.12.23.
 //
 
-#include "components/TriMesh.h"
+#include "TriMesh.h"
 #include "ImGuiUtils.h"
 #include "Engine.h"
 

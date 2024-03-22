@@ -7,7 +7,7 @@
 #include "Engine.h"
 #include "Commands.h"
 #include "imgui.h"
-#include "components/Input.h"
+#include "Input.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

@@ -17,9 +17,9 @@
 #include "OpenGLUtils.h"
 #include "GLMeshRenderPass.h"
 #include "MeshVertexNormalsAreaAngleHybrid.h"
-#include "components/CommandDoubleBuffer.h"
-#include "components/Input.h"
-#include "components/Picker.h"
+#include "CommandDoubleBuffer.h"
+#include "Input.h"
+#include "Picker.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

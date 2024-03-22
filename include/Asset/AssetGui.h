@@ -5,7 +5,7 @@
 #ifndef ENGINE23_ASSETGUI_H
 #define ENGINE23_ASSETGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg {
     struct Asset;

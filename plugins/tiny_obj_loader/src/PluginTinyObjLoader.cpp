@@ -12,7 +12,7 @@
 #include "OpenGLUtils.h"
 #include "GlmUtils.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "components/Input.h"
+#include "Input.h"
 #include "AABB.h"
 #include "Mesh.h"
 #include "MeshVertexNormalsAreaAngleHybrid.h"
@@ -20,7 +20,7 @@
 #include "PropertyEigenMap.h"
 #include "Transform.h"
 #include "Asset.h"
-#include "components/TriMesh.h"
+#include "TriMesh.h"
 #include "Camera.h"
 #include "FilePath.h"
 

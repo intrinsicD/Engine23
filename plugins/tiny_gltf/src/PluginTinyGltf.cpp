@@ -6,8 +6,8 @@
 #include "Events.h"
 #include "Engine.h"
 #include "Commands.h"
-#include "components/Input.h"
-#include "components/TriMesh.h"
+#include "Input.h"
+#include "TriMesh.h"
 #include "File/FilePath.h"
 
 // Define these only in *one* .cc file.

@@ -7,7 +7,7 @@
 
 #include "Mesh.h"
 #include "EngineFwd.h"
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg{
 

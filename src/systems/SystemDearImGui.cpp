@@ -10,7 +10,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "Commands.h"
-#include "components/Window.h"
+#include "Window.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

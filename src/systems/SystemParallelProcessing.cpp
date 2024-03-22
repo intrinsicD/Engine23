@@ -8,7 +8,7 @@
 #include <sstream>
 #include "Commands.h"
 #include "imgui.h"
-#include "components/WorkerPool.h"
+#include "WorkerPool.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

@@ -5,7 +5,7 @@
 #ifndef ENGINE23_SYSTEMPOINTCLOUD_H
 #define ENGINE23_SYSTEMPOINTCLOUD_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg{
     class SystemPointCloud {

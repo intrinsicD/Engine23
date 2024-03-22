@@ -13,10 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED
-        include/CommandGraph.h
-        src/CommandGraph.cpp
-        include/DynamicBitset.h)
+add_library(Engine23Lib SHARED)
 
 
 add_subdirectory(app)
@@ -26,6 +23,8 @@ add_subdirectory(backend)
 add_subdirectory(ext)
 add_subdirectory(include)
 add_subdirectory(src)
+
+add_subdirectory(test)
 
 export(TARGETS Engine23Lib glfw fmt glm TinyAD NAMESPACE FILE BcgEngine23LibTargets.cmake)
 

@@ -7,11 +7,11 @@
 #include "Commands.h"
 #include "Events.h"
 #include "Engine.h"
-#include "components/Entity.h"
+#include "Entity.h"
 #include "AABBGui.h"
 #include "PropertyEigenMap.h"
 #include "fmt/core.h"
-#include "components/Picker.h"
+#include "Picker.h"
 #include "SystemsUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -6,8 +6,8 @@
 #include "Engine.h"
 #include "Events.h"
 #include "Commands.h"
-#include "components/Picker.h"
-#include "components/TriMesh.h"
+#include "Picker.h"
+#include "TriMesh.h"
 #include "imgui.h"
 
 //----------------------------------------------------------------------------------------------------------------------

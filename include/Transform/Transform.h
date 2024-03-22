@@ -6,7 +6,7 @@
 #define ENGINE23_TRANSFORM_H
 
 #include "Eigen/Geometry"
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg{
     struct Transform {

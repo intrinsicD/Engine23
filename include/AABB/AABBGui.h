@@ -5,7 +5,7 @@
 #ifndef ENGINE23_AABBGUI_H
 #define ENGINE23_AABBGUI_H
 
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 #include "EngineFwd.h"
 #include "AABB.h"
 

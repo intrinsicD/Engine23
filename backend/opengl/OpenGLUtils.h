@@ -10,7 +10,7 @@
 #include <exception>
 #include <unordered_map>
 #include <vector>
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg::OpenGL {
     void AssertNoOglError();

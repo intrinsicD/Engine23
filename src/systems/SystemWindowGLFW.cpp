@@ -8,9 +8,9 @@
 #include "GLFW/glfw3.h"
 #include "Commands.h"
 #include "systems/SystemDearImGui.h"
-#include "components/Window.h"
-#include "components/Viewport.h"
-#include "components/Input.h"
+#include "Window.h"
+#include "Viewport.h"
+#include "Input.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

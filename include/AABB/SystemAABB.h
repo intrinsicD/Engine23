@@ -6,7 +6,7 @@
 #define ENGINE23_SYSTEMAABB_H
 
 #include "EngineFwd.h"
-#include "components/ComponentGui.h"
+#include "ComponentGui.h"
 
 namespace Bcg {
     class SystemAABB {

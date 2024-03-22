@@ -8,7 +8,7 @@
 #include "Commands.h"
 #include "Transform.h"
 #include "TransformGui.h"
-#include "components/Picker.h"
+#include "Picker.h"
 #include "imgui.h"
 
 //----------------------------------------------------------------------------------------------------------------------

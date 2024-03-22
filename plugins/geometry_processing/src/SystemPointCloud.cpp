@@ -5,10 +5,10 @@
 #include "SystemPointCloud.h"
 #include "Engine.h"
 #include "Events.h"
-#include "components/Entity.h"
+#include "Entity.h"
 #include "Commands.h"
 #include "imgui.h"
-#include "components/Picker.h"
+#include "Picker.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

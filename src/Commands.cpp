@@ -6,8 +6,8 @@
 #include "Engine.h"
 #include "systems/SystemParallelProcessing.h"
 #include "fmt/core.h"
-#include "components/CommandDoubleBuffer.h"
-#include "components/Time.h"
+#include "CommandDoubleBuffer.h"
+#include "Time.h"
 
 #include <iostream>
 #include <memory>
