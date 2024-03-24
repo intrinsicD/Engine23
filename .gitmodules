@@ -34,3 +34,6 @@
 [submodule "ext/TinyAD"]
 	path = ext/TinyAD
 	url = https://github.com/patr-schm/TinyAD.git
+[submodule "ext/googletest"]
+	path = ext/googletest
+	url = https://github.com/google/googletest.git
