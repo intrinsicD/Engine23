@@ -2,6 +2,7 @@
 // Created by alex on 20.02.24.
 //
 #include "FaceContainer.h"
+#include <assert.h>
 
 namespace Bcg {
     FaceContainer::FaceContainer() : PropertyContainer("Faces"), deleted(get_or_add<bool>("f_deleted", false)) {

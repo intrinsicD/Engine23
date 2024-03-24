@@ -3,6 +3,7 @@
 //
 
 #include "HalfedgeContainer.h"
+#include <assert.h>
 
 namespace Bcg {
     HalfedgeContainer::HalfedgeContainer() : PropertyContainer("Halfedges"), deleted(get_or_add<bool>("h_deleted", false)) {

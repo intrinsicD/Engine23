@@ -3,6 +3,7 @@
 //
 
 #include "VertexContainer.h"
+#include <assert.h>
 
 namespace Bcg {
     VertexContainer::VertexContainer() : PropertyContainer("Vertices"), deleted(get_or_add<bool>("v_deleted", false)) {

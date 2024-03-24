@@ -3,6 +3,7 @@
 //
 
 #include "EdgeContainer.h"
+#include <assert.h>
 
 namespace Bcg {
     EdgeContainer::EdgeContainer() : PropertyContainer("Edges"), deleted(get_or_add<bool>("e_deleted", false)) {
