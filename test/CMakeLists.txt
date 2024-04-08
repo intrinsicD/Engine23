@@ -7,4 +7,8 @@ target_sources(Engine23Test PRIVATE
         TestCommandGraph.cpp
         TestCommandGraphAdj.cpp
         TestEntt.cpp
+        TestAABB.cpp
+        TestLine.cpp
+        TestPlane.cpp
+        TestSphere.cpp
 )

@@ -7,39 +7,55 @@
 
 #include "Sphere.h"
 
-namespace Bcg{
-    template<typename T, int N>
-    Sphere<T, N> IterativeFit(const T *points, size_t num_points, size_t max_iterations = 100, T epsilon = 1e-6) {
-        Sphere<T, N> sphere;
-        sphere.center.setZero();
-        sphere.radius = 0;
-        for (size_t i = 0; i < num_points; ++i) {
-            sphere.center += points[i];
+namespace Bcg {
+    template<typename T, int M, int N>
+    Sphere<T, N> IterativeFit(const Eigen::Matrix<T, M, N> &points, size_t max_iterations = 100, T epsilon = 1e-6) {
+        Eigen::Vector<T, N> average = points.colwise().mean();
+        Sphere<T, N> sphere(average, 0);
+
+        // Correctly initialize the radius to ensure all points are within the sphere
+        T maxDistSqr = 0;
+        for (long i = 0; i < points.rows(); ++i) {
+            Eigen::Vector<T, N> diff = points.row(i) - sphere.center.transpose();
+            T distSqr = diff.squaredNorm();
+            maxDistSqr = std::max(maxDistSqr, distSqr);
         }
-        sphere.center /= num_points;
-        for (size_t i = 0; i < num_points; ++i) {
-            sphere.radius = std::max(sphere.radius, (points[i] - sphere.center).norm());
-        }
+        sphere.radius = std::sqrt(maxDistSqr); // Initial radius as the distance to the farthest point
+
+
+        T invNumPoints = 1.0 / static_cast<T>(points.size());
+        T epsilonSqr = epsilon * epsilon;
+
         for (size_t iteration = 0; iteration < max_iterations; ++iteration) {
-            T radius = 0;
-            Eigen::Matrix<T, N, 1> center = Eigen::Matrix<T, N, 1>::Zero();
-            for (size_t i = 0; i < num_points; ++i) {
-                Eigen::Matrix<T, N, 1> diff = points[i] - sphere.center;
-                T norm = diff.norm();
-                if (norm > 0) {
-                    center += diff * (1 - sphere.radius / norm);
-                    radius += norm;
+            // Update the iterates.
+            Eigen::Vector<T, N> current = sphere.center;
+
+            // Compute average L, dL/da, dL/db, dL/dc.
+            T lenAverage = 0.0;
+            Eigen::Vector<T, N> derLenAverage = Eigen::Vector<T, N>::Zero();
+            for (long i = 0; i < points.rows(); ++i) {
+                Eigen::Vector<T, N> diff = points.row(i) - sphere.center.transpose();
+                T length = diff.norm();
+                if (length > (T) 0) {
+                    lenAverage += length;
+                    T invLength = ((T) 1) / length;
+                    derLenAverage -= invLength * diff;
                 }
             }
-            if (radius < epsilon) {
+            lenAverage *= invNumPoints;
+            derLenAverage *= invNumPoints;
+
+            sphere.center = average + lenAverage * derLenAverage;
+            sphere.radius = lenAverage;
+
+            Eigen::Vector<T, N> diff = sphere.center - current;
+            T diffSqrLen = diff.dot(diff);
+            if (diffSqrLen <= epsilonSqr) {
                 break;
             }
-            sphere.center += center / num_points;
-            sphere.radius = radius / num_points;
         }
         return sphere;
     }
-
 }
 
 #endif //ENGINE23_SPHEREITERATIVEFIT_H

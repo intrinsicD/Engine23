@@ -51,14 +51,7 @@ namespace Bcg {
             return (max - min) / 2.0;
         }
 
-        void set_center(const Eigen::Vector<T, N> &center) {
-            Eigen::Vector<T, N> halfextent = this->halfextent();
-            min = center - halfextent;
-            max = center + halfextent;
-        }
-
-        void set_halfextent(const Eigen::Vector<T, N> &halfextent) {
-            Eigen::Vector<T, N> center = this->center();
+        void set_centered_form(const Eigen::Vector<T, N> &center, const Eigen::Vector<T, N> &halfextent) {
             min = center - halfextent;
             max = center + halfextent;
         }
@@ -169,7 +162,7 @@ namespace Bcg {
         Eigen::Vector<T, N> max = -Eigen::Vector<T, N>::Constant(std::numeric_limits<T>::max());
     };
 
-    using AABB3 = AABB<real_t, 3>;
+    using AABB3 = AABB<double, 3>;
 }
 
 #endif //ENGINE23_AABB_H

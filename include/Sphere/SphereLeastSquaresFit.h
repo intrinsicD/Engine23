@@ -6,33 +6,35 @@
 #define ENGINE23_SPHERELEASTSQUARESFIT_H
 
 #include "Sphere.h"
+#include "Eigen/Dense"
+#include "Eigen/Cholesky"
 
 namespace Bcg{
-    template<typename Derived>
-    bool SphereLeastSquaresFitSmallData(const Eigen::EigenBase<Derived> &points, Sphere<typename Derived::Scalar, 3> &sphere) {
-        using T = typename Derived::Scalar;
+    template<typename T, int M, int N>
+    bool SphereLeastSquaresFitSmallData(const Eigen::Matrix<T, M, N> &points, Sphere<T, N> &sphere) {
         // Compute the average of the data points.
-        Eigen::Vector<T, 3> average = points.derived().colwise().mean();
+        Eigen::Vector<T, N> average = points.colwise().mean();
 
         // Compute the Y matrix (points - average) and S matrix (element-wise squared Y)
-        Eigen::Matrix<T, Eigen::Dynamic, 3> Y = points.derived().rowwise() - average.transpose();
-        Eigen::Matrix<T, Eigen::Dynamic, 3> S = Y.array().square();
+        Eigen::Matrix<T, M, N> Y = points.rowwise() - average.transpose();
+        Eigen::Matrix<T, M, N> S = Y.array().square();
 
-        // Compute the covariance matrix M of the Y
-        Eigen::Matrix<T, 3, 3> M = (Y.adjoint() * Y) / points.rows();
+        // Compute the covariance matrix cov of the Y
+        Eigen::Matrix<T, N, N> cov = (Y.adjoint() * Y) / points.rows();
 
         // Compute the right-hand side R of the linear system M*(C-A) = R.
-        Eigen::Matrix<T, 3, 1> R = (Y.array() * S.array()).matrix().colwise().sum() * 0.5;
+        Eigen::Vector<T, N> R = (Y.array() * S.array()).matrix().colwise().sum() * 0.5;
 
         // Solve the linear system M*(C-A) = R for the center C.
-        Eigen::Vector<T, 3> C_minus_A = M.ldlt().solve(R);
+        Eigen::LDLT<Eigen::Matrix<T, N, N>> ldlt(cov);
+        Eigen::Vector<T, N> C_minus_A = ldlt.solve(R);
         sphere.center = average + C_minus_A;
 
         // Compute the average squared distance and the radius
         T avg_squared_dist = (S.rowwise().sum().mean());
         sphere.radius = std::sqrt(avg_squared_dist);
 
-        return M.determinant() != 0;
+        return cov.determinant() != 0;
     }
 
     template<typename T, int N>

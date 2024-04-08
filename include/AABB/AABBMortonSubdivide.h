@@ -13,32 +13,21 @@ namespace Bcg {
     Eigen::Vector<T, N>
     MortonChildCenter(const Eigen::Vector<T, N> &center, const Eigen::Vector<T, N> &halfSize, size_t i) {
         assert(i < (1 << N));
-        Eigen::Vector<T, N> result = center;
-        for (size_t j = 0; j < N; ++j) {
-            if (i & (1 << j)) {
-                result[j] += halfSize[j];
-            } else {
-                result[j] -= halfSize[j];
-            }
+        Eigen::Vector<T, N> result;
+        for (unsigned int j = 0, mask = 1; j < N; ++j, mask <<= (unsigned int) 1) {
+            T sign = ((i & mask) ? 0.5 : -0.5);
+            result[j] = center[j] + sign * halfSize[j];
         }
         return result;
     }
 
     template<typename T, int N>
     AABB<T, N> MortonChildAABB(const AABB<T, N> &aabb, size_t i) {
-        assert(i < (1 << N));
-        Eigen::Vector<T, N> center = aabb.Center();
-        Eigen::Vector<T, N> halfSize = aabb.HalfSize();
-        Eigen::Vector<T, N> min = center;
-        Eigen::Vector<T, N> max = center;
-        for (size_t j = 0; j < N; ++j) {
-            if (i & (1 << j)) {
-                min[j] += halfSize[j];
-            } else {
-                max[j] -= halfSize[j];
-            }
-        }
-        return AABB<T, N>(min, max);
+        Eigen::Vector<T, N> center = aabb.center();
+        Eigen::Vector<T, N> halfSize = aabb.halfextent();
+        AABB<T, N> result;
+        result.set_centered_form(MortonChildCenter(center, halfSize, i), halfSize / 2.0);
+        return result;
     }
 
     template<typename T, int N>
@@ -54,25 +43,16 @@ namespace Bcg {
 
     template<typename T, int N>
     size_t MortonChildIndex(const AABB<T, N> &aabb, const Eigen::Vector<T, N> &point) {
-        return MortonChildIndex(aabb.Center(), point);
+        return MortonChildIndex(aabb.center(), point);
     }
 
     template<typename T, int N>
     std::array<AABB<T, N>, 1 << N> Subdivide(const AABB<T, N> &aabb) {
         std::array<AABB<T, N>, 1 << N> result;
-        Eigen::Vector<T, N> center = aabb.Center();
-        Eigen::Vector<T, N> halfSize = aabb.HalfSize();
+        Eigen::Vector<T, N> center = aabb.center();
+        Eigen::Vector<T, N> halfSize = aabb.halfextent();
         for (size_t i = 0; i < (1 << N); ++i) {
-            Eigen::Vector<T, N> min = center;
-            Eigen::Vector<T, N> max = center;
-            for (size_t j = 0; j < N; ++j) {
-                if (i & (1 << j)) {
-                    min[j] -= halfSize[j];
-                } else {
-                    max[j] += halfSize[j];
-                }
-            }
-            result[i] = AABB<T, N>(min, max);
+            result[i].set_centered_form(MortonChildCenter(center, halfSize, i), halfSize / 2.0);
         }
         return result;
     }

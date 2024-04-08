@@ -30,11 +30,11 @@ namespace Bcg {
 
     //http://extremelearning.com.au/evenly-distributing-points-on-a-sphere/
     template<typename T>
-    std::vector<Eigen::Vector<T, 3>> SampleFibunacciLattice(const Sphere<T, 3> &sphere, size_t num_samples,
+    Eigen::Matrix<T,-1, 3> SampleFibunacciLattice(const Sphere<T, 3> &sphere, size_t num_samples,
                                                             FibunacciLattice type = FLTHIRD) {
         //http://extremelearning.com.au/evenly-distributing-points-on-a-sphere/
-        std::vector<Eigen::Vector<T, 3>> points;
-        points.reserve(num_samples);
+        Eigen::Matrix<T,-1, 3> points(num_samples, 3);
+
         T golden_ratio = (1.0 + std::sqrt(5.0)) / 2.0;
         T TWOPI = 2 * M_PI;
         T epsilon = 0.36;
@@ -76,15 +76,13 @@ namespace Bcg {
         }
 
         if (type == FLTHIRD || type == FLOFFSET) {
-            points.emplace_back(Eigen::Vector<T, 3>(0, 0, 1) * sphere.radius + sphere.center);
+            points.row(start_index) = Eigen::Vector<T, 3>(0, 0, 1) * sphere.radius + sphere.center;
         }
-
         for (size_t i = start_index; i < end_index; ++i) {
-            points.emplace_back(
-                    LatticePoint(i, num_samples, golden_ratio, TWOPI, offset, sample_count_offset, sphere));
+            points.row(i) = LatticePoint(i, num_samples, golden_ratio, TWOPI, offset, sample_count_offset, sphere);
         }
         if (type == FLTHIRD || type == FLOFFSET) {
-            points.emplace_back(Eigen::Vector<T, 3>(0, 0, -1) * sphere.radius + sphere.center);
+            points.row(end_index) = Eigen::Vector<T, 3>(0, 0, -1) * sphere.radius + sphere.center;
         }
         return points;
     }

@@ -7,21 +7,13 @@
 
 #include "AABB.h"
 
-namespace Bcg{
+namespace Bcg {
     template<typename T, int N>
     T SurfaceArea(const AABB<T, N> &aabb) {
-        T area = 0;
-        for (size_t i = 0; i < N; ++i) {
-            T side = 1;
-            for (size_t j = 0; j < N; ++j) {
-                if (i == j) {
-                    side *= aabb.max[j] - aabb.min[j];
-                } else {
-                    side *= 2 * (aabb.max[j] - aabb.min[j]);
-                }
-            }
-            area += side;
-        }
+        auto extent = aabb.max - aabb.min;
+        T area = 2 * extent[0] * extent[1];
+        area += 2 * extent[1] * extent[2];
+        area += 2 * extent[0] * extent[2];
         return area;
     }
 
