@@ -9,21 +9,13 @@
 
 namespace Bcg {
     template<typename T, int M, int N>
-    Sphere<T, N> IterativeFit(const Eigen::Matrix<T, M, N> &points, size_t max_iterations = 100, T epsilon = 1e-6) {
+    Sphere<T, N> IterativeFit(const Eigen::Matrix<T, M, N> &points, size_t max_iterations = 100, T epsilon = std::numeric_limits<T>::epsilon()) {
         Eigen::Vector<T, N> average = points.colwise().mean();
-        Sphere<T, N> sphere(average, 0);
-
-        // Correctly initialize the radius to ensure all points are within the sphere
-        T maxDistSqr = 0;
-        for (long i = 0; i < points.rows(); ++i) {
-            Eigen::Vector<T, N> diff = points.row(i) - sphere.center.transpose();
-            T distSqr = diff.squaredNorm();
-            maxDistSqr = std::max(maxDistSqr, distSqr);
-        }
-        sphere.radius = std::sqrt(maxDistSqr); // Initial radius as the distance to the farthest point
+        T radius = (points.rowwise() - average.transpose()).rowwise().norm().mean();
+        Sphere<T, N> sphere(average, radius);
 
 
-        T invNumPoints = 1.0 / static_cast<T>(points.size());
+        T invNumPoints = 1.0 / static_cast<T>(points.rows());
         T epsilonSqr = epsilon * epsilon;
 
         for (size_t iteration = 0; iteration < max_iterations; ++iteration) {
@@ -34,11 +26,11 @@ namespace Bcg {
             T lenAverage = 0.0;
             Eigen::Vector<T, N> derLenAverage = Eigen::Vector<T, N>::Zero();
             for (long i = 0; i < points.rows(); ++i) {
-                Eigen::Vector<T, N> diff = points.row(i) - sphere.center.transpose();
+                Eigen::Vector<T, N> diff = points.row(i) - current.transpose();
                 T length = diff.norm();
-                if (length > (T) 0) {
+                if (length > 0) {
                     lenAverage += length;
-                    T invLength = ((T) 1) / length;
+                    T invLength = 1.0 / length;
                     derLenAverage -= invLength * diff;
                 }
             }
@@ -49,7 +41,7 @@ namespace Bcg {
             sphere.radius = lenAverage;
 
             Eigen::Vector<T, N> diff = sphere.center - current;
-            T diffSqrLen = diff.dot(diff);
+            T diffSqrLen = diff.squaredNorm();
             if (diffSqrLen <= epsilonSqr) {
                 break;
             }

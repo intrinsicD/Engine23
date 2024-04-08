@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "SphereClosestPoint.h"
+#include "Time.h"
 
 TEST(Spheret, ClosestPoint) {
     Bcg::Sphere<double, 3> sphere({0, 0, 0}, 1);
@@ -103,25 +104,39 @@ TEST(Sphere, DoesNotIntersectSphere) {
 #include "SphereSamplingFibunacciLattice.h"
 
 TEST(Sphere, IterativeFit) {
+    Bcg::Time::Point start = Bcg::Time::Point::Now();
     auto expected_sphere = Bcg::Sphere<double, 3>({0.5, 0.3, -2.6}, 1.2);
     Eigen::Matrix<double, -1, 3> points = Bcg::SampleFibunacciLattice(expected_sphere, 1000);
 
-    Bcg::Sphere<double, 3> sphere = Bcg::IterativeFit(points, 1000);
-
+    Bcg::Sphere<double, 3> sphere = Bcg::IterativeFit(points, 100);
+    Bcg::Time::Point end = Bcg::Time::Point::Now();
+    std::cout << "IterativeFit: " << end.duration(start) << std::endl;
     EXPECT_EQ(sphere.center, expected_sphere.center);
     EXPECT_EQ(sphere.radius, expected_sphere.radius);
 }
 
 #include "SphereLeastSquaresFit.h"
 
-
-TEST(Sphere, LeastSquaresFit) {
+TEST(Sphere, SphereLeastSquaresFitSvd) {
+    Bcg::Time::Point start = Bcg::Time::Point::Now();
     auto expected_sphere = Bcg::Sphere<double, 3>({0.5, 0.3, -2.6}, 1.2);
     Eigen::Matrix<double, -1, 3> points = Bcg::SampleFibunacciLattice(expected_sphere, 1000);
 
-    Bcg::Sphere<double, 3> sphere;
-    bool success = Bcg::SphereLeastSquaresFitSmallData(points, sphere);
-    EXPECT_TRUE(success);
+    Bcg::Sphere<double, 3> sphere = Bcg::SphereLeastSquaresFitSvd(points);
+    Bcg::Time::Point end = Bcg::Time::Point::Now();
+    std::cout << "SphereLeastSquaresFitSvd: " << end.duration(start) << std::endl;
+    EXPECT_EQ(sphere.center, expected_sphere.center);
+    EXPECT_EQ(sphere.radius, expected_sphere.radius);
+}
+
+TEST(Sphere, SphereLeastSquaresFitFast) {
+    Bcg::Time::Point start = Bcg::Time::Point::Now();
+    auto expected_sphere = Bcg::Sphere<double, 3>({0.5, 0.3, -2.6}, 1.2);
+    Eigen::Matrix<double, -1, 3> points = Bcg::SampleFibunacciLattice(expected_sphere, 1000);
+
+    Bcg::Sphere<double, 3> sphere = Bcg::SphereLeastSquaresFitFast(points);
+    Bcg::Time::Point end = Bcg::Time::Point::Now();
+    std::cout << "SphereLeastSquaresFitFast: " << end.duration(start) << std::endl;
     EXPECT_EQ(sphere.center, expected_sphere.center);
     EXPECT_EQ(sphere.radius, expected_sphere.radius);
 }

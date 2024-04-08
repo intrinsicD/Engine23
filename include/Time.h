@@ -28,7 +28,7 @@ namespace Bcg {
             }
 
             template<typename Duration = Unit::milli>
-            double duration(const Point &other) const {
+            double duration(const Point &other) {
                 return std::chrono::duration<double, Duration>(value - other.value).count();
             }
 

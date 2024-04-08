@@ -9,36 +9,9 @@
 #include "Eigen/Dense"
 #include "Eigen/Cholesky"
 
-namespace Bcg{
-    template<typename T, int M, int N>
-    bool SphereLeastSquaresFitSmallData(const Eigen::Matrix<T, M, N> &points, Sphere<T, N> &sphere) {
-        // Compute the average of the data points.
-        Eigen::Vector<T, N> average = points.colwise().mean();
-
-        // Compute the Y matrix (points - average) and S matrix (element-wise squared Y)
-        Eigen::Matrix<T, M, N> Y = points.rowwise() - average.transpose();
-        Eigen::Matrix<T, M, N> S = Y.array().square();
-
-        // Compute the covariance matrix cov of the Y
-        Eigen::Matrix<T, N, N> cov = (Y.adjoint() * Y) / points.rows();
-
-        // Compute the right-hand side R of the linear system M*(C-A) = R.
-        Eigen::Vector<T, N> R = (Y.array() * S.array()).matrix().colwise().sum() * 0.5;
-
-        // Solve the linear system M*(C-A) = R for the center C.
-        Eigen::LDLT<Eigen::Matrix<T, N, N>> ldlt(cov);
-        Eigen::Vector<T, N> C_minus_A = ldlt.solve(R);
-        sphere.center = average + C_minus_A;
-
-        // Compute the average squared distance and the radius
-        T avg_squared_dist = (S.rowwise().sum().mean());
-        sphere.radius = std::sqrt(avg_squared_dist);
-
-        return cov.determinant() != 0;
-    }
-
+namespace Bcg {
     template<typename T, int N>
-    Sphere<T, N> SphereLeastSquaresFitLargeData(const Eigen::Matrix<T, -1, N> &points) {
+    Sphere<T, N> SphereLeastSquaresFitSvd(const Eigen::Matrix<T, -1, N> &points) {
         /*
          * https://jekel.me/2015/Least-Squares-Sphere-Fit/
          * */
@@ -46,9 +19,58 @@ namespace Bcg{
         A.resize(points.rows(), points.cols() + 1);
         A.block(0, 0, points.rows(), points.cols()) = 2.0 * points;
         A.col(points.cols()).setOnes();
-        Eigen::Vector<T, -1> f = points.colwise().squaredNorm();
+        Eigen::Vector<T, -1> f = points.rowwise().squaredNorm();
         Eigen::Vector<T, -1> c = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(f);
         return {c.head(N), std::sqrt(c[N] + c.head(N).squaredNorm())};
+    }
+
+    template<typename T, int N>
+    Sphere<T, N> SphereLeastSquaresFitFast(const Eigen::Matrix<T, -1, N> &points) {
+        //Paper: Fast Geometric Fit Algorithm for Sphere Using Exact Solution
+        auto x = points.col(0);
+        auto y = points.col(1);
+        auto z = points.col(2);
+
+        int num_points = x.size();
+        T Sx = x.sum();
+        T Sy = y.sum();
+        T Sz = z.sum();
+        T Sxx = x.array().square().sum();
+        T Syy = y.array().square().sum();
+        T Szz = z.array().square().sum();
+        T Sxy = (x.array() * y.array()).sum();
+        T Sxz = (x.array() * z.array()).sum();
+        T Syz = (y.array() * z.array()).sum();
+        T Sxxx = (x.array().square() * x.array()).sum();
+        T Syyy = (y.array().square() * y.array()).sum();
+        T Szzz = (z.array().square() * z.array()).sum();
+        T Sxyy = (x.array() * y.array().square()).sum();
+        T Sxzz = (x.array() * z.array().square()).sum();
+        T Sxxy = (x.array().square() * y.array()).sum();
+        T Sxxz = (x.array().square() * z.array()).sum();
+        T Syyz = (y.array().square() * z.array()).sum();
+        T Syzz = (y.array() * z.array().square()).sum();
+
+        T A1 = Sxx + Syy + Szz;
+        T a = 2 * Sx * Sx - 2 * num_points * Sxx;
+        T b = 2 * Sx * Sy - 2 * num_points * Sxy;
+        T c = 2 * Sx * Sz - 2 * num_points * Sxz;
+        T d = -num_points * (Sxxx + Sxyy + Sxzz) + A1 * Sx;
+        T e = 2 * Sx * Sy - 2 * num_points * Sxy;
+        T f = 2 * Sy * Sy - 2 * num_points * Syy;
+        T g = 2 * Sy * Sz - 2 * num_points * Syz;
+        T h = -num_points * (Sxxy + Syyy + Syzz) + A1 * Sy;
+        T j = 2 * Sx * Sz - 2 * num_points * Sxz;
+        T k = 2 * Sy * Sz - 2 * num_points * Syz;
+        T l = 2 * Sz * Sz - 2 * num_points * Szz;
+        T m = -num_points * (Sxxz + Syyz + Szzz) + A1 * Sz;
+
+        T delta = a * (f * l - g * k) - e * (b * l - c * k) + j * (b * g - c * f);
+        T xc = (d * (f * l - g * k) - h * (b * l - c * k) + m * (b * g - c * f)) / delta;
+        T yc = (a * (h * l - m * g) - e * (d * l - m * c) + j * (d * g - h * c)) / delta;
+        T zc = (a * (f * m - h * k) - e * (b * m - d * k) + j * (b * h - d * f)) / delta;
+        T R = sqrt(xc * xc + yc * yc + zc * zc + (A1 - 2 * (xc * Sx + yc * Sy + zc * Sz)) / num_points);
+        return Sphere < T, N > ({ xc, yc, zc }, R);
     }
 }
 
