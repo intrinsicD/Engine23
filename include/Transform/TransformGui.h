@@ -6,15 +6,25 @@
 #define ENGINE23_TRANSFORMGUI_H
 
 #include "ComponentGui.h"
+#include "Transform.h"
 
 namespace Bcg {
-    struct Transform;
-
     template<>
-    struct ComponentGui<Transform> {
+    struct ComponentGui<Transform<double>> {
         static void Show(entt::entity entity_id);
 
-        static void Show(Transform &transform);
+        static void Show(Transform<double> &transform);
+
+        static void Edit(Transform<double> &transform);
+    };
+
+    template<>
+    struct ComponentGui<Transform<float>> {
+        static void Show(entt::entity entity_id);
+
+        static void Show(Transform<float> &transform);
+
+        static void Edit(Transform<float> &transform);
     };
 }
 

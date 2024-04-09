@@ -72,7 +72,7 @@ namespace Bcg{
     }
 
     void GLMeshRenderPass::render(){
-        auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform>();
+        auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform<float>>();
         auto &camera = Engine::Context().get<Camera>();
         //bind shader_program
         //update ubos (camera, etc...)
@@ -85,7 +85,7 @@ namespace Bcg{
         program.set_mat4("projection", camera.get_projection().data());
 
         for(auto entity_id : view){
-            auto &transform = view.get<Transform>(entity_id);
+            auto &transform = view.get<Transform<float>>(entity_id);
             auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
             program.set_vec3("our_color", renderable.our_color);
             program.set_mat4("model", transform.model.matrix().data());

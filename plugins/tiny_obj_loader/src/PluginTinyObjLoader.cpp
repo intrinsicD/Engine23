@@ -366,7 +366,7 @@ namespace Bcg {
 
             auto &renderable_triangles = Engine::State().emplace<OpenGL::RenderableTriangles>(entity_id);
 
-            Engine::State().emplace<Transform>(entity_id);
+            Engine::State().emplace<Transform<float>>(entity_id);
             Asset asset;
             asset.name = FilePath::Filename(filepath);
             asset.filepath = filepath;
@@ -377,7 +377,7 @@ namespace Bcg {
             render_command.add_command_sptr(std::make_shared<TaskCommand>("forward render", [entity_id]() {
                 auto &camera = Engine::Context().get<Camera>();
                 auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(entity_id);
-                auto &transform = Engine::State().get<Transform>(entity_id);
+                auto &transform = Engine::State().get<Transform<float>>(entity_id);
                 renderable.program.use();
                 renderable.program.set_vec3("our_color", renderable.our_color);
                 renderable.program.set_mat4("view", camera.get_view().data());

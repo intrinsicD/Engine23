@@ -44,7 +44,7 @@ namespace Bcg {
 
             if (ImGui::Begin("Transform", &show_gui, ImGuiWindowFlags_AlwaysAutoResize)) {
                 auto &picker = Engine::Context().get<Picker>();
-                ComponentGui<Transform>::Show(picker.id.entity);
+                ComponentGui<Transform<float>>::Show(picker.id.entity);
             }
             ImGui::End();
         }
@@ -82,7 +82,7 @@ namespace Bcg {
     }
 
     void SystemTransform::set_identity(entt::entity entity) {
-        auto &transform = Engine::State().get<Transform>(entity);
+        auto &transform = Engine::State().get<Transform<float>>(entity);
         transform.model.setIdentity();
     }
 

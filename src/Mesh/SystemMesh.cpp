@@ -115,8 +115,8 @@ namespace Bcg {
                 });
 
                 prepare_entity.add_task("upload_to_gpu", [entity_id](){
-                    if(!Engine::State().all_of<Transform>(entity_id)){
-                        Engine::State().emplace<Transform>(entity_id);
+                    if(!Engine::State().all_of<Transform<float>>(entity_id)){
+                        Engine::State().emplace<Transform<float>>(entity_id);
                     }
 
                     if(!Engine::State().all_of<OpenGL::RenderableTriangles>(entity_id)){

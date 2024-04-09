@@ -78,9 +78,9 @@ namespace Bcg {
                             ComponentGui<AABB3>::Show(entity);
                         }
                     }
-                    if(Engine::State().all_of<Transform>(entity)){
+                    if(Engine::State().all_of<Transform<float>>(entity)){
                         if(ImGui::CollapsingHeader("Transform")){
-                            ComponentGui<Transform>::Show(entity);
+                            ComponentGui<Transform<float>>::Show(entity);
                         }
                     }
                     ImGui::EndTabItem();
