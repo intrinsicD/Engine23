@@ -19,16 +19,16 @@ namespace Bcg {
 
     template<typename T, int N>
     T TriangleArea(const Triangle<T, N> &triangle) {
-        double a = (triangle.points.col(1) - triangle.points.col(0)).norm();
-        double b = (triangle.points.col(2) - triangle.points.col(1)).norm();
-        double c = (triangle.points.col(0) - triangle.points.col(2)).norm();
+        double a = (triangle.points.row(1) - triangle.points.row(0)).norm();
+        double b = (triangle.points.row(2) - triangle.points.row(1)).norm();
+        double c = (triangle.points.row(0) - triangle.points.row(2)).norm();
         return AreaFromMeric(a, b, c);
     }
 
     template<typename T, int N>
     T TriangleAreaCross(const Triangle<T, N> &triangle) {
-        return (triangle.points.col(1) - triangle.points.col(0)).cross(
-                triangle.points.col(2) - triangle.points.col(0)).norm() / 2;
+        return (triangle.points.row(1) - triangle.points.row(0)).cross(
+                triangle.points.row(2) - triangle.points.row(0)).norm() / 2;
     }
 }
 

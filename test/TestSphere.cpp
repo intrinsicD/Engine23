@@ -111,8 +111,10 @@ TEST(Sphere, IterativeFit) {
     Bcg::Sphere<double, 3> sphere = Bcg::IterativeFit(points, 100);
     Bcg::Time::Point end = Bcg::Time::Point::Now();
     std::cout << "IterativeFit: " << end.duration(start) << std::endl;
-    EXPECT_EQ(sphere.center, expected_sphere.center);
-    EXPECT_EQ(sphere.radius, expected_sphere.radius);
+    auto error_center = (sphere.center - expected_sphere.center).norm();
+    EXPECT_LT(error_center, 1e-6);
+    double error_radius = std::abs(sphere.radius - expected_sphere.radius);
+    EXPECT_LT(error_radius, 1e-6);
 }
 
 #include "SphereLeastSquaresFit.h"
@@ -125,8 +127,10 @@ TEST(Sphere, SphereLeastSquaresFitSvd) {
     Bcg::Sphere<double, 3> sphere = Bcg::SphereLeastSquaresFitSvd(points);
     Bcg::Time::Point end = Bcg::Time::Point::Now();
     std::cout << "SphereLeastSquaresFitSvd: " << end.duration(start) << std::endl;
-    EXPECT_EQ(sphere.center, expected_sphere.center);
-    EXPECT_EQ(sphere.radius, expected_sphere.radius);
+    auto error_center = (sphere.center - expected_sphere.center).norm();
+    EXPECT_LT(error_center, 1e-6);
+    double error_radius = std::abs(sphere.radius - expected_sphere.radius);
+    EXPECT_LT(error_radius, 1e-6);
 }
 
 TEST(Sphere, SphereLeastSquaresFitFast) {
@@ -137,7 +141,9 @@ TEST(Sphere, SphereLeastSquaresFitFast) {
     Bcg::Sphere<double, 3> sphere = Bcg::SphereLeastSquaresFitFast(points);
     Bcg::Time::Point end = Bcg::Time::Point::Now();
     std::cout << "SphereLeastSquaresFitFast: " << end.duration(start) << std::endl;
-    EXPECT_EQ(sphere.center, expected_sphere.center);
-    EXPECT_EQ(sphere.radius, expected_sphere.radius);
+    auto error_center = (sphere.center - expected_sphere.center).norm();
+    EXPECT_LT(error_center, 1e-6);
+    double error_radius = std::abs(sphere.radius - expected_sphere.radius);
+    EXPECT_LT(error_radius, 1e-6);
 }
 

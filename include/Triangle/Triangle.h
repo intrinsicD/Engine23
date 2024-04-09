@@ -6,19 +6,28 @@
 #define ENGINE23_TRIANGLE_H
 
 #include "Eigen/Geometry"
+#include "Eigen/SVD"
 
-namespace Bcg{
+namespace Bcg {
     template<typename T, int N>
     class Triangle {
     public:
-        Eigen::Matrix<T, N, 3> points;
+        Eigen::Matrix<T, 3, N> points;
 
         Triangle() : points(Eigen::Matrix<T, N, 3>::Zero()) {}
 
-        Triangle(const Eigen::Matrix<T, N, 3> &points) : points(points) {}
+        Triangle(const Eigen::Vector<T, N> &p0, const Eigen::Vector<T, N> &p1, const Eigen::Vector<T, N> &p2) {
+            points.row(0) = p0;
+            points.row(1) = p1;
+            points.row(2) = p2;
+        }
 
-        Eigen::Matrix<T, N, 3> normal() const {
-            return (points.col(1) - points.col(0)).cross(points.col(2) - points.col(0)).normalized();
+        explicit Triangle(const Eigen::Matrix<T, N, 3> &points) : points(points) {}
+
+        Eigen::Vector<T, N> normal() const {
+            Eigen::Matrix<T, 3, N> centered = points.rowwise() - points.colwise().mean();
+            Eigen::JacobiSVD<Eigen::Matrix<T, 3, N>> svd(centered, Eigen::ComputeFullV);
+            return svd.matrixV().col(points.cols() - 1);
         }
 
         bool operator==(const Triangle &triangle) const {

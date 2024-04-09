@@ -11,4 +11,5 @@ target_sources(Engine23Test PRIVATE
         TestLine.cpp
         TestPlane.cpp
         TestSphere.cpp
+        TestTriangle.cpp
 )

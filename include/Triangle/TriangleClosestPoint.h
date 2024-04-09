@@ -9,10 +9,12 @@
 
 namespace Bcg {
     template<typename T, int N>
-    Eigen::Matrix<T, N, 1> TriangleClosestPoint(const Triangle<T, N> &triangle, const Eigen::Vector<T, N> &point) {
-        Eigen::Vector<T, 3> bc = TriangleBarycentricCoordinates(triangle, point);
+    Eigen::Vector<T, N> ClosestPoint(const Triangle<T, N> &triangle, const Eigen::Vector<T, N> &point) {
+        Eigen::Vector<T, N> normal = triangle.normal();
+        Eigen::Vector<T, N> projected_point = point - normal * normal.dot(point.transpose() - triangle.points.row(0));
+        Eigen::Vector<T, 3> bc = ToBarycentricCoordinates(triangle, projected_point);
         bc = bc.cwiseMax(Eigen::Vector<T, 3>::Zero()).cwiseMin(Eigen::Vector<T, 3>::Ones());
-        return TrianglePointFromBarycentricCoordinates(triangle, bc);
+        return FromBarycentricCoordinates(triangle, bc);
     }
 }
 
