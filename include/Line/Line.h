@@ -17,7 +17,8 @@ namespace Bcg {
         Line() : origin(Eigen::Vector<T, N>::Zero()), direction(Eigen::Vector<T, N>::Unit(0)) {}
 
         Line(const Eigen::Vector<T, N> &origin, const Eigen::Vector<T, N> &direction) : origin(origin),
-                                                                                    direction(direction) {}
+                                                                                        direction(
+                                                                                                direction.normalized()) {}
 
         Eigen::Vector<T, N> point(double t) const {
             return origin + t * direction;

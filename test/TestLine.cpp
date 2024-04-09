@@ -13,8 +13,18 @@ TEST(Line, ClosestPoint) {
     auto perp = Bcg::FindPerpendicular(line.direction);
     Eigen::Vector<double, 3> expected_closest_point({0.5, 0.5, 0.5});
     Eigen::Vector<double, 3> point(expected_closest_point + perp);
-    Eigen::Vector<double, 3> closest_point = Bcg::LineClosestPoint(line, point);
+    Eigen::Vector<double, 3> closest_point = Bcg::ClosestPoint(line, point);
     EXPECT_EQ(closest_point, expected_closest_point);
+}
+
+TEST(Line, ClosestPointBetweenTwoLines) {
+    Bcg::Line<double, 3> line1({0, 0, -1}, {1, 0, 0});
+    Bcg::Line<double, 3> line2({0, 0, 1}, {0, 1, 0});
+    Eigen::Vector<double, 3> expected_closest_point1(line1.origin);
+    Eigen::Vector<double, 3> expected_closest_point2(line2.origin);
+    auto closest_points = Bcg::ClosestPoint(line1, line2);
+    EXPECT_EQ(closest_points[0], expected_closest_point1);
+    EXPECT_EQ(closest_points[1], expected_closest_point2);
 }
 
 #include "LineIntersectsAABB.h"

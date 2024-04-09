@@ -11,8 +11,8 @@
 namespace Bcg{
     template<typename T, int N>
     bool Intersects(const Line<T, N> &line, const AABB<T, N> &aabb) {
-        Eigen::Matrix<T, N, 1> tmin;
-        Eigen::Matrix<T, N, 1> tmax;
+        Eigen::Vector<T, N> tmin;
+        Eigen::Vector<T, N> tmax;
         for (int i = 0; i < N; ++i) {
             T t1 = (aabb.min[i] - line.origin[i]) / line.direction[i];
             T t2 = (aabb.max[i] - line.origin[i]) / line.direction[i];

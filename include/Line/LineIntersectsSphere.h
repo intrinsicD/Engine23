@@ -11,7 +11,7 @@
 namespace Bcg {
     template<typename T, int N>
     bool Intersects(const Line<T, N> &line, const Sphere<T, N> &sphere) {
-        Eigen::Matrix<T, N, 1> oc = line.origin - sphere.center;
+        Eigen::Vector<T, N> oc = line.origin - sphere.center;
         T a = line.direction.squaredNorm();
         T b = 2 * oc.dot(line.direction);
         T c = oc.squaredNorm() - sphere.radius * sphere.radius;
