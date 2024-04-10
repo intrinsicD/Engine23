@@ -10,7 +10,7 @@
 
 namespace Bcg {
     template<typename T, int N>
-    T IntersectionPoint(const Ray<T, N> &ray, const AABB<T, N> &aabb) {
+    bool Intersects(const Ray<T, N> &ray, const AABB<T, N> &aabb) {
         Eigen::Vector<T, N> tmin;
         Eigen::Vector<T, N> tmax;
         for (int i = 0; i < N; ++i) {
@@ -21,10 +21,7 @@ namespace Bcg {
         }
         T tmin_max = tmin.maxCoeff();
         T tmax_min = tmax.minCoeff();
-        if (tmin_max > tmax_min) {
-            return -std::numeric_limits<T>::infinity();
-        }
-        return tmin_max;
+        return tmin_max <= tmax_min;
     }
 
 }

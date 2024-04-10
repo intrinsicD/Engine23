@@ -57,18 +57,18 @@ TEST(AABB, DoesNotIntersectAABB) {
     EXPECT_FALSE(Bcg::Intersects(aabb1, aabb2));
 }
 
-#include "AABBIntersectsLine.h"
+#include "AABBIntersectsRay.h"
 
-TEST(AABB, IntersectsLine) {
+TEST(AABB, IntersectsRay) {
     Bcg::AABB<double, 3> aabb({0, 0, 0}, {1, 1, 1});
-    Bcg::Line<double, 3> line({-1, -1, -1}, {1, 1, 1});
-    EXPECT_TRUE(Bcg::Intersects(aabb, line));
+    Bcg::Ray<double, 3> ray({-1, -1, -1}, {1, 1, 1});
+    EXPECT_TRUE(Bcg::Intersects(aabb, ray));
 }
 
-TEST(AABB, DoesNotIntersectLine) {
+TEST(AABB, DoesNotIntersectRay) {
     Bcg::AABB<double, 3> aabb({0, 0, 0}, {1, 1, 1});
-    Bcg::Line<double, 3> line({2, 2, 2}, {1, 0, 0});
-    EXPECT_FALSE(Bcg::Intersects(aabb, line));
+    Bcg::Ray<double, 3> ray({2, 2, 2}, {1, 0, 0});
+    EXPECT_FALSE(Bcg::Intersects(aabb, ray));
 }
 
 #include "AABBIntersectsPlane.h"

@@ -16,7 +16,7 @@ namespace Bcg {
     }
 
     template<typename T, int N>
-    std::array<Eigen::Vector<T, N>, 2> ClosestPoint(const Ray<T, N> &ray1, const Ray<T, N> &ray2) {
+    std::array<Eigen::Vector<T, N>, 2> ClosestPoints(const Ray<T, N> &ray1, const Ray<T, N> &ray2) {
         Eigen::Vector<T, N> w0 = ray1.origin - ray2.origin;
         T a = ray1.direction.dot(ray1.direction);
         T b = ray1.direction.dot(ray2.direction);

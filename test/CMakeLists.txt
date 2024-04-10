@@ -8,8 +8,9 @@ target_sources(Engine23Test PRIVATE
         TestCommandGraphAdj.cpp
         TestEntt.cpp
         TestAABB.cpp
-        TestLine.cpp
+        TestRay.cpp
         TestPlane.cpp
+        TestSegment.cpp
         TestSphere.cpp
         TestTriangle.cpp
 )

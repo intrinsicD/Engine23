@@ -29,20 +29,20 @@ TEST(Plane, DoesNotIntersectAABB) {
     EXPECT_FALSE(Bcg::Intersects(plane, aabb));
 }
 
-#include "PlaneIntersectsLine.h"
+#include "PlaneIntersectsRay.h"
 #include "VectorPerpendicular.h"
 
-TEST(Plane, IntersectsLine) {
+TEST(Plane, IntersectsRay) {
     Bcg::Plane<double, 3> plane({1, 1, 1}, {0, 0, 0});
-    Bcg::Line<double, 3> line({0.5, 0.5, 0.5}, {1, 1, 1});
-    EXPECT_TRUE(Bcg::Intersects(plane, line));
+    Bcg::Ray<double, 3> ray({0.5, 0.5, 0.5}, {1, 1, 1});
+    EXPECT_TRUE(Bcg::Intersects(plane, ray));
 }
 
-TEST(Plane, DoesNotIntersectLine) {
+TEST(Plane, DoesNotIntersectRay) {
     Bcg::Plane<double, 3> plane({1, 1, 1}, {0, 0, 0});
     auto perp = Bcg::FindPerpendicular(plane.normal);
-    Bcg::Line<double, 3> line({0, 0, 0}, perp);
-    EXPECT_FALSE(Bcg::Intersects(plane, line));
+    Bcg::Ray<double, 3> ray({0, 0, 0}, perp);
+    EXPECT_FALSE(Bcg::Intersects(plane, ray));
 }
 
 #include "PlaneIntersectsPlane.h"

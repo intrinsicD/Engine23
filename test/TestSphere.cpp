@@ -72,18 +72,18 @@ TEST(Sphere, DoesNotIntersectAABB) {
     EXPECT_FALSE(Bcg::Intersects(sphere, aabb));
 }
 
-#include "SphereIntersectsLine.h"
+#include "SphereIntersectsRay.h"
 
-TEST(Sphere, IntersectsLine) {
+TEST(Sphere, IntersectsRay) {
     Bcg::Sphere<double, 3> sphere({0, 0, 0}, 1);
-    Bcg::Line<double, 3> line({0.5, 0.5, 0.5}, {1, 1, 1});
-    EXPECT_TRUE(Bcg::Intersects(sphere, line));
+    Bcg::Ray<double, 3> ray({0.5, 0.5, 0.5}, {1, 1, 1});
+    EXPECT_TRUE(Bcg::Intersects(sphere, ray));
 }
 
-TEST(Sphere, DoesNotIntersectLine) {
+TEST(Sphere, DoesNotIntersectRay) {
     Bcg::Sphere<double, 3> sphere({2, 0, 0}, 1);
-    Bcg::Line<double, 3> line({2, 2, 2}, {3, 3, 3});
-    EXPECT_FALSE(Bcg::Intersects(sphere, line));
+    Bcg::Ray<double, 3> ray({2, 2, 2}, {3, 3, 3});
+    EXPECT_FALSE(Bcg::Intersects(sphere, ray));
 }
 
 #include "SphereIntersectsSphere.h"

@@ -16,7 +16,7 @@ namespace Bcg{
 
         Ray() : origin(Eigen::Matrix<T, N, 1>::Zero()), direction(Eigen::Matrix<T, N, 1>::Unit(0)) {}
 
-        Ray(const Eigen::Matrix<T, N, 1> &origin, const Eigen::Matrix<T, N, 1> &direction) : origin(origin), direction(direction) {}
+        Ray(const Eigen::Matrix<T, N, 1> &origin, const Eigen::Matrix<T, N, 1> &direction) : origin(origin), direction(direction.normalized()) {}
 
         Eigen::Matrix<T, N, 1> point(T t) const {
             assert(t >= 0);
