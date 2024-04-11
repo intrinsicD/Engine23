@@ -12,7 +12,9 @@
 #include "Transform/Transform.h"
 #include "Picker.h"
 #include "Asset.h"
+#include "Input.h"
 #include "AssetGui.h"
+#include "GLFW/glfw3.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -33,6 +35,8 @@ namespace Bcg {
         void on_startup_engine(const Events::Startup<Engine> &event);
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+
+        void on_input_keyboard(const Events::Update<Input::Keyboard> &event);
     }
 }
 
@@ -172,6 +176,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemEntityInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Keyboard>>().connect<&SystemEntityInternal::on_input_keyboard>();
             Log::Info(SystemEntity::name(), "Startup").enqueue();
         }
 
@@ -180,6 +185,16 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemEntityInternal::on_render_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Input::Keyboard>>().disconnect<&SystemEntityInternal::on_input_keyboard>();
+        }
+
+
+        void on_input_keyboard(const Events::Update<Input::Keyboard> &event) {
+            auto &input = Engine::Context().get<Input>();
+
+            if (input.keyboard.keys[GLFW_KEY_DELETE]) {
+                Engine::Dispatcher().trigger(Events::Destroy<entt::entity>{&Engine::Context().get<Picker>().id.entity});
+            }
         }
     }
 }

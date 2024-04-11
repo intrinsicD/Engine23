@@ -39,7 +39,7 @@ namespace Bcg{
         struct Sensitivity{
             float zoom = 5.0f;
             float move = 5.0f;
-            float rotate = 5.0f;
+            float rotate = 2.0f;
             float drag = 0.01f;
         }sensitivity;
 
