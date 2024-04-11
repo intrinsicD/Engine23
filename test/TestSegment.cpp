@@ -24,6 +24,26 @@ TEST(Segment, ClosestPoints) {
     EXPECT_EQ(closest2, expected2);
 }
 
+TEST(Segment, ClosestPoints1) {
+    Bcg::Segment<double, 2> segment1({0, 0}, {0, 0});
+    Bcg::Segment<double, 2> segment2({0, 1}, {1, 0});
+    auto [closest1, closest2] = Bcg::ClosestPoints(segment1, segment2);
+    Eigen::Vector2d expected1 = {0, 0};
+    Eigen::Vector2d expected2 = {0.5, 0.5};
+    EXPECT_EQ(closest1, expected1);
+    EXPECT_EQ(closest2, expected2);
+}
+
+TEST(Segment, ClosestPoints2) {
+    Bcg::Segment<double, 2> segment1({0, 0}, {1, 1});
+    Bcg::Segment<double, 2> segment2({0, 1}, {0, 1});
+    auto [closest1, closest2] = Bcg::ClosestPoints(segment1, segment2);
+    Eigen::Vector2d expected1 = {0.5, 0.5};
+    Eigen::Vector2d expected2 = {0, 1};
+    EXPECT_EQ(closest1, expected1);
+    EXPECT_EQ(closest2, expected2);
+}
+
 #include "SegmentIntersectsAABB.h"
 
 TEST(Segment, IntersectsAABB) {
