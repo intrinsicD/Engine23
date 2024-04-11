@@ -19,7 +19,6 @@ namespace Bcg{
         Segment(const Eigen::Vector<T, N> &start, const Eigen::Vector<T, N> &end) : start(start), end(end) {}
 
         Eigen::Vector<T, N> point(T t) const {
-            assert(t >= 0 && t <= 1);
             return start + t * (end - start);
         }
 
