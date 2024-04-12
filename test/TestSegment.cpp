@@ -68,7 +68,7 @@ TEST(Segment, IntersectsSphere) {
 
 TEST(Segment, DoesNotIntersectSphere) {
     Bcg::Segment<double, 3> segment({0, 0, 0}, {1, 1, 1});
-    Bcg::Sphere<double, 3> sphere({1.5, 1.5, 1.5}, 1);
+    Bcg::Sphere<double, 3> sphere({2.1, 2.1, 2.1}, 1);
     EXPECT_FALSE(Bcg::Intersects(segment, sphere));
 }
 
@@ -81,7 +81,7 @@ TEST(Segment, IntersectsTriangle) {
 }
 
 TEST(Segment, DoesNotIntersectTriangle) {
-    Bcg::Segment<double, 3> segment({0, 0, 0}, {1, 1, 1});
-    Bcg::Triangle<double, 3> triangle({1.5, 1.5, 1.5}, {2.5, 1.5, 1.5}, {1.5, 2.5, 1.5});
+    Bcg::Segment<double, 3> segment({0, 0, 1}, {1, 1, 1});
+    Bcg::Triangle<double, 3> triangle({0, 0, 0}, {1, 0, 0}, {0, 1, 0});
     EXPECT_FALSE(Bcg::Intersects(segment, triangle));
 }
