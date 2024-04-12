@@ -13,10 +13,10 @@ namespace Bcg {
     Eigen::Vector<T, 3>
     ToBarycentricCoordinates(const Triangle<T, N> &triangle, const Eigen::Vector<T, N> &point) {
         //project the point onto the plane of the triangle
-        double area = TriangleArea(triangle);
-        double lamnda0 = TriangleArea(Triangle<T, N>(point, triangle.points.row(1), triangle.points.row(2))) / area;
-        double lamnda1 = TriangleArea(Triangle<T, N>(triangle.points.row(0), point, triangle.points.row(2))) / area;
-        double lamnda2 = TriangleArea(Triangle<T, N>(triangle.points.row(0), triangle.points.row(1), point)) / area;
+        T area = TriangleArea(triangle);
+        T lamnda0 = TriangleArea(Triangle<T, N>(point, triangle.points.row(1), triangle.points.row(2))) / area;
+        T lamnda1 = TriangleArea(Triangle<T, N>(triangle.points.row(0), point, triangle.points.row(2))) / area;
+        T lamnda2 = TriangleArea(Triangle<T, N>(triangle.points.row(0), triangle.points.row(1), point)) / area;
         return Eigen::Vector<T, 3>(lamnda0, lamnda1, lamnda2);
     }
 

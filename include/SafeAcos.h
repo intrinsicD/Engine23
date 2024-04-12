@@ -5,8 +5,13 @@
 #ifndef ENGINE23_SAFEACOS_H
 #define ENGINE23_SAFEACOS_H
 
-namespace Bcg{
-    double SafeAcos(double value);
+#include <cmath>
+
+namespace Bcg {
+    template<typename T>
+    T SafeAcos(T value) {
+        return std::acos((value > -1 ? value : -1) < 1 ? value : 1);
+    }
 }
 
 #endif //ENGINE23_SAFEACOS_H

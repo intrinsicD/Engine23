@@ -4,21 +4,9 @@
 
 #include "MeshFaceAreas.h"
 #include "MeshFaceAreaVectors.h"
+#include "TriangleArea.h"
 
 namespace Bcg {
-
-    inline double AreaFromMetric(double a, double b, double c) {
-        if (a < b) std::swap(a, b);
-        if (a < c) std::swap(a, c);
-        if (b < c) std::swap(b, c);
-        assert(a >= b);
-        assert(b >= c);
-
-        double p = std::sqrt(std::abs((a + (b + c)) * (c - (a - b)) * (c + (a - b)) * (a + (b - c)))) / 4;
-        assert(!std::isnan(p));
-        return p;
-    }
-
     double MeshFaceArea(const Mesh &mesh, const FaceHandle &f, const Property<Eigen::Vector<double, 3>> &positions) {
         std::vector<Eigen::Vector<double, 3>> P;
         for (const auto &v: mesh.get_vertices(f)) {

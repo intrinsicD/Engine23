@@ -7,7 +7,6 @@ target_sources(Engine23Lib PRIVATE
         StringUtils.cpp
         ImGuiUtils.cpp
         Plugins.cpp
-        SafeAcos.cpp
 )
 add_subdirectory(AABB)
 add_subdirectory(Asset)
