@@ -20,7 +20,7 @@ namespace Bcg{
 
     void GLMeshRenderPass::render(){
         auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform<float>>();
-        auto &camera = Engine::Context().get<Camera>();
+        auto &camera = Engine::Context().get<Camera<float>>();
         //bind shader_program
         //update ubos (camera, etc...)
 

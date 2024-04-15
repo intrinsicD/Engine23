@@ -64,7 +64,7 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("Camera", &show_gui)) {
-                auto &camera = Engine::Context().get<Camera>();
+                auto &camera = Engine::Context().get<Camera<float>>();
                 auto model = camera.get_model();
                 ImGui::Text("Model: %f %f %f %f\n"
                             "      %f %f %f %f\n"
@@ -135,7 +135,7 @@ namespace Bcg {
                 if (ImGui::CollapsingHeader("Projection Parameters")) {
                     bool is_orthographic = camera.is_orthographic;
                     if (is_orthographic) {
-                        Camera::ProjectionParameters::Orthographic orthographic = camera.projection_parameters.orthographic_parameters;
+                        Camera<float>::ProjectionParameters::Orthographic orthographic = camera.projection_parameters.orthographic_parameters;
                         if (!edit) {
                             ImGui::Text("Left: %f", orthographic.left);
                             ImGui::Text("Right: %f", orthographic.right);
@@ -145,7 +145,7 @@ namespace Bcg {
                             ImGui::Text("Far##Orthographic: %f", orthographic.far);
                         } else {
                             static bool changed_ortho = false;
-                            static Camera::ProjectionParameters::Orthographic orthographic_new = orthographic;
+                            static Camera<float>::ProjectionParameters::Orthographic orthographic_new = orthographic;
                             changed_ortho |= ImGui::InputFloat("Left", &orthographic_new.left);
                             changed_ortho |= ImGui::InputFloat("Right", &orthographic_new.right);
                             changed_ortho |= ImGui::InputFloat("Bottom", &orthographic_new.bottom);
@@ -163,7 +163,7 @@ namespace Bcg {
                             camera.set_orthographic_parameters({-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f});
                         }
                     } else {
-                        Camera::ProjectionParameters::Perspective perspective = camera.projection_parameters.perspective_parameters;
+                        Camera<float>::ProjectionParameters::Perspective perspective = camera.projection_parameters.perspective_parameters;
                         if (!edit) {
                             ImGui::Text("Fovy: %f", perspective.fovy_degrees);
                             ImGui::Text("Aspect: %f", perspective.aspect);
@@ -171,7 +171,7 @@ namespace Bcg {
                             ImGui::Text("Far##Orthographic: %f", perspective.far);
                         } else {
                             static bool changed_perspective = false;
-                            static Camera::ProjectionParameters::Perspective perspective_new = perspective;
+                            static Camera<float>::ProjectionParameters::Perspective perspective_new = perspective;
                             changed_perspective |= ImGui::InputFloat("Fovy", &perspective_new.fovy_degrees);
                             changed_perspective |= ImGui::InputFloat("Aspect", &perspective_new.aspect);
                             changed_perspective |= ImGui::InputFloat("Near##Perspective", &perspective_new.near);
@@ -216,7 +216,7 @@ namespace Bcg {
         }
 
         void on_update_viewport(const Events::Update<Viewport> &event) {
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             auto &window = Engine::Context().get<Window>();
             if (camera.is_orthographic) {
                 camera.set_orthographic_parameters({-window.width / 2.0f, window.width / 2.0f,
@@ -234,7 +234,7 @@ namespace Bcg {
         void on_update_input(const Events::Update<Input> &event) {
             if (ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Input>().keyboard;
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             auto &time = Engine::Context().get<Time>();
 
             auto delta = float(time.mainloop.duration) * camera.sensitivity.move;
@@ -266,7 +266,7 @@ namespace Bcg {
 
         void on_update_mouse_position(const Events::Update<Input::Mouse::Position> &event) {
             auto &input = Engine::Context().get<Input>();
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
 
             if (input.mouse.button.middle) {
                 Eigen::Vector<float, 2> pos_delta = (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
@@ -311,7 +311,7 @@ namespace Bcg {
         void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event) {
             if (ImGui::GetIO().WantCaptureMouse) return;
 
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             auto &scroll = Engine::Context().get<Input>().mouse.scroll;
             auto &time = Engine::Context().get<Time>();
 
@@ -350,7 +350,7 @@ namespace Bcg {
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             auto &input = Engine::Context().get<Input>();
             auto &window = Engine::Context().get<Window>();
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             camera.arc_ball_parameters.last_point_2d = input.mouse.position;
             camera.arc_ball_parameters.last_point_ok = MapToSphere(camera.arc_ball_parameters.last_point_2d,
                                                                    window.width,
@@ -366,9 +366,9 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
-            Engine::State().on_construct<Camera>().connect<&on_construct_component<SystemCamera>>();
-            Engine::State().on_update<Camera>().connect<&on_update_component<SystemCamera>>();
-            Engine::State().on_destroy<Camera>().connect<&on_destroy_component<SystemCamera>>();
+            Engine::State().on_construct<Camera<float>>().connect<&on_construct_component<SystemCamera>>();
+            Engine::State().on_update<Camera<float>>().connect<&on_update_component<SystemCamera>>();
+            Engine::State().on_destroy<Camera<float>>().connect<&on_destroy_component<SystemCamera>>();
             Log::Info(SystemCamera::name(), "Startup").enqueue();
         }
 
@@ -379,9 +379,9 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().disconnect<&on_update_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().disconnect<&on_update_viewport>();
             Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&on_render_gui_menu>();
-            Engine::State().on_construct<Camera>().disconnect<&on_construct_component<SystemCamera>>();
-            Engine::State().on_update<Camera>().disconnect<&on_update_component<SystemCamera>>();
-            Engine::State().on_destroy<Camera>().disconnect<&on_destroy_component<SystemCamera>>();
+            Engine::State().on_construct<Camera<float>>().disconnect<&on_construct_component<SystemCamera>>();
+            Engine::State().on_update<Camera<float>>().disconnect<&on_update_component<SystemCamera>>();
+            Engine::State().on_destroy<Camera<float>>().disconnect<&on_destroy_component<SystemCamera>>();
             Log::Info(SystemCamera::name(), "Shutdown").enqueue();
         }
     }
@@ -403,14 +403,14 @@ namespace Bcg {
 
     void SystemCamera::pre_init() {
         //register necessary components
-        auto &camera = Engine::Context().emplace<Camera>();
+        auto &camera = Engine::Context().emplace<Camera<float>>();
     }
 
     void SystemCamera::init() {
         //register event handlers
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemCameraInternal::on_startup>();
         Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemCameraInternal::on_shutdown>();
-        auto &camera = Engine::Context().get<Camera>();
+        auto &camera = Engine::Context().get<Camera<float>>();
         auto &window = Engine::Context().get<Window>();
         camera.set_perspective_parameters({45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
         camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));

@@ -12,7 +12,7 @@
 namespace Bcg {
     static bool show_guizmo = false;
 
-    inline void EditTransform(const Camera &camera, Eigen::Matrix<float, 4, 4> &matrix) {
+    inline void EditTransform(const Camera<float> &camera, Eigen::Matrix<float, 4, 4> &matrix) {
         static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
         static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 
@@ -90,7 +90,7 @@ namespace Bcg {
             }
         }
         if (show_guizmo) {
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             EditTransform(camera, transform.model.matrix());
         }
     }
@@ -143,7 +143,7 @@ namespace Bcg {
             }
         }
         if (show_guizmo) {
-            auto &camera = Engine::Context().get<Camera>();
+            auto &camera = Engine::Context().get<Camera<float>>();
             auto model = transform.model.cast<float>();
             EditTransform(camera, model.matrix());
             transform.model = model.cast<double>();
