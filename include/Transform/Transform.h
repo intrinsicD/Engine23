@@ -60,7 +60,6 @@ namespace Bcg {
             model.linear() *= rot.matrix() * get_scale().asDiagonal();
         }
     };
-
 }
 
 #endif //ENGINE23_TRANSFORM_H

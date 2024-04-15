@@ -13,7 +13,7 @@ namespace Bcg{
         Frustum() = default;
 
         Frustum(const Camera &camera);
-
+    };
 }
 
 #endif //ENGINE23_FRUSTUM_H
