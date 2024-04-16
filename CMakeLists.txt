@@ -13,12 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 add_custom_target(Engine23 ALL)
 
 #The main library
-add_library(Engine23Lib SHARED
-        include/AABB/AABBContainsPoint.h
-        include/AABB/AABBContainsAABB.h
-        include/AABB/AABBIntersectsAABB.h
-        include/AABB/AABBMortonSubdivide.h
-        include/Sphere/Sphere.h)
+add_library(Engine23Lib SHARED)
 
 
 add_subdirectory(app)

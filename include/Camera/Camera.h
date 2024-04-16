@@ -8,14 +8,9 @@
 #include "LookAtRH.h"
 #include "OrthoRH_NO.h"
 #include "PerspectiveRH_NO.h"
+#include "DegreesToRadians.h"
 
 namespace Bcg {
-
-    template<typename T>
-    T FovyRadians(T fovy_degrees) {
-        return fovy_degrees * std::numbers::pi / T(360.0);
-    }
-
     template<typename T>
     struct Camera {
         struct ProjectionParameters {
@@ -65,7 +60,7 @@ namespace Bcg {
             set_worldup({0.0, 1.0, 0.0});
             set_position({0.0, 0.0, 3.0});
             set_target({0.0, 0.0, 0.0});
-            set_perspective_parameters({0.1, 100.0, 800.0 / 600.0, FovyRadians<T>(45.0)});
+            set_perspective_parameters({0.1, 100.0, 800.0 / 600.0, DegreesToRadians<T>(45.0)});
         }
 
         Eigen::Matrix<T, 4, 4> get_model() const {
@@ -87,7 +82,7 @@ namespace Bcg {
                                   projection_parameters.orthographic_parameters.near,
                                   projection_parameters.orthographic_parameters.far);
             } else {
-                return PerspectiveRH_NO(FovyRadians(projection_parameters.perspective_parameters.fovy_degrees),
+                return PerspectiveRH_NO(DegreesToRadians(projection_parameters.perspective_parameters.fovy_degrees),
                                         projection_parameters.perspective_parameters.aspect,
                                         projection_parameters.perspective_parameters.near,
                                         projection_parameters.perspective_parameters.far);

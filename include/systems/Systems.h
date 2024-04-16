@@ -19,7 +19,6 @@
 #include "SystemRendererOpenGL.h"
 #include "SystemEntity.h"
 #include "SystemTransform.h"
-#include "SystemTriMesh.h"
 #include "SystemAABB.h"
 #include "SystemMesh.h"
 

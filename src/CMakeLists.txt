@@ -1,7 +1,6 @@
 target_sources(Engine23Lib PRIVATE
         Commands.cpp
         CommandGraph.cpp
-        Components.cpp
         Engine.cpp
         FilePath.cpp
         StringUtils.cpp

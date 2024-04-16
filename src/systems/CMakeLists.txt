@@ -7,7 +7,6 @@ target_sources(Engine23Lib PRIVATE
         SystemPlatform.cpp
         SystemPlugins.cpp
         SystemTimer.cpp
-        SystemTriMesh.cpp
         SystemUserInput.cpp
         SystemWindowGLFW.cpp
 )

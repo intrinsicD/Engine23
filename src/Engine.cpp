@@ -41,7 +41,6 @@ namespace Bcg {
         SystemCamera::pre_init();
         SystemEntity::pre_init();
         SystemTransform::pre_init();
-        SystemTriMesh::pre_init();
         SystemHierarchy::pre_init();
         SystemAABB::pre_init();
         SystemMesh::pre_init();
@@ -62,7 +61,6 @@ namespace Bcg {
         SystemCamera::init();
         SystemEntity::init();
         SystemTransform::init();
-        SystemTriMesh::init();
         SystemHierarchy::init();
         SystemAABB::init();
         SystemMesh::init();
@@ -77,7 +75,6 @@ namespace Bcg {
         SystemAABB::remove();
         SystemAABB::remove();
         SystemHierarchy::remove();
-        SystemTriMesh::remove();
         SystemTransform::remove();
         SystemEntity::remove();
         SystemCamera::remove();

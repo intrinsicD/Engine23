@@ -5,8 +5,11 @@
 #ifndef ENGINE23_SHADERPROGRAM_H
 #define ENGINE23_SHADERPROGRAM_H
 
-namespace Bcg{
-    class ShaderProgram{
+#include <string>
+#include <vector>
+
+namespace Bcg {
+    class ShaderProgram {
     public:
         ShaderProgram() = default;
 

@@ -84,7 +84,7 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin("TriMesh", &show_gui)) {
+            if (ImGui::Begin("Mesh", &show_gui)) {
                 auto &picker = Engine::Context().get<Picker>();
                 if (picker.id.entity != entt::null && Engine::State().all_of<Mesh>(picker.id.entity)) {
                     auto &mesh = Engine::State().get<Mesh>(picker.id.entity);
