@@ -12,7 +12,7 @@
 namespace Bcg {
     struct Input {
         struct Mouse {
-        struct Position : public Eigen::Vector<float, 2> {
+            struct Position : public Eigen::Vector<float, 2> {
             };
             struct Button {
                 bool left = false;

@@ -8,5 +8,4 @@ target_sources(Engine23Lib PRIVATE
         SystemPlugins.cpp
         SystemTimer.cpp
         SystemUserInput.cpp
-        SystemWindowGLFW.cpp
 )
