@@ -19,7 +19,7 @@ namespace Bcg {
                 T aspect = 4.0 / 3.0;
                 T near;
                 T far;
-                bool dirty;
+                bool dirty = false;
             } perspective_parameters;
             struct Orthographic {
                 T left;
@@ -28,7 +28,7 @@ namespace Bcg {
                 T top;
                 T near;
                 T far;
-                bool dirty;
+                bool dirty = false;
             } orthographic_parameters;
         } projection_parameters;
         struct ViewParameters {

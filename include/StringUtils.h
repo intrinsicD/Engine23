@@ -137,7 +137,6 @@ namespace Bcg {
             std::ptrdiff_t neg_exp{};
             size_t lineCount = 0;
             size_t numberPerLineCount = 0;
-            size_t textEnd = 0;
 
             auto mystrtol = [](char const *&pen, uint64_t val) {
                 for (char c; (c = *pen ^ '0') <= 9; ++pen) {
@@ -150,7 +149,7 @@ namespace Bcg {
             while (*pen != '\0') {
                 // not end of string
                 const char *start = pen;
-                textEnd = 0;
+                size_t textEnd = 0;
 
                 while (!std::isdigit(*pen) && *pen != '\0') {
                     // walk over all non digit characters

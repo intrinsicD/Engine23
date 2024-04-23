@@ -353,20 +353,15 @@ namespace Bcg {
         }
 
         template<>
-        [[nodiscard]] size_t COUNTSETBITS<unsigned int>(unsigned int var) const {
-            var = var - ((var >> 1) & 0x55555555);
-            var = (var & 0x33333333) + ((var >> 2) & 0x33333333);
-            return ((var + (var >> 4)) & 0x0F0F0F0F) * 0x01010101 >> 24;
-        }
-
-        template<>
-        [[nodiscard]] size_t COUNTSETBITS<size_t>(size_t var) const {
+        [[nodiscard]] size_t COUNTSETBITS<uint64_t>(uint64_t var) const {
             if constexpr (sizeof(size_t) == 8 /*  sizeof(size_t) * 8 = 64*/) {
                 var = var - ((var >> 1) & 0x5555555555555555UL);
                 var = (var & 0x3333333333333333UL) + ((var >> 2) & 0x3333333333333333UL);
                 return (size_t) ((((var + (var >> 4)) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL) >> 56);
             } else {
-                return COUNTSETBITS<unsigned int>(var);
+                var = var - ((var >> 1) & 0x55555555);
+                var = (var & 0x33333333) + ((var >> 2) & 0x33333333);
+                return ((var + (var >> 4)) & 0x0F0F0F0F) * 0x01010101 >> 24;
             }
         }
 

@@ -5,8 +5,8 @@
 #ifndef ENGINE23_SHADERPROGRAM_H
 #define ENGINE23_SHADERPROGRAM_H
 
-#include <string>
 #include <vector>
+#include "VertexAttribute.h"
 
 namespace Bcg {
     class ShaderProgram {
@@ -14,6 +14,9 @@ namespace Bcg {
         ShaderProgram() = default;
 
         unsigned int id;
+
+        virtual std::vector<VertexAttribute> get_required_vertex_attributes() = 0;
+
     };
 }
 
