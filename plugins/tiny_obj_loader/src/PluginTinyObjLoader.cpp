@@ -20,7 +20,6 @@
 #include "PropertyEigenMap.h"
 #include "Transform.h"
 #include "Asset.h"
-#include "TriMesh.h"
 #include "Camera.h"
 #include "FilePath.h"
 

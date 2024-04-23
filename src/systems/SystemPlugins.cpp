@@ -108,12 +108,7 @@ namespace Bcg {
         Log::Info("Initialized", name()).enqueue();
 
         auto &plugins = Engine::Context().emplace<std::unordered_map<std::string, Plugin *>>();
-        {
-            auto plugin = load("lib/libbcg_plugin_learn_opengl.so");
-            plugin->pre_init();
-            plugin->init();
-            plugins["learn_opengl"] = plugin;
-        }
+
         {
             auto plugin = load("lib/libbcg_plugin_tiny_obj_loader.so");
             plugin->pre_init();

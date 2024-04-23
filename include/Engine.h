@@ -35,6 +35,15 @@ namespace Bcg {
             return Instance()->dispatcher;
         }
 
+        std::function<void()> window_close_callback;
+        std::function<void()> window_size_callback;
+        std::function<void()> mouse_button_callback;
+        std::function<void()> cursor_pos_callback;
+        std::function<void()> scroll_callback;
+        std::function<void()> key_callback;
+        std::function<void()> drop_callback;
+        std::function<void()> user_callback;
+
         entt::registry state;
         entt::dispatcher dispatcher;
         bool is_running = false;

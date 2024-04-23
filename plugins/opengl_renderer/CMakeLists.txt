@@ -1,0 +1,10 @@
+add_library(bcg_plugin_opengl_renderer SHARED)
+
+add_subdirectory(include)
+add_subdirectory(src)
+
+target_link_libraries(bcg_plugin_opengl_renderer PRIVATE Engine23Lib)
+
+export(TARGETS bcg_plugin_opengl_renderer NAMESPACE FILE BcgPluginOpenGLRendererTargets.cmake)
+
+add_dependencies(Engine23 bcg_plugin_opengl_renderer)
