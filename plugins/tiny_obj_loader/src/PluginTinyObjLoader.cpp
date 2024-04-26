@@ -6,7 +6,7 @@
 #include "tiny_obj_loader.h"
 #include "PluginTinyObjLoader.h"
 #include "Commands.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "Engine.h"
 #include "fmt/core.h"
 #include "OpenGLUtils.h"

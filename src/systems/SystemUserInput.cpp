@@ -3,7 +3,7 @@
 //
 
 #include "systems/SystemUserInput.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "Engine.h"
 #include "Commands.h"
 #include "imgui.h"
@@ -60,7 +60,7 @@ namespace Bcg{
 
         void on_render_gui(const Events::Render<Gui> &event){
             if(!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Dispatcher().sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace Bcg{
         void on_render_gui_menu(const Events::Render<GuiMenu> &event){
             if (ImGui::BeginMenu("Menu")) {
                 if(ImGui::MenuItem("Input", nullptr, &show_gui)){
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Dispatcher().sink<Events::Render<Gui>>().connect<&on_render_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -114,16 +114,16 @@ namespace Bcg{
         }
 
         void on_startup(const Events::Startup<Engine> &events) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
+            Engine::Dispatcher().sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &events) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
+            Engine::Dispatcher().sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
+            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() , "Shutdown").enqueue();
         }
     }
@@ -144,14 +144,14 @@ namespace Bcg {
     }
 
     void SystemUserInput::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemUserInputInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemUserInputInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemUserInputInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemUserInputInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemUserInput::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemUserInputInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemUserInputInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemUserInputInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemUserInputInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
     }
 }

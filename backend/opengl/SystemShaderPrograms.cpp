@@ -6,7 +6,7 @@
 #include "Engine.h"
 #include "glad/gl.h"
 #include "Commands.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "OpenGLUtils.h"
 #include <filesystem>
 #include "File/FileWatcher.h"

@@ -5,7 +5,7 @@
 #include "PluginComputeShaderNormals.h"
 #include "Engine.h"
 #include "Commands.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "imgui.h"
 
 //----------------------------------------------------------------------------------------------------------------------

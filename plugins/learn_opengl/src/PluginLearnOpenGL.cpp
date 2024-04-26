@@ -5,7 +5,7 @@
 #include "PluginLearnOpenGL.h"
 #include "OpenGLUtils.h"
 #include "Engine.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "Commands.h"
 #include "imgui.h"
 #include "glad/gl.h"

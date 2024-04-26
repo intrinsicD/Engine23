@@ -4,7 +4,8 @@
 
 #include "PluginOpenGLRenderer.h"
 #include "Engine.h"
-#include "Events.h"
+#include "Events/Events.h"
+#include "InternalCallbackEvents.h"
 #include "Commands.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
@@ -30,6 +31,8 @@ namespace Bcg::PluginOpenGLRendererInternal {
 
     void on_render_gui_menu(const Events::Render<GuiMenu> &event);
 
+    void on_callback_window_size(const Events::Callback::WindowSize &event);
+
     void on_startup(const Events::Startup<Plugin> &event);
 
     void on_shutdown(const Events::Shutdown<Engine> &event);
@@ -45,7 +48,13 @@ namespace Bcg::PluginOpenGLRendererInternal {
         }
 
         if (ImGui::Begin("Renderer", &show_gui, ImGuiWindowFlags_AlwaysAutoResize)) {
-
+            auto &context = Engine::Context().get<RendererContext>();
+            ImGui::Text("GLFW initialized:          %d", context.glfw_initialized);
+            ImGui::Text("GLFW registered callbacks: %d", context.glfw_registered_callbacks);
+            ImGui::Text("DPI Scale:                 %.2f", context.dpi_scale);
+            ImGui::Text("Window Size:               %d x %d", context.width, context.height);
+            ImGui::Text("Swap Interval:             %d", context.swap_interval);
+            ImGui::Text("Title:                     %s", context.title.c_str());
         }
         ImGui::End();
     }
@@ -59,6 +68,25 @@ namespace Bcg::PluginOpenGLRendererInternal {
 
             ImGui::EndMenu();
         }
+    }
+
+    void on_callback_window_size(const Events::Callback::WindowSize &event) {
+        glViewport(0, 0, event.width, event.height);
+        OpenGL::AssertNoOglError();
+    }
+
+    void on_startup(const Events::Startup<Plugin> &event) {
+        Engine::Dispatcher().sink<Events::Render<GuiMenu>>().connect<PluginOpenGLRendererInternal::on_render_gui_menu>();
+        Engine::Dispatcher().sink<Events::Callback::WindowSize>().connect<PluginOpenGLRendererInternal::on_callback_window_size>();
+
+        Log::Info(PluginOpenGLRenderer::name(), "Startup").enqueue();
+    }
+
+    void on_shutdown(const Events::Shutdown<Engine> &event) {
+        Engine::Dispatcher().sink<Events::Render<GuiMenu>>().disconnect<PluginOpenGLRendererInternal::on_render_gui_menu>();
+        Engine::Dispatcher().sink<Events::Callback::WindowSize>().disconnect<PluginOpenGLRendererInternal::on_callback_window_size>();
+
+        Log::Info(PluginOpenGLRenderer::name(), "Shutdown").enqueue();
     }
 
     double compute_dpi_scale() {
@@ -94,6 +122,10 @@ namespace Bcg::PluginOpenGLRendererInternal {
 namespace Bcg {
     PluginOpenGLRenderer::PluginOpenGLRenderer() : Plugin("OpenGLRenderer") {
 
+    }
+
+    std::string PluginOpenGLRenderer::name() {
+        return "OpenGLRenderer";
     }
 
     void PluginOpenGLRenderer::pre_init() {
@@ -134,29 +166,53 @@ namespace Bcg {
 
         glfwSetWindowSizeCallback(context.glfWwindow, [](GLFWwindow *h_window, int width, int height) {
             auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-            if(engine->window_size_callback){
+            if (engine->window_size_callback) {
                 engine->window_size_callback();
             }
-            glViewport(0, 0, width, height);
-            OpenGL::AssertNoOglError();
-            engine->dispatcher.trigger(Events::Update<Viewport>{});
+            engine->dispatcher.trigger(Events::Callback::WindowSize{h_window, width, height});
         });
 
         glfwSetMouseButtonCallback(context.glfWwindow, [](GLFWwindow *h_window, int button, int action, int mods) {
             auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-            if(engine->mouse_button_callback){
+            if (engine->mouse_button_callback) {
                 engine->mouse_button_callback();
             }
+            engine->dispatcher.trigger(Events::Callback::MouseButton{0, button, action, mods});
+        });
 
-            auto &input = engine->state.ctx().get<Input>();
-            if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                input.mouse.button.left = action == GLFW_PRESS;
-            } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-                input.mouse.button.right = action == GLFW_PRESS;
-            } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
-                input.mouse.button.middle = action == GLFW_PRESS;
+        glfwSetCursorPosCallback(context.glfWwindow, [](GLFWwindow *h_window, double xpos, double ypos) {
+            auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+            if (engine->cursor_pos_callback) {
+                engine->cursor_pos_callback();
             }
-            engine->dispatcher.trigger(Events::Update<Input::Mouse::Button>{});
+            engine->dispatcher.trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
+        });
+
+        glfwSetScrollCallback(context.glfWwindow, [](GLFWwindow *h_window, double xoffset, double yoffset) {
+            auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+            if (engine->scroll_callback) {
+                engine->scroll_callback();
+            }
+            engine->dispatcher.trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
+        });
+
+        glfwSetKeyCallback(context.glfWwindow, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
+            auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+            if (engine->key_callback) {
+                engine->key_callback();
+            }
+            engine->dispatcher.trigger(Events::Callback::Key{h_window, scancode, action, mods});
+        });
+
+        glfwSetDropCallback(context.glfWwindow, [](GLFWwindow *h_window, int count, const char **paths) {
+            auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+            if (engine->drop_callback) {
+                engine->drop_callback();
+            }
+            //Figure out how to handle file drop...
+            //Option 1: Systems or plugins register to this callback and process all paths
+            //Option 2: Preprocess to determine what files were dropped and how to continue with them...
+            engine->dispatcher.trigger(Events::Callback::Drop{h_window, count, paths});
         });
 
         Log::Info("Initialized", name()).enqueue();

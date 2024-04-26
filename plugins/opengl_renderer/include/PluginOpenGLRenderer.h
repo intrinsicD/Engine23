@@ -15,6 +15,8 @@ namespace Bcg{
 
         ~PluginOpenGLRenderer() override = default;
 
+        static std::string name();
+
     protected:
         void pre_init() override;
 

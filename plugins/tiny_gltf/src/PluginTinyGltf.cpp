@@ -3,7 +3,7 @@
 //
 
 #include "PluginTinyGltf.h"
-#include "Events.h"
+#include "Events/Events.h"
 #include "Engine.h"
 #include "Commands.h"
 #include "Input.h"

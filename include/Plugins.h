@@ -27,7 +27,7 @@ namespace Bcg {
 
         virtual ~Plugin() = default;
 
-        std::string name() const { return m_name; }
+        std::string internal_name() const { return m_name; }
 
     protected:
         friend SystemPlugins;
