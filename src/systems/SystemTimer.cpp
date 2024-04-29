@@ -23,9 +23,9 @@ namespace Bcg {
 
         void on_begin_main_loop(const Events::Begin<MainLoop> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_end_main_loop(const Events::End<MainLoop> &event);
     }
@@ -70,9 +70,9 @@ namespace Bcg {
 
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -97,10 +97,10 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Timer", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -135,7 +135,7 @@ namespace Bcg {
 
     void SystemTimer::init() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemTimerInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemTimerInternal::on_render_gui_menu>();
+        Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemTimerInternal::on_update_gui_menu>();
         Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().connect<&SystemTimerInternal::on_begin_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().connect<&SystemTimerInternal::on_end_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().connect<&SystemTimerInternal::on_begin_main_loop>();
@@ -145,7 +145,7 @@ namespace Bcg {
 
     void SystemTimer::remove() {
         Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemTimerInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemTimerInternal::on_render_gui_menu>();
+        Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemTimerInternal::on_update_gui_menu>();
         Engine::Instance()->dispatcher.sink<Events::Begin<SimulationLoop>>().disconnect<&SystemTimerInternal::on_begin_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::End<SimulationLoop>>().disconnect<&SystemTimerInternal::on_end_simulation_loop>();
         Engine::Instance()->dispatcher.sink<Events::Begin<MainLoop>>().disconnect<&SystemTimerInternal::on_begin_main_loop>();

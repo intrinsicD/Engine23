@@ -11,8 +11,16 @@
 #include "Time.h"
 #include "CommandDoubleBufferSimulation.h"
 #include "CommandDoubleBufferRender.h"
+#include "GLFW/glfw3.h"
 
 namespace Bcg {
+    void CreateWindow(int width, int height, const std::string &title) {
+        auto *h_window = glfwCreateWindow(width, height, title.c_str(),nullptr, nullptr);
+    }
+    void RegisterCallbacks(){
+
+    }
+
     Engine::Engine() {
         //The engine is a singleton
         //Has an entt::registry as state to store and represent the current state of the engine or application
@@ -124,18 +132,18 @@ namespace Bcg {
             while (time.simulationloop.accumulator > time.simulationloop.duration) {
                 dispatcher.trigger<Events::Begin<SimulationLoop>>();
                 dispatcher.trigger<Events::Update<SimulationLoop>>();
-                dispatcher.trigger<Events::Update<SimulationCommandDoubleBuffer>>();
                 dispatcher.trigger<Events::End<SimulationLoop>>();
+                dispatcher.trigger<Events::Update<SimulationCommandDoubleBuffer>>();
             }
 
             dispatcher.trigger<Events::Begin<Frame>>();
-            dispatcher.trigger<Events::Render<Frame>>();
-            dispatcher.trigger<Events::Render<GuiMenu>>();
-            dispatcher.trigger<Events::Render<Gui>>();
-            dispatcher.trigger<Events::Update<RenderCommandDoubleBuffer>>();
-            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
+            dispatcher.trigger<Events::Update<Frame>>();
+            dispatcher.trigger<Events::Update<GuiMenu>>();
+            dispatcher.trigger<Events::Update<Gui>>();
             dispatcher.trigger<Events::End<Frame>>();
+            dispatcher.trigger<Events::Update<RenderCommandDoubleBuffer>>();
             dispatcher.trigger<Events::End<MainLoop>>();
+            dispatcher.trigger<Events::Update<CommandDoubleBuffer>>();
         }
 
         //shutdown engine

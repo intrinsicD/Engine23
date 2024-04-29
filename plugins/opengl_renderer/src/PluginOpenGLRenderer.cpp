@@ -25,11 +25,11 @@ namespace Bcg::PluginOpenGLRendererInternal {
         bool glfw_registered_callbacks = false;
     };
 
-    void on_render_frame(const Events::Render<Frame> &event);
+    void on_update_frame(const Events::Update<Frame> &event);
 
-    void on_render_gui(const Events::Render<Gui> &event);
+    void on_update_gui(const Events::Update<Gui> &event);
 
-    void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+    void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
     void on_callback_window_size(const Events::Callback::WindowSize &event);
 
@@ -41,9 +41,9 @@ namespace Bcg::PluginOpenGLRendererInternal {
 }
 
 namespace Bcg::PluginOpenGLRendererInternal {
-    void on_render_gui(const Events::Render<Gui> &event) {
+    void on_update_gui(const Events::Update<Gui> &event) {
         if (!show_gui) {
-            Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&PluginOpenGLRendererInternal::on_render_gui>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&PluginOpenGLRendererInternal::on_update_gui>();
             return;
         }
 
@@ -59,11 +59,11 @@ namespace Bcg::PluginOpenGLRendererInternal {
         ImGui::End();
     }
 
-    void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+    void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
         if (ImGui::BeginMenu("Menu")) {
 
             if (ImGui::MenuItem("Renderer", nullptr, &show_gui)) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&PluginOpenGLRendererInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&PluginOpenGLRendererInternal::on_update_gui>();
             }
 
             ImGui::EndMenu();
@@ -76,14 +76,14 @@ namespace Bcg::PluginOpenGLRendererInternal {
     }
 
     void on_startup(const Events::Startup<Plugin> &event) {
-        Engine::Dispatcher().sink<Events::Render<GuiMenu>>().connect<PluginOpenGLRendererInternal::on_render_gui_menu>();
+        Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<PluginOpenGLRendererInternal::on_update_gui_menu>();
         Engine::Dispatcher().sink<Events::Callback::WindowSize>().connect<PluginOpenGLRendererInternal::on_callback_window_size>();
 
         Log::Info(PluginOpenGLRenderer::name(), "Startup").enqueue();
     }
 
     void on_shutdown(const Events::Shutdown<Engine> &event) {
-        Engine::Dispatcher().sink<Events::Render<GuiMenu>>().disconnect<PluginOpenGLRendererInternal::on_render_gui_menu>();
+        Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<PluginOpenGLRendererInternal::on_update_gui_menu>();
         Engine::Dispatcher().sink<Events::Callback::WindowSize>().disconnect<PluginOpenGLRendererInternal::on_callback_window_size>();
 
         Log::Info(PluginOpenGLRenderer::name(), "Shutdown").enqueue();

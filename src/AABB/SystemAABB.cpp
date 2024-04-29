@@ -26,11 +26,11 @@ namespace Bcg {
 
         void on_shutdown(const Events::Shutdown<Engine> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_update_aabb(const Events::Update<AABB3> &event);
+        void on_update_aabb(const Events::Update<AABB3, entt::entity> &event);
     }
 }
 
@@ -41,8 +41,8 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemAABBInternal {
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemAABBInternal::on_render_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<AABB3>>().connect<&SystemAABBInternal::on_update_aabb>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemAABBInternal::on_update_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<AABB3, entt::entity>>().connect<&SystemAABBInternal::on_update_aabb>();
             Engine::State().on_construct<AABB3>().connect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().connect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().connect<&on_destroy_component<SystemAABB>>();
@@ -50,26 +50,26 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemAABBInternal::on_render_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<AABB3>>().disconnect<&SystemAABBInternal::on_update_aabb>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemAABBInternal::on_update_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<AABB3, entt::entity>>().disconnect<&SystemAABBInternal::on_update_aabb>();
             Engine::State().on_construct<AABB3>().disconnect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().disconnect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().disconnect<&on_destroy_component<SystemAABB>>();
             Log::Info(SystemAABB::name() , "Shutdown").enqueue();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("AABB", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -80,8 +80,9 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_update_aabb(const Events::Update<AABB3> &event) {
-            Entity entity(Engine::State(), event.entity_id);
+        void on_update_aabb(const Events::Update<AABB3, entt::entity> &event) {
+            auto entity_id = std::get<0>(event.data);
+            Entity entity(Engine::State(), entity_id);
             if(!entity.is_valid()){
                 return;
             }
@@ -90,11 +91,11 @@ namespace Bcg {
             if(vertices){
                 positions = vertices->get<Eigen::Vector<double, 3>>("v_position");
                 if(!positions){
-                    Log::Warn(fmt::format("Entity {} has no position data", static_cast<unsigned int>(event.entity_id))).enqueue();
+                    Log::Warn(fmt::format("Entity {} has no position data", static_cast<unsigned int>(entity_id))).enqueue();
                     return;
                 }
             }else{
-                Log::Warn(fmt::format("Entity {} has no vertices", static_cast<unsigned int>(event.entity_id))).enqueue();
+                Log::Warn(fmt::format("Entity {} has no vertices", static_cast<unsigned int>(entity_id))).enqueue();
                 return;
             }
 

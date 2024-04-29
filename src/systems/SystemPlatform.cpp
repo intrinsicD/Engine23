@@ -16,9 +16,9 @@ namespace Bcg {
     namespace SystemPlatformInternal {
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_startup(const Events::Startup<Engine> &event);
 
@@ -38,9 +38,9 @@ namespace Bcg {
             std::string compiler;
         };
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemPlatformInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemPlatformInternal::on_update_gui>();
                 return;
             }
 
@@ -53,22 +53,22 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Platform")) {
                 if (ImGui::MenuItem("Platform", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemPlatformInternal::on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemPlatformInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemPlatformInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemPlatformInternal::on_update_gui_menu>();
             Log::Info(SystemPlatform::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemPlatformInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemPlatformInternal::on_update_gui_menu>();
             Log::Info(SystemPlatform::name() , "Shutdown").enqueue();
         }
     }

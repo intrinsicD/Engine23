@@ -13,7 +13,7 @@
 
 namespace Bcg {
     namespace PluginGeometryProcessingInternal {
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_startup(const Events::Startup<Plugin> &event);
 
@@ -27,7 +27,7 @@ namespace Bcg {
 
 namespace Bcg {
     namespace PluginGeometryProcessingInternal {
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event){
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event){
             if (ImGui::BeginMenu("Geometry Processing")) {
                 ImGui::EndMenu();
             }

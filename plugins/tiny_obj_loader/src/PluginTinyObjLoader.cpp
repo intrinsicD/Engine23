@@ -128,7 +128,7 @@ namespace Bcg {
             entt::entity entity_id;
             Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&entity_id});
             Engine::State().emplace<Mesh>(entity_id, mesh);
-            Engine::Instance()->dispatcher.trigger(Events::Update<AABB3>{entity_id});
+            Engine::Instance()->dispatcher.trigger(Events::Update<AABB3, entt::entity>{{entity_id}});
             auto &aabb = Engine::State().get<AABB3>(entity_id);
             auto scaling = aabb.max.cwiseMax(-aabb.min).maxCoeff();
 

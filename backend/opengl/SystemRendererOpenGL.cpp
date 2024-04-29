@@ -34,15 +34,15 @@ namespace Bcg {
 
         void on_update_viewport(const Events::Update<Viewport> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_begin_frame(const Events::Begin<Frame> &event);
 
         static std::shared_ptr<TaskCommand> forward_render;
 
-        void on_render_frame(const Events::Render<Frame> &event);
+        void on_update_frame(const Events::Update<Frame> &event);
 
         void on_startup_renderer(const Events::Startup<Renderer> &event);
 
@@ -61,9 +61,9 @@ namespace Bcg {
             SystemRendererOpenGL::set_viewport(window.width, window.height);
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui>();
                 return;
             }
 
@@ -77,9 +77,9 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_renderable_triangles(const Events::Render<Gui> &event){
+        void on_update_gui_renderable_triangles(const Events::Update<Gui> &event){
             if (!show_gui_renderable_triangles) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_renderable_triangles>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 return;
             }
 
@@ -93,13 +93,13 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Renderer")) {
                 if (ImGui::MenuItem("Info", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemRendererOpenGLInternal::on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui>();
                 }
                 if(ImGui::MenuItem("RenderableTriangles", nullptr, &show_gui_renderable_triangles)){
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemRendererOpenGLInternal::on_render_gui_renderable_triangles>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 }
                 ImGui::EndMenu();
             }
@@ -115,7 +115,7 @@ namespace Bcg {
             }
         }
 
-        void on_render_frame(const Events::Render<Frame> &event) {
+        void on_update_frame(const Events::Update<Frame> &event) {
             auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
             double_buffer.enqueue_next(forward_render);
             GLMeshRenderPass meshes;
@@ -125,8 +125,8 @@ namespace Bcg {
         void on_startup_renderer(const Events::Startup<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&SystemRendererOpenGLInternal::on_update_viewport>();
-            Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().connect<&SystemRendererOpenGLInternal::on_render_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().connect<&SystemRendererOpenGLInternal::on_update_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
 
             int version = gladLoadGL(glfwGetProcAddress);
 
@@ -173,7 +173,7 @@ namespace Bcg {
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
             Log::Info(SystemRendererOpenGL::name() , "Shutdown").enqueue();
         }
     }

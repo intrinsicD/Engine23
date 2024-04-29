@@ -20,9 +20,9 @@ namespace Bcg {
 
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_startup_engine(const Events::Startup<Engine> &event);
 
@@ -55,9 +55,9 @@ namespace Bcg {
             }
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemParallelProcessingInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemParallelProcessingInternal::on_update_gui>();
                 return;
             }
 
@@ -100,17 +100,17 @@ namespace Bcg {
 
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Parallel", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemParallelProcessingInternal::on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemParallelProcessingInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_update_gui_menu>();
 
             Log::Info(SystemParallelProcessing::name() , "Startup").enqueue();
             SystemParallelProcessing::start(std::thread::hardware_concurrency() - 1);

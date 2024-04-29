@@ -18,13 +18,18 @@ namespace Bcg::Events{
 
     };
 
-    template<typename T>
+    template<typename T, typename ...Args>
     struct Update{
-        entt::entity entity_id = entt::null;
+        std::tuple<Args...> data;
+    };
+
+    template<typename T, typename ...Args>
+    struct Add{
+        std::tuple<Args...> data;
     };
 
     template<typename T>
-    struct Render{
+    struct Remove{
 
     };
 

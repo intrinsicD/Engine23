@@ -20,9 +20,9 @@ namespace Bcg {
     namespace SystemShaderProgramsInternal {
         static bool show_gui = false;
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
         void on_begin_frame(const Events::Begin<Frame> &event);
 
@@ -38,18 +38,18 @@ namespace Bcg {
 
 namespace Bcg {
     namespace SystemShaderProgramsInternal {
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("ShaderPrograms", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -85,12 +85,12 @@ namespace Bcg {
             SystemShaderPrograms::add_to_watcher(programs[name]);
 
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemShaderProgramsInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
             Log::Info(SystemShaderPrograms::name() , "Shutdown").enqueue();
         }
     }

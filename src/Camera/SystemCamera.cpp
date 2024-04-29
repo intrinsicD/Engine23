@@ -26,9 +26,9 @@ namespace Bcg {
     namespace SystemCameraInternal {
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_update_viewport(const Events::Update<Viewport> &event);
 
@@ -57,9 +57,9 @@ namespace Bcg {
 
 namespace Bcg {
     namespace SystemCameraInternal {
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -206,10 +206,10 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Camera", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -365,7 +365,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().connect<&on_update_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&on_update_viewport>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
             Engine::State().on_construct<Camera<float>>().connect<&on_construct_component<SystemCamera>>();
             Engine::State().on_update<Camera<float>>().connect<&on_update_component<SystemCamera>>();
             Engine::State().on_destroy<Camera<float>>().connect<&on_destroy_component<SystemCamera>>();
@@ -378,7 +378,7 @@ namespace Bcg {
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Position>>().disconnect<&on_update_mouse_position>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Mouse::Button>>().disconnect<&on_update_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().disconnect<&on_update_viewport>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&on_update_gui_menu>();
             Engine::State().on_construct<Camera<float>>().disconnect<&on_construct_component<SystemCamera>>();
             Engine::State().on_update<Camera<float>>().disconnect<&on_update_component<SystemCamera>>();
             Engine::State().on_destroy<Camera<float>>().disconnect<&on_destroy_component<SystemCamera>>();

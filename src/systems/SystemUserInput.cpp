@@ -19,9 +19,9 @@ namespace Bcg {
 
         void RenderGuiKeyboard(const Input::Keyboard &keyboard);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event);
 
@@ -58,9 +58,9 @@ namespace Bcg{
 
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event){
+        void on_update_gui(const Events::Update<Gui> &event){
             if(!show_gui) {
-                Engine::Dispatcher().sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -81,10 +81,10 @@ namespace Bcg{
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event){
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event){
             if (ImGui::BeginMenu("Menu")) {
                 if(ImGui::MenuItem("Input", nullptr, &show_gui)){
-                    Engine::Dispatcher().sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -114,14 +114,14 @@ namespace Bcg{
         }
 
         void on_startup(const Events::Startup<Engine> &events) {
-            Engine::Dispatcher().sink<Events::Render<GuiMenu>>().connect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemUserInputInternal::on_update_gui_menu>();
             Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
             Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &events) {
-            Engine::Dispatcher().sink<Events::Render<GuiMenu>>().disconnect<&SystemUserInputInternal::on_render_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemUserInputInternal::on_update_gui_menu>();
             Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&SystemUserInputInternal::on_update_input_drop>();
             Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().connect<&SystemUserInputInternal::on_update_mouse_button>();
             Log::Info(SystemUserInput::name() , "Shutdown").enqueue();

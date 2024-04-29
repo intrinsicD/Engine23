@@ -16,9 +16,9 @@ namespace Bcg{
     namespace SystemLoggerInternal {
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
 
         void on_startup_engine(const Events::Startup<Engine> &event);
@@ -33,9 +33,9 @@ namespace Bcg{
 
 namespace Bcg{
     namespace SystemLoggerInternal {
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&SystemLoggerInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemLoggerInternal::on_update_gui>();
                 return;
             }
 
@@ -56,11 +56,11 @@ namespace Bcg{
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
 
                 if (ImGui::MenuItem("Logger", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&SystemLoggerInternal::on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemLoggerInternal::on_update_gui>();
                 }
 
                 ImGui::EndMenu();
@@ -69,12 +69,12 @@ namespace Bcg{
 
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemLoggerInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemLoggerInternal::on_update_gui_menu>();
             Log::Info(SystemLogger::name() + "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemLoggerInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemLoggerInternal::on_update_gui_menu>();
             Log::Info(SystemLogger::name() + "Shutdown").enqueue();
         }
     }

@@ -5,6 +5,7 @@
 #include "SystemMouse.h"
 #include "Engine.h"
 #include "Events/Events.h"
+#include "InternalCallbackEvents.h"
 #include "Mouse.h"
 #include "Commands.h"
 #include "imgui.h"
@@ -18,9 +19,9 @@ namespace Bcg {
     namespace SystemMouseInternal {
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_end_main_loop(const Events::End<MainLoop> &event);
 
@@ -75,9 +76,9 @@ namespace Bcg {
             RenderGuiMouseScroll(mouse.scroll);
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -89,10 +90,10 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Mouse", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -146,7 +147,7 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemMouseInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemMouseInternal::on_update_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().connect<&SystemMouseInternal::on_end_main_loop>();
             Engine::Instance()->dispatcher.sink<Events::Callback::MouseButton>().connect<&SystemMouseInternal::on_callback_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Callback::MouseCursorPosition>().connect<&SystemMouseInternal::on_callback_mouse_cursor_position>();
@@ -156,7 +157,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemMouseInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemMouseInternal::on_update_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::End<MainLoop>>().disconnect<&SystemMouseInternal::on_end_main_loop>();
             Engine::Instance()->dispatcher.sink<Events::Callback::MouseButton>().disconnect<&SystemMouseInternal::on_callback_mouse_button>();
             Engine::Instance()->dispatcher.sink<Events::Callback::MouseCursorPosition>().disconnect<&SystemMouseInternal::on_callback_mouse_cursor_position>();

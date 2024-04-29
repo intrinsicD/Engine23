@@ -23,11 +23,11 @@ namespace Bcg {
     namespace PluginLearnOpenGLInternal {
         static bool show_gui = false;
 
-        void on_render_frame(const Events::Render<Frame> &event);
+        void on_update_frame(const Events::Update<Frame> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_startup(const Events::Startup<Plugin> &event);
 
@@ -41,7 +41,7 @@ namespace Bcg {
 
 namespace Bcg {
     namespace PluginLearnOpenGLInternal {
-        void on_render_frame(const Events::Render<Frame> &event) {
+        void on_update_frame(const Events::Update<Frame> &event) {
 /*            {
                 auto &camera = Engine::Context().get<Camera>();
                 auto view = Engine::State().view<OpenGL::RenderableTriangles, Transform>();
@@ -60,9 +60,9 @@ namespace Bcg {
             }*/
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&PluginLearnOpenGLInternal::on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&PluginLearnOpenGLInternal::on_update_gui>();
                 return;
             }
 
@@ -146,18 +146,18 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Learn OpenGL", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&PluginLearnOpenGLInternal::on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&PluginLearnOpenGLInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().connect<&on_render_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().connect<&on_update_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
@@ -200,7 +200,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<Frame>>().disconnect<&on_render_frame>();
+            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().disconnect<&on_update_frame>();
 
             Log::Info(PluginLearnOpenGL().name() , "Shutdown").enqueue();
         }

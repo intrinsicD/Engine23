@@ -16,9 +16,9 @@ namespace Bcg {
     namespace SystemHierarchyInternal {
         static bool show_gui = false;
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
         void on_startup(const Events::Startup<Engine> &event);
 
@@ -29,9 +29,9 @@ namespace Bcg {
 
 namespace Bcg {
     namespace SystemHierarchyInternal {
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -42,10 +42,10 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Entity")) {
                 if (ImGui::MenuItem("Hierarchy", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -53,7 +53,7 @@ namespace Bcg {
 
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemHierarchyInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemHierarchyInternal::on_update_gui_menu>();
             Engine::State().on_construct<Hierarchy>().connect<&on_construct_component<SystemHierarchy>>();
             Engine::State().on_update<Hierarchy>().connect<&on_update_component<SystemHierarchy>>();
             Engine::State().on_destroy<Hierarchy>().connect<&on_destroy_component<SystemHierarchy>>();
@@ -61,7 +61,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemHierarchyInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemHierarchyInternal::on_update_gui_menu>();
             Engine::State().on_construct<Hierarchy>().disconnect<&on_construct_component<SystemHierarchy>>();
             Engine::State().on_update<Hierarchy>().disconnect<&on_update_component<SystemHierarchy>>();
             Engine::State().on_destroy<Hierarchy>().disconnect<&on_destroy_component<SystemHierarchy>>();

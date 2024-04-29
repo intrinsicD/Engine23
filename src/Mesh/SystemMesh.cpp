@@ -33,9 +33,9 @@ namespace Bcg {
 
         void on_shutdown(const Events::Shutdown<Engine> &event);
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event);
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
-        void on_render_gui(const Events::Render<Gui> &event);
+        void on_update_gui(const Events::Update<Gui> &event);
 
         void on_update_input_drop(const Events::Update<Input::Drop> &event);
 
@@ -50,7 +50,7 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemMeshInternal {
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().connect<&SystemMeshInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemMeshInternal::on_update_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemMeshInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().connect<&SystemMeshInternal::on_load_mesh>();
             Engine::State().on_construct<Mesh>().connect<&on_construct_component<SystemMesh>>();
@@ -60,7 +60,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Render<GuiMenu>>().disconnect<&SystemMeshInternal::on_render_gui_menu>();
+            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemMeshInternal::on_update_gui_menu>();
             Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&SystemMeshInternal::on_update_input_drop>();
             Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().disconnect<&SystemMeshInternal::on_load_mesh>();
             Engine::State().on_construct<Mesh>().disconnect<&on_construct_component<SystemMesh>>();
@@ -69,18 +69,18 @@ namespace Bcg {
             Log::Info(SystemMesh::name(), "Shutdown").enqueue();
         }
 
-        void on_render_gui_menu(const Events::Render<GuiMenu> &event) {
+        void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Mesh", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().connect<&on_render_gui>();
+                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
-        void on_render_gui(const Events::Render<Gui> &event) {
+        void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Render<Gui>>().disconnect<&on_render_gui>();
+                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
