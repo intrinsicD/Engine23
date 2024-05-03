@@ -15,24 +15,29 @@ namespace Bcg {
     public:
         AABB() = default;
 
-        AABB(const Eigen::Vector <T, N> &min, const Eigen::Vector <T, N> &max) : min(min), max(max) {}
+        AABB(const Eigen::Vector<T, N> &min, const Eigen::Vector<T, N> &max) : min(min), max(max) {}
+
+        template<typename Derived>
+        AABB &grow(const Eigen::EigenBase<Derived> &points) {
+            return grow(points.derived());
+        }
 
         template<int M = -1>
-        AABB &grow(const Eigen::Matrix <T, M, N> &points) {
+        AABB &grow(const Eigen::Matrix<T, M, N> &points) {
             min = min.cwiseMin(points.colwise().minCoeff());
             max = max.cwiseMax(points.colwise().maxCoeff());
             return *this;
         }
 
         template<int M = -1>
-        AABB &grow(const Eigen::Matrix <T, N, M> &points) {
+        AABB &grow(const Eigen::Matrix<T, N, M> &points) {
             min = min.cwiseMin(points.rowwise().minCoeff());
             max = max.cwiseMax(points.rowwise().maxCoeff());
             return *this;
         }
 
         template<typename Derived>
-        AABB &fit(const Eigen::EigenBase <Derived> &points) {
+        AABB &fit(const Eigen::EigenBase<Derived> &points) {
             min = points.derived().colwise().minCoeff();
             max = points.derived().colwise().maxCoeff();
             return *this;
@@ -44,15 +49,15 @@ namespace Bcg {
             return *this;
         }
 
-        [[nodiscard]] Eigen::Vector <T, N> center() const {
+        [[nodiscard]] Eigen::Vector<T, N> center() const {
             return (min + max) / 2.0;
         }
 
-        [[nodiscard]] Eigen::Vector <T, N> halfextent() const {
+        [[nodiscard]] Eigen::Vector<T, N> halfextent() const {
             return (max - min) / 2.0;
         }
 
-        void set_centered_form(const Eigen::Vector <T, N> &center, const Eigen::Vector <T, N> &halfextent) {
+        void set_centered_form(const Eigen::Vector<T, N> &center, const Eigen::Vector<T, N> &halfextent) {
             min = center - halfextent;
             max = center + halfextent;
         }
@@ -107,7 +112,7 @@ namespace Bcg {
             return result;
         }
 
-        AABB &operator+=(const Eigen::Vector <T, N> &point) {
+        AABB &operator+=(const Eigen::Vector<T, N> &point) {
             min = min.cwiseMin(point);
             max = max.cwiseMax(point);
             return *this;
@@ -119,7 +124,7 @@ namespace Bcg {
             return *this;
         }
 
-        AABB operator+(const Eigen::Vector <T, N> &point) const {
+        AABB operator+(const Eigen::Vector<T, N> &point) const {
             return AABB(*this) += point;
         }
 
@@ -161,10 +166,11 @@ namespace Bcg {
 
         friend std::ostream &operator<<(std::ostream &stream, const AABB &aabb) {
             stream << "Min: " << aabb.min << ", Max: " << aabb.max;
+            return stream;
         }
 
-        Eigen::Vector <T, N> min = Eigen::Vector<T, N>::Constant(std::numeric_limits<T>::max());
-        Eigen::Vector <T, N> max = -Eigen::Vector<T, N>::Constant(std::numeric_limits<T>::max());
+        Eigen::Vector<T, N> min = Eigen::Vector<T, N>::Constant(std::numeric_limits<T>::max());
+        Eigen::Vector<T, N> max = -Eigen::Vector<T, N>::Constant(std::numeric_limits<T>::max());
     };
 
     using AABB3 = AABB<double, 3>;

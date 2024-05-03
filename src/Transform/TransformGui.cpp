@@ -8,6 +8,8 @@
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "Camera.h"
+#include "Component.h"
+#include "ResourceContainer.h"
 
 namespace Bcg {
     static bool show_guizmo = false;
@@ -73,11 +75,11 @@ namespace Bcg {
     }
 
     void ComponentGui<Transform<float>>::Show(entt::entity entity_id) {
-        if (entity_id == entt::null || !Engine::State().all_of<Transform<float>>(entity_id)) {
+        if (entity_id == entt::null || !Engine::State().all_of<Component<Transform<float>>>(entity_id)) {
             return;
         }
 
-        auto &transform = Engine::State().get<Transform<float>>(entity_id);
+        auto &transform = Engine::State().get<Component<Transform<float>>>(entity_id);
         ComponentGui<Transform<float>>::Show(transform);
     }
 
@@ -93,6 +95,11 @@ namespace Bcg {
             auto &camera = Engine::Context().get<Camera<float>>();
             EditTransform(camera, transform.model.matrix());
         }
+    }
+
+    void ComponentGui<Transform<float>>::Show(Component<Transform<float>> &component){
+        auto &instances = Engine::Context().get<ResourceContainer<Transform<float>>>();
+        return Show(instances.pool[component.index]);
     }
 
     void ComponentGui<Transform<float>>::Show(Transform<float> &transform) {
@@ -126,12 +133,12 @@ namespace Bcg {
 
 
     void ComponentGui<Transform<double>>::Show(entt::entity entity_id) {
-        if (entity_id == entt::null || !Engine::State().all_of<Transform<double>>(entity_id)) {
+        if (entity_id == entt::null || !Engine::State().all_of<Component<Transform<double>>>(entity_id)) {
             return;
         }
 
-        auto &transform = Engine::State().get<Transform<double>>(entity_id);
-        ComponentGui<Transform<double>>::Show(transform);
+        auto &component = Engine::State().get<Component<Transform<double>>>(entity_id);
+        ComponentGui<Transform<double>>::Show(component);
     }
 
     void ComponentGui<Transform<double>>::Edit(Transform<double> &transform){
@@ -148,6 +155,11 @@ namespace Bcg {
             EditTransform(camera, model.matrix());
             transform.model = model.cast<double>();
         }
+    }
+
+    void ComponentGui<Transform<double>>::Show(Component<Transform<double>> &component) {
+        auto &instances = Engine::Context().get<ResourceContainer<Transform<double>>>();
+        return Show(instances.pool[component.index]);
     }
 
     void ComponentGui<Transform<double>>::Show(Transform<double> &transform) {

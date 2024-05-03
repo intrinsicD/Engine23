@@ -17,6 +17,7 @@ namespace Bcg {
     void CreateWindow(int width, int height, const std::string &title) {
         auto *h_window = glfwCreateWindow(width, height, title.c_str(),nullptr, nullptr);
     }
+
     void RegisterCallbacks(){
 
     }
@@ -52,6 +53,7 @@ namespace Bcg {
         SystemHierarchy::pre_init();
         SystemAABB::pre_init();
         SystemMesh::pre_init();
+        SystemAsset::pre_init();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
@@ -72,6 +74,7 @@ namespace Bcg {
         SystemHierarchy::init();
         SystemAABB::init();
         SystemMesh::init();
+        SystemAsset::init();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info(fmt::format("Engine: Constructor took {} seconds",
@@ -80,7 +83,8 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
-        SystemAABB::remove();
+        SystemAsset::remove();
+        SystemMesh::remove();
         SystemAABB::remove();
         SystemHierarchy::remove();
         SystemTransform::remove();

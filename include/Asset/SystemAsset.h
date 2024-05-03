@@ -1,19 +1,19 @@
 //
-// Created by alex on 23.02.24.
+// Created by alex on 03.05.24.
 //
 
-#ifndef ENGINE23_SYSTEMAABB_H
-#define ENGINE23_SYSTEMAABB_H
+#ifndef ENGINE23_SYSTEMASSET_H
+#define ENGINE23_SYSTEMASSET_H
+
 
 #include "EngineFwd.h"
-#include "ComponentGui.h"
 
 namespace Bcg {
-    class SystemAABB {
+    class SystemAsset {
     public:
-        SystemAABB() = default;
+        SystemAsset() = default;
 
-        ~SystemAABB() = default;
+        ~SystemAsset() = default;
 
         static std::string name();
 
@@ -37,4 +37,5 @@ namespace Bcg {
         static void remove();
     };
 }
-#endif //ENGINE23_SYSTEMAABB_H
+
+#endif //ENGINE23_SYSTEMASSET_H

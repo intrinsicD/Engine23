@@ -10,6 +10,10 @@
 #include "entt/entity/registry.hpp"
 
 namespace Bcg {
+    inline std::string AsString(entt::entity entity_id) {
+        return std::to_string(static_cast<unsigned int>(entity_id));
+    }
+
     class Entity {
     public:
         Entity(entt::registry &registry, entt::entity id) : registry(registry), id(id) {}
@@ -53,46 +57,13 @@ namespace Bcg {
             return registry.remove<T>(id);
         }
 
-        [[nodiscard]] VertexContainer *vertices() const {
-            if (Engine::State().all_of<Mesh>(id)) {
-                return &Engine::State().get<Mesh>(id).vertices;
-            } else if (Engine::State().all_of<Graph>(id)) {
-                return &Engine::State().get<Graph>(id).vertices;
-            } else if (Engine::State().all_of<PointCloud>(id)) {
-                return &Engine::State().get<PointCloud>(id).vertices;
-            } else {
-                return nullptr;
-            }
-        }
+        [[nodiscard]] VertexContainer *vertices() const;
 
-        [[nodiscard]] HalfedgeContainer *halfedges() const {
-            if (Engine::State().all_of<Mesh>(id)) {
-                return &Engine::State().get<Mesh>(id).halfedges;
-            } else if (Engine::State().all_of<Graph>(id)) {
-                return &Engine::State().get<Graph>(id).halfedges;
-            } else {
-                return nullptr;
-            }
-        }
+        [[nodiscard]] HalfedgeContainer *halfedges() const;
 
-        [[nodiscard]] EdgeContainer *edges() const {
-            if (Engine::State().all_of<Mesh>(id)) {
-                return &Engine::State().get<Mesh>(id).edges;
-            } else if (Engine::State().all_of<Graph>(id)) {
-                return &Engine::State().get<Graph>(id).edges;
-            } else {
-                return nullptr;
-            }
-        }
+        [[nodiscard]] EdgeContainer *edges() const;
 
-        [[nodiscard]] FaceContainer *faces() const {
-            if (Engine::State().all_of<Mesh>(id)) {
-                return &Engine::State().get<Mesh>(id).faces;
-            } else {
-                return nullptr;
-            }
-        }
-
+        [[nodiscard]] FaceContainer *faces() const;
     };
 
     template<>

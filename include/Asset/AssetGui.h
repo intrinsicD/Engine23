@@ -6,6 +6,7 @@
 #define ENGINE23_ASSETGUI_H
 
 #include "ComponentGui.h"
+#include "Component.h"
 
 namespace Bcg {
     struct Asset;
@@ -13,6 +14,8 @@ namespace Bcg {
     template<>
     struct ComponentGui<Asset> {
         static void Show(entt::entity entity_id);
+
+        static void Show(Component<Asset> component);
 
         static void Show(Asset &asset);
     };

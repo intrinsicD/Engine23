@@ -20,6 +20,18 @@ namespace Bcg {
 
         static void set_viewport(int width, int height);
 
+        static void *create_window(int width, int height, const std::string &title);
+
+        static void destroy(void *window_handle);
+
+        static void make_current(void *window_handle);
+
+        static void swap_buffers(void *window_handle);
+
+        static void set_window_size(void *window_handle, int width, int height);
+
+        static double get_dpi_for_monitor(void *monitor);
+
     protected:
         friend Engine;
 

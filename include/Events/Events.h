@@ -34,6 +34,11 @@ namespace Bcg::Events{
     };
 
     template<typename T>
+    struct RemoveAll{
+
+    };
+
+    template<typename T>
     struct Begin{
 
     };

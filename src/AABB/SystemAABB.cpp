@@ -13,12 +13,16 @@
 #include "fmt/core.h"
 #include "Picker.h"
 #include "SystemsUtils.h"
+#include "ResourceContainer.h"
+#include "Component.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    using ResourceContainerAABB = ResourceContainer<AABB3>;
+
     namespace SystemAABBInternal {
         static bool show_gui = false;
 
@@ -46,7 +50,7 @@ namespace Bcg {
             Engine::State().on_construct<AABB3>().connect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().connect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().connect<&on_destroy_component<SystemAABB>>();
-            Log::Info(SystemAABB::name() , "Startup").enqueue();
+            Log::Info(SystemAABB::name(), "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
@@ -55,7 +59,7 @@ namespace Bcg {
             Engine::State().on_construct<AABB3>().disconnect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().disconnect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().disconnect<&on_destroy_component<SystemAABB>>();
-            Log::Info(SystemAABB::name() , "Shutdown").enqueue();
+            Log::Info(SystemAABB::name(), "Shutdown").enqueue();
         }
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
@@ -83,18 +87,19 @@ namespace Bcg {
         void on_update_aabb(const Events::Update<AABB3, entt::entity> &event) {
             auto entity_id = std::get<0>(event.data);
             Entity entity(Engine::State(), entity_id);
-            if(!entity.is_valid()){
+            if (!entity.is_valid()) {
                 return;
             }
             auto *vertices = entity.vertices();
             Property<Eigen::Vector<double, 3>> positions;
-            if(vertices){
+            if (vertices) {
                 positions = vertices->get<Eigen::Vector<double, 3>>("v_position");
-                if(!positions){
-                    Log::Warn(fmt::format("Entity {} has no position data", static_cast<unsigned int>(entity_id))).enqueue();
+                if (!positions) {
+                    Log::Warn(fmt::format("Entity {} has no position data",
+                                          static_cast<unsigned int>(entity_id))).enqueue();
                     return;
                 }
-            }else{
+            } else {
                 Log::Warn(fmt::format("Entity {} has no vertices", static_cast<unsigned int>(entity_id))).enqueue();
                 return;
             }
@@ -102,10 +107,15 @@ namespace Bcg {
             AABB3 aabb;
             aabb.fit(MapConst(positions));
 
-            if (!entity.all_of<AABB3>()) {
-                entity.emplace<AABB3>(std::move(aabb));
-            }else{
-                entity.replace<AABB3>(std::move(aabb));
+            auto &aabbs = Engine::Context().get<ResourceContainerAABB>();
+
+            if (!entity.all_of<Component<AABB3>>()) {
+                auto aabb_id = SystemAABB::create_instance();
+                SystemAABB::add_to_entity(entity_id, aabb_id);
+                aabbs.pool[aabb_id] = aabb;
+            } else {
+                auto &component = Engine::State().get<Component<AABB3>>(entity_id);
+                aabbs.pool[component.index] = aabb;
             }
         }
     }
@@ -120,12 +130,49 @@ namespace Bcg {
         return "SystemAABB";
     }
 
-    std::string SystemAABB::component_name(){
+    std::string SystemAABB::component_name() {
         return "AABB";
     }
 
-    void SystemAABB::pre_init() {
+    unsigned int SystemAABB::create_instance() {
+        auto &instances = Engine::Context().get<ResourceContainerAABB>();
+        if (!instances.free_list.empty()) {
+            unsigned int instance_id = instances.free_list.back();
+            instances.free_list.pop_back();
+            instances.pool[instance_id] = AABB3();
+            Log::Info("Reuse " + component_name() + " instance with instance_id: " +
+                      std::to_string(instance_id)).enqueue();
+            return instance_id;
+        } else {
+            unsigned int instance_id = instances.get_size();
+            instances.push_back();
+            Log::Info("Created " + component_name() + " instance with instance_id: " +
+                      std::to_string(instance_id)).enqueue();
+            return instance_id;
+        }
+    }
 
+    void SystemAABB::destroy_instance(unsigned int instance_id) {
+        auto &instances = Engine::Context().get<ResourceContainerAABB>();
+        instances.free_list.push_back(instance_id);
+        Log::Info(
+                "Destroy " + component_name() + " instance with instance_id: " + std::to_string(instance_id)).enqueue();
+    }
+
+    void SystemAABB::add_to_entity(entt::entity entity_id, unsigned int instance_id) {
+        Engine::State().emplace_or_replace<Component<AABB3>>(entity_id, instance_id);
+        Log::Info(
+                "Add " + component_name() + " with instance_id: " + std::to_string(instance_id) + " to entity_id: " +
+                AsString(entity_id)).enqueue();
+    }
+
+    void SystemAABB::remove_from_entity(entt::entity entity_id) {
+        Engine::State().remove<Component<AABB3>>(entity_id);
+        Log::Info("Removed " + component_name() + " from entity_id: " + AsString(entity_id)).enqueue();
+    }
+
+    void SystemAABB::pre_init() {
+        Engine::Context().emplace<ResourceContainerAABB>();
     }
 
     void SystemAABB::init() {

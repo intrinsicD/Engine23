@@ -7,6 +7,7 @@
 #include "SystemRendererOpenGL.h"
 #include "Engine.h"
 #include "Events/Events.h"
+#include "Events/InternalCallbackEvents.h"
 #include "fmt/core.h"
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
@@ -47,6 +48,8 @@ namespace Bcg {
         void on_startup_renderer(const Events::Startup<Renderer> &event);
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event);
+
+        void register_callbacks(GLFWwindow *h_window);
     }
 }
 
@@ -169,12 +172,91 @@ namespace Bcg {
                 }
                 return 1;
             });
+
+            auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
+            OpenGL::ShaderProgram program;
+            program.v_shader.filepath = "../backend/glsl/programs/simple_shading/vertex_shader.glsl";
+            program.f_shader.filepath = "../backend/glsl/programs/simple_shading/fragment_shader.glsl";
+            program.name = "simple_shading";
+            program.load_shaders();
+            program.compile_from_sources();
+            program.link();
+            if (program.check_link_status()) {
+                programs[program.name] = program;
+            } else {
+                auto m_name = SystemRendererOpenGL::name();
+                Log::Error(m_name + ": " + program.name + " Error: " + program.error_message).enqueue();
+            }
+
+            Log::Info(SystemRendererOpenGL::name() , "Startup").enqueue();
         }
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
             Log::Info(SystemRendererOpenGL::name() , "Shutdown").enqueue();
+        }
+
+
+        void register_callbacks(GLFWwindow *h_window){
+            glfwSetWindowCloseCallback(h_window, [](GLFWwindow *h_window) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->window_close_callback) {
+                    engine->window_close_callback();
+                }
+                engine->is_running = false;
+            });
+
+            glfwSetWindowSizeCallback(h_window, [](GLFWwindow *h_window, int width, int height) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->window_size_callback) {
+                    engine->window_size_callback();
+                }
+                engine->dispatcher.trigger(Events::Callback::WindowSize{h_window, width, height});
+            });
+
+            glfwSetMouseButtonCallback(h_window, [](GLFWwindow *h_window, int button, int action, int mods) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->mouse_button_callback) {
+                    engine->mouse_button_callback();
+                }
+                engine->dispatcher.trigger(Events::Callback::MouseButton{0, button, action, mods});
+            });
+
+            glfwSetCursorPosCallback(h_window, [](GLFWwindow *h_window, double xpos, double ypos) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->cursor_pos_callback) {
+                    engine->cursor_pos_callback();
+                }
+                engine->dispatcher.trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
+            });
+
+            glfwSetScrollCallback(h_window, [](GLFWwindow *h_window, double xoffset, double yoffset) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->scroll_callback) {
+                    engine->scroll_callback();
+                }
+                engine->dispatcher.trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
+            });
+
+            glfwSetKeyCallback(h_window, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->key_callback) {
+                    engine->key_callback();
+                }
+                engine->dispatcher.trigger(Events::Callback::Key{h_window, scancode, action, mods});
+            });
+
+            glfwSetDropCallback(h_window, [](GLFWwindow *h_window, int count, const char **paths) {
+                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
+                if (engine->drop_callback) {
+                    engine->drop_callback();
+                }
+                //Figure out how to handle file drop...
+                //Option 1: Systems or plugins register to this callback and process all paths
+                //Option 2: Preprocess to determine what files were dropped and how to continue with them...
+                engine->dispatcher.trigger(Events::Callback::Drop{h_window, count, paths});
+            });
         }
     }
 }
@@ -191,6 +273,56 @@ namespace Bcg {
 
     void SystemRendererOpenGL::set_viewport(int width, int height) {
         set_viewport(0, 0, width, height);
+    }
+
+    void *SystemRendererOpenGL::create_window(int width, int height, const std::string &title){
+        return glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    }
+
+    void SystemRendererOpenGL::destroy(void *window_handle){
+        glfwDestroyWindow(static_cast<GLFWwindow *>(window_handle));
+    }
+
+    void SystemRendererOpenGL::make_current(void *window_handle){
+        glfwMakeContextCurrent(static_cast<GLFWwindow *>(window_handle));
+    }
+
+    void SystemRendererOpenGL::swap_buffers(void *window_handle){
+        glfwSwapBuffers(static_cast<GLFWwindow *>(window_handle));
+    }
+
+    void SystemRendererOpenGL::set_window_size(void *window_handle, int width, int height){
+        glfwSetWindowSize(static_cast<GLFWwindow *>(window_handle), width, height);
+    }
+
+    double SystemRendererOpenGL::get_dpi_for_monitor(void *monitor){
+        if (!monitor) {
+            return 1.0; // Default scale factor
+        }
+
+        GLFWmonitor *glfWmonitor = static_cast<GLFWmonitor *>(monitor);
+
+        int width, height;
+        glfwGetMonitorPhysicalSize(glfWmonitor, &width, &height);
+        if (width == 0 || height == 0) {
+            return 1.0; // Default scale factor
+        }
+
+        // Get monitor resolution
+        const GLFWvidmode *mode = glfwGetVideoMode(glfWmonitor);
+        if (!mode) {
+            return 1.0; // Default scale factor
+        }
+
+        // Calculate DPI
+        double dpiX = static_cast<double>(mode->width) / (static_cast<double>(width) / 25.4);
+        double dpiY = static_cast<double>(mode->height) / (static_cast<double>(height) / 25.4);
+
+        // Average and normalize DPI to get scale factor
+        // Here, 96 is the standard DPI value.
+        double dpiScale = (dpiX + dpiY) / 2.0 / 96.0;
+
+        return dpiScale;
     }
 
     std::string SystemRendererOpenGL::name() {

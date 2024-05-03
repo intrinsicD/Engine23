@@ -11,13 +11,12 @@ namespace Bcg{
     template<typename T>
     class ResourceContainer : public PropertyContainer{
     public:
-        ResourceContainer() = default;
-
-        explicit ResourceContainer(std::string name) : PropertyContainer(name) {
-            pool = add<T>(name);
+        ResourceContainer() : PropertyContainer("Data") {
+            pool = add<T>("Data");
         }
 
         Property<T> pool;
+        std::vector<unsigned int> free_list;
     };
 }
 

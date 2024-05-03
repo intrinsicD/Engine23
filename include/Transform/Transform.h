@@ -8,6 +8,7 @@
 #include "Eigen/Geometry"
 #include "ComponentGui.h"
 #include "Rotation3DAngleAxis.h"
+#include <iostream>
 
 namespace Bcg {
     template<typename T>
@@ -58,6 +59,11 @@ namespace Bcg {
 
             model.linear().setIdentity();
             model.linear() *= rot.matrix() * get_scale().asDiagonal();
+        }
+
+        friend std::ostream &operator<<(std::ostream &stream, const Transform &transform){
+            stream << transform.model.matrix();
+            return stream;
         }
     };
 }

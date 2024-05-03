@@ -21,6 +21,7 @@
 #include "SystemTransform.h"
 #include "SystemAABB.h"
 #include "SystemMesh.h"
+#include "SystemAsset.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -42,5 +43,8 @@ namespace Bcg{
 // Implementation of public functions
 //----------------------------------------------------------------------------------------------------------------------
 
+namespace Bcg{
+
+}
 
 #endif //ENGINE23_SYSTEMS_H
