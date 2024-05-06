@@ -42,7 +42,7 @@ namespace Bcg{
     namespace SystemGuiInternal {
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_demo_imgui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemGuiInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemGuiInternal::on_update_gui>();
                 return;
             }
             ImGui::ShowDemoWindow(&show_demo_imgui);
@@ -52,7 +52,7 @@ namespace Bcg{
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Show Demo Window", nullptr,
                                     &show_demo_imgui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemGuiInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemGuiInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -73,16 +73,16 @@ namespace Bcg{
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemGuiInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::End<Frame>>().connect<&on_end_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemGuiInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().connect<&on_begin_frame>();
+            Engine::Dispatcher().sink<Events::End<Frame>>().connect<&on_end_frame>();
             Log::Info(SystemGui::name() , "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemGuiInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::End<Frame>>().disconnect<&on_end_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemGuiInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().disconnect<&on_begin_frame>();
+            Engine::Dispatcher().sink<Events::End<Frame>>().disconnect<&on_end_frame>();
             Log::Info(SystemGui::name() , "Shutdown").enqueue();
         }
     }
@@ -103,14 +103,14 @@ namespace Bcg {
     }
 
     void SystemGui::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemGuiInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemGuiInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemGuiInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemGuiInternal::on_shutdown_engine>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemGui::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemGuiInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemGuiInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemGuiInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemGuiInternal::on_shutdown_engine>();
 
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();

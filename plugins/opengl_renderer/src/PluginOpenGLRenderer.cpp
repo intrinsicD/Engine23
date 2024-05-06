@@ -43,7 +43,7 @@ namespace Bcg::PluginOpenGLRendererInternal {
 namespace Bcg::PluginOpenGLRendererInternal {
     void on_update_gui(const Events::Update<Gui> &event) {
         if (!show_gui) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&PluginOpenGLRendererInternal::on_update_gui>();
+            Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&PluginOpenGLRendererInternal::on_update_gui>();
             return;
         }
 
@@ -63,7 +63,7 @@ namespace Bcg::PluginOpenGLRendererInternal {
         if (ImGui::BeginMenu("Menu")) {
 
             if (ImGui::MenuItem("Renderer", nullptr, &show_gui)) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&PluginOpenGLRendererInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&PluginOpenGLRendererInternal::on_update_gui>();
             }
 
             ImGui::EndMenu();
@@ -145,8 +145,8 @@ namespace Bcg {
     }
 
     void PluginOpenGLRenderer::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginOpenGLRendererInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&PluginOpenGLRendererInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().connect<&PluginOpenGLRendererInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&PluginOpenGLRendererInternal::on_shutdown>();
 
 
         auto &context = Engine::Context().get<PluginOpenGLRendererInternal::RendererContext>();

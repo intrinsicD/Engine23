@@ -11,18 +11,20 @@
 #include "Component.h"
 #include "ResourceContainer.h"
 
-namespace Bcg{
+namespace Bcg {
     //Currently the render pass is rendering the mesh
-    void GLMeshRenderPass::prepare(){
+    void GLMeshRenderPass::prepare() {
 
     }
 
-    void GLMeshRenderPass::render(){
+    void GLMeshRenderPass::render() {
         auto view = Engine::State().group<OpenGL::RenderableTriangles, Component<Transform<float>>>();
-        if(view.empty()){
+        if (view.empty()) {
             return;
         }
-        auto &camera = Engine::Context().get<Camera<float>>();
+        auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
+        auto &instances = Engine::Context().get<ResourceContainer<Camera<float>>>();
+        auto &camera = instances.pool[component_camera.index];
         //bind shader_program
         //update ubos (camera, etc...)
 
@@ -35,7 +37,7 @@ namespace Bcg{
 
         auto &transforms = Engine::Context().get<ResourceContainer<Transform<float>>>();
 
-        for(auto entity_id : view){
+        for (auto entity_id: view) {
             auto &transform_id = view.get<Component<Transform<float>>>(entity_id).index;
             auto &transform = transforms.pool[transform_id];
             auto &renderable = view.get<OpenGL::RenderableTriangles>(entity_id);
@@ -47,11 +49,11 @@ namespace Bcg{
         }
     }
 
-    void GLMeshRenderPass::post_render(){
+    void GLMeshRenderPass::post_render() {
 
     }
 
-    void GLMeshRenderPass::execute(){
+    void GLMeshRenderPass::execute() {
         prepare();
         render();
         post_render();

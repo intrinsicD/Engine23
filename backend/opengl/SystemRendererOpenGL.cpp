@@ -66,7 +66,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui>();
                 return;
             }
 
@@ -82,7 +82,7 @@ namespace Bcg {
 
         void on_update_gui_renderable_triangles(const Events::Update<Gui> &event){
             if (!show_gui_renderable_triangles) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 return;
             }
 
@@ -99,10 +99,10 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Renderer")) {
                 if (ImGui::MenuItem("Info", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui>();
                 }
                 if(ImGui::MenuItem("RenderableTriangles", nullptr, &show_gui_renderable_triangles)){
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 }
                 ImGui::EndMenu();
             }
@@ -126,10 +126,10 @@ namespace Bcg {
         }
 
         void on_startup_renderer(const Events::Startup<Renderer> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Viewport>>().connect<&SystemRendererOpenGLInternal::on_update_viewport>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().connect<&SystemRendererOpenGLInternal::on_update_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().connect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Dispatcher().sink<Events::Update<Viewport>>().connect<&SystemRendererOpenGLInternal::on_update_viewport>();
+            Engine::Dispatcher().sink<Events::Update<Frame>>().connect<&SystemRendererOpenGLInternal::on_update_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
 
             int version = gladLoadGL(glfwGetProcAddress);
 
@@ -192,8 +192,8 @@ namespace Bcg {
         }
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
             Log::Info(SystemRendererOpenGL::name() , "Shutdown").enqueue();
         }
 
@@ -345,8 +345,8 @@ namespace Bcg {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        Engine::Instance()->dispatcher.sink<Events::Startup<Renderer>>().connect<&SystemRendererOpenGLInternal::on_startup_renderer>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Renderer>>().connect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
+        Engine::Dispatcher().sink<Events::Startup<Renderer>>().connect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Dispatcher().sink<Events::Shutdown<Renderer>>().connect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
 
         Log::Info("Initialized", name()).enqueue();
         SystemShaderPrograms().init();
@@ -356,9 +356,9 @@ namespace Bcg {
     void SystemRendererOpenGL::remove() {
         SystemBuffers().remove();
         SystemShaderPrograms().remove();
-        Engine::Instance()->dispatcher.sink<Events::Startup<
+        Engine::Dispatcher().sink<Events::Startup<
                 Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<
+        Engine::Dispatcher().sink<Events::Shutdown<
                 Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
         Log::Info("Removed", name()).enqueue();
     }

@@ -96,20 +96,20 @@ namespace Bcg{
     }
 
     void SystemCommandBuffers::init(){
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemCommandBuffersInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemCommandBuffersInternal::on_shutdown>();
-        Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
-        Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
-        Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemCommandBuffersInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemCommandBuffersInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Update<SimulationCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Update<RenderCommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Update<CommandDoubleBuffer>>().connect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemCommandBuffers::remove(){
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemCommandBuffersInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemCommandBuffersInternal::on_shutdown>();
-        Engine::Instance()->dispatcher.sink<Events::Update<SimulationCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
-        Engine::Instance()->dispatcher.sink<Events::Update<RenderCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
-        Engine::Instance()->dispatcher.sink<Events::Update<CommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemCommandBuffersInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemCommandBuffersInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Update<SimulationCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_simulation_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Update<RenderCommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_render_command_double_buffer>();
+        Engine::Dispatcher().sink<Events::Update<CommandDoubleBuffer>>().disconnect<&SystemCommandBuffersInternal::on_update_command_double_buffer>();
         Log::Info("Removed", name()).enqueue();
     }
 }

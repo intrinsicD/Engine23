@@ -159,7 +159,7 @@ namespace Bcg{
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.trigger(Events::Shutdown<Renderer>{});
+            Engine::Dispatcher().trigger(Events::Shutdown<Renderer>{});
             if (!Engine::Instance()->state.ctx().find<Window>()) {
                 Log::Error(SystemWindowGLFW::name() + ": Not started").enqueue();
                 return;

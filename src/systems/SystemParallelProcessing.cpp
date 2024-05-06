@@ -57,7 +57,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemParallelProcessingInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemParallelProcessingInternal::on_update_gui>();
                 return;
             }
 
@@ -103,14 +103,14 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Parallel", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemParallelProcessingInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemParallelProcessingInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemParallelProcessingInternal::on_update_gui_menu>();
 
             Log::Info(SystemParallelProcessing::name() , "Startup").enqueue();
             SystemParallelProcessing::start(std::thread::hardware_concurrency() - 1);
@@ -138,15 +138,15 @@ namespace Bcg {
     }
 
     void SystemParallelProcessing::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemParallelProcessingInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemParallelProcessingInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemParallelProcessingInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemParallelProcessingInternal::on_shutdown_engine>();
 
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemParallelProcessing::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemParallelProcessingInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemParallelProcessingInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemParallelProcessingInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemParallelProcessingInternal::on_shutdown_engine>();
 
         Log::Info("Removed", name()).enqueue();
     }

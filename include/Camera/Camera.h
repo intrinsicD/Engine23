@@ -124,6 +124,12 @@ namespace Bcg {
             projection_parameters.orthographic_parameters = parameters;
             is_orthographic = true;
         }
+
+        friend std::ostream &operator<<(std::ostream &stream, const Camera<T> &camera){
+            stream << "Camera: TODO implement this!" << std::endl;
+            //TODO implement Camera output stream as string
+            return stream;
+        }
     };
 }
 

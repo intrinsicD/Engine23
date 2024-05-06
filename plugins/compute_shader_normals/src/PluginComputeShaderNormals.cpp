@@ -47,8 +47,8 @@ namespace Bcg {
     }
 
     void PluginComputeShaderNormals::pre_init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginComputeShaderNormalsInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&PluginComputeShaderNormalsInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().connect<&PluginComputeShaderNormalsInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&PluginComputeShaderNormalsInternal::on_shutdown>();
     }
 
     void PluginComputeShaderNormals::init() {

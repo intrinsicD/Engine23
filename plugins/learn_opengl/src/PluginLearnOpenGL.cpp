@@ -62,7 +62,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&PluginLearnOpenGLInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&PluginLearnOpenGLInternal::on_update_gui>();
                 return;
             }
 
@@ -149,15 +149,15 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Learn OpenGL", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&PluginLearnOpenGLInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&PluginLearnOpenGLInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().connect<&on_update_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<Frame>>().connect<&on_update_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
 
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
@@ -200,7 +200,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Frame>>().disconnect<&on_update_frame>();
+            Engine::Dispatcher().sink<Events::Update<Frame>>().disconnect<&on_update_frame>();
 
             Log::Info(PluginLearnOpenGL().name() , "Shutdown").enqueue();
         }
@@ -221,8 +221,8 @@ namespace Bcg {
     }
 
     void PluginLearnOpenGL::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginLearnOpenGLInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&PluginLearnOpenGLInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().connect<&PluginLearnOpenGLInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&PluginLearnOpenGLInternal::on_shutdown>();
 
         Log::Info("Initialized", name()).enqueue();
     }

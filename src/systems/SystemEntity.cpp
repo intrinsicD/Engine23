@@ -140,18 +140,18 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemEntityInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemEntityInternal::on_update_gui>();
                 return;
             }
 
             if (ImGui::Begin("Entity", &show_gui, ImGuiWindowFlags_AlwaysAutoResize)) {
                 auto &picker = Engine::Context().get<Picker>();
                 if (ImGui::Button("Create")) {
-                    Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&picker.id.entity});
+                    Engine::Dispatcher().trigger(Events::Create<entt::entity>{&picker.id.entity});
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Destroy")) {
-                    Engine::Instance()->dispatcher.trigger(Events::Destroy<entt::entity>{&picker.id.entity});
+                    Engine::Dispatcher().trigger(Events::Destroy<entt::entity>{&picker.id.entity});
                     picker.id.entity = entt::null;
                 }
                 if (picker.id.entity != entt::null) {
@@ -165,7 +165,7 @@ namespace Bcg {
             if (ImGui::BeginMenu("Menu")) {
 
                 if (ImGui::MenuItem("Entity", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemEntityInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemEntityInternal::on_update_gui>();
                 }
 
                 ImGui::EndMenu();
@@ -173,19 +173,19 @@ namespace Bcg {
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemEntityInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
-            Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Keyboard>>().connect<&SystemEntityInternal::on_input_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemEntityInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
+            Engine::Dispatcher().sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
+            Engine::Dispatcher().sink<Events::Update<Input::Keyboard>>().connect<&SystemEntityInternal::on_input_keyboard>();
             Log::Info(SystemEntity::name(), "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             Log::Info(SystemEntity::name(), "Shutdown").enqueue();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemEntityInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
-            Engine::Instance()->dispatcher.sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Keyboard>>().disconnect<&SystemEntityInternal::on_input_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemEntityInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
+            Engine::Dispatcher().sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
+            Engine::Dispatcher().sink<Events::Update<Input::Keyboard>>().disconnect<&SystemEntityInternal::on_input_keyboard>();
         }
 
 
@@ -230,14 +230,14 @@ namespace Bcg {
     }
 
     void SystemEntity::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemEntityInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemEntityInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemEntityInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemEntityInternal::on_shutdown_engine>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemEntity::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemEntityInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemEntityInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemEntityInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemEntityInternal::on_shutdown_engine>();
         Log::Info("Removed", name()).enqueue();
     }
 }

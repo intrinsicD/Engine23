@@ -60,7 +60,7 @@ namespace Bcg {
             if (ImGui::BeginMenu("Menu")) {
 
                 if (ImGui::MenuItem("Resources", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemResourcesInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemResourcesInternal::on_update_gui>();
                 }
 
                 ImGui::EndMenu();
@@ -69,7 +69,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemResourcesInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemResourcesInternal::on_update_gui>();
                 return;
             }
 

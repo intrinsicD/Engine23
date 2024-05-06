@@ -35,7 +35,7 @@ namespace Bcg{
     namespace SystemLoggerInternal {
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemLoggerInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemLoggerInternal::on_update_gui>();
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace Bcg{
             if (ImGui::BeginMenu("Menu")) {
 
                 if (ImGui::MenuItem("Logger", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemLoggerInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemLoggerInternal::on_update_gui>();
                 }
 
                 ImGui::EndMenu();
@@ -69,12 +69,12 @@ namespace Bcg{
 
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemLoggerInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemLoggerInternal::on_update_gui_menu>();
             Log::Info(SystemLogger::name() + "Startup").enqueue();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemLoggerInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemLoggerInternal::on_update_gui_menu>();
             Log::Info(SystemLogger::name() + "Shutdown").enqueue();
         }
     }
@@ -94,15 +94,15 @@ namespace Bcg {
     }
 
     void SystemLogger::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemLoggerInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemLoggerInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemLoggerInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemLoggerInternal::on_shutdown_engine>();
         Log::Info("Initialized", name()).enqueue();
         set_log_level(LogLevel::Info);
     }
 
     void SystemLogger::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemLoggerInternal::on_startup_engine>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemLoggerInternal::on_shutdown_engine>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemLoggerInternal::on_startup_engine>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemLoggerInternal::on_shutdown_engine>();
         Log::Info("Removed", name()).enqueue();
         Log::TODO(name() + ": figure out enabling and disabling logging").enqueue();
     }

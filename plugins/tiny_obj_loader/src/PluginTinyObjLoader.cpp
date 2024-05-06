@@ -126,9 +126,9 @@ namespace Bcg {
             normals = MeshVertexNormalsAreaAngleHybrid(mesh);
 
             entt::entity entity_id;
-            Engine::Instance()->dispatcher.trigger(Events::Create<entt::entity>{&entity_id});
+            Engine::Dispatcher().trigger(Events::Create<entt::entity>{&entity_id});
             Engine::State().emplace<Mesh>(entity_id, mesh);
-            Engine::Instance()->dispatcher.trigger(Events::Update<AABB3, entt::entity>{{entity_id}});
+            Engine::Dispatcher().trigger(Events::Update<AABB3, entt::entity>{{entity_id}});
             auto &aabb = Engine::State().get<AABB3>(entity_id);
             auto scaling = aabb.max.cwiseMax(-aabb.min).maxCoeff();
 
@@ -226,13 +226,13 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
-            //Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&on_update>();
+            //Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&on_update>();
             Log::Info(PluginTinyObjLoader().name(), "Startup").enqueue();
         }
 
 
         void on_shutdown(const Events::Shutdown<Plugin> &event) {
-           // Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
+           // Engine::Dispatcher().sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
             Log::Info(PluginTinyObjLoader().name(), "Shutdown").enqueue();
         }
     }
@@ -248,14 +248,14 @@ namespace Bcg {
     }
 
     void PluginTinyObjLoader::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Plugin>>().connect<&PluginTinyObjLoaderInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void PluginTinyObjLoader::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Plugin>>().disconnect<&PluginTinyObjLoaderInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
     }
 }

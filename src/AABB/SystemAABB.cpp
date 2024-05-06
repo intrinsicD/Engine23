@@ -45,8 +45,8 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemAABBInternal {
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemAABBInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<AABB3, entt::entity>>().connect<&SystemAABBInternal::on_update_aabb>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemAABBInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<AABB3, entt::entity>>().connect<&SystemAABBInternal::on_update_aabb>();
             Engine::State().on_construct<AABB3>().connect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().connect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().connect<&on_destroy_component<SystemAABB>>();
@@ -54,8 +54,8 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemAABBInternal::on_update_gui_menu>();
-            Engine::Instance()->dispatcher.sink<Events::Update<AABB3, entt::entity>>().disconnect<&SystemAABBInternal::on_update_aabb>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemAABBInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<AABB3, entt::entity>>().disconnect<&SystemAABBInternal::on_update_aabb>();
             Engine::State().on_construct<AABB3>().disconnect<&on_construct_component<SystemAABB>>();
             Engine::State().on_update<AABB3>().disconnect<&on_update_component<SystemAABB>>();
             Engine::State().on_destroy<AABB3>().disconnect<&on_destroy_component<SystemAABB>>();
@@ -65,7 +65,7 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("AABB", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -73,7 +73,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -176,14 +176,14 @@ namespace Bcg {
     }
 
     void SystemAABB::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemAABBInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemAABBInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemAABBInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemAABBInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemAABB::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemAABBInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemAABBInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemAABBInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemAABBInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
     }
 }

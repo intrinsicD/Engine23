@@ -103,8 +103,8 @@ namespace Bcg {
     }
 
     void SystemPlugins::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPluginsInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemPluginsInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemPluginsInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
 
         auto &plugins = Engine::Context().emplace<std::unordered_map<std::string, Plugin *>>();
@@ -118,8 +118,8 @@ namespace Bcg {
     }
 
     void SystemPlugins::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPluginsInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPluginsInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemPluginsInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemPluginsInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
 
         auto &plugins = Engine::Context().emplace<std::unordered_map<std::string, Plugin *>>();

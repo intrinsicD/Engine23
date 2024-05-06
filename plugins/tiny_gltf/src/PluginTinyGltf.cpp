@@ -251,7 +251,7 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&on_update>();
+            Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&on_update>();
 
             Engine::Context().emplace<Models>();
             Engine::Context().emplace<Assets>();
@@ -260,7 +260,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Plugin> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
+            Engine::Dispatcher().sink<Events::Update<Input::Drop>>().disconnect<&on_update>();
             Log::Info(PluginTinyGltf().name() , "Shutdown").enqueue();
         }
     }
@@ -274,14 +274,14 @@ namespace Bcg {
     }
 
     void PluginTinyGltf::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().connect<&PluginTinyGltfInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().connect<&PluginTinyGltfInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().connect<&PluginTinyGltfInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Plugin>>().connect<&PluginTinyGltfInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void PluginTinyGltf::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Plugin>>().disconnect<&PluginTinyGltfInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Plugin>>().disconnect<&PluginTinyGltfInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Plugin>>().disconnect<&PluginTinyGltfInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Plugin>>().disconnect<&PluginTinyGltfInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
     }
 }

@@ -41,7 +41,7 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("ShaderPrograms", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
@@ -49,7 +49,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -84,13 +84,13 @@ namespace Bcg {
             programs[name] = std::move(point_cloud_program);
             SystemShaderPrograms::add_to_watcher(programs[name]);
 
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().connect<&SystemShaderProgramsInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().connect<&SystemShaderProgramsInternal::on_begin_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
             Log::Info(SystemShaderPrograms::name() , "Shutdown").enqueue();
         }
     }
@@ -266,14 +266,14 @@ namespace Bcg {
     }
 
     void SystemShaderPrograms::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemShaderProgramsInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemShaderProgramsInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemShaderProgramsInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemShaderProgramsInternal::on_shutdown>();
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemShaderPrograms::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemShaderProgramsInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemShaderProgramsInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemShaderProgramsInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemShaderProgramsInternal::on_shutdown>();
         Engine::Context().erase<OpenGL::ShaderPrograms>();
         Log::Info("Removed", name()).enqueue();
     }

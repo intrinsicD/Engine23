@@ -40,7 +40,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&SystemPlatformInternal::on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemPlatformInternal::on_update_gui>();
                 return;
             }
 
@@ -56,19 +56,19 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Platform")) {
                 if (ImGui::MenuItem("Platform", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&SystemPlatformInternal::on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemPlatformInternal::on_update_gui>();
                 }
                 ImGui::EndMenu();
             }
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemPlatformInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemPlatformInternal::on_update_gui_menu>();
             Log::Info(SystemPlatform::name() , "Startup").enqueue();
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemPlatformInternal::on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemPlatformInternal::on_update_gui_menu>();
             Log::Info(SystemPlatform::name() , "Shutdown").enqueue();
         }
     }
@@ -126,16 +126,16 @@ namespace Bcg {
     }
 
     void SystemPlatform::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemPlatformInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemPlatformInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemPlatformInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemPlatformInternal::on_shutdown>();
         auto &info = Engine::Context().emplace<SystemPlatformInternal::PlatformInfo>();
         Log::Info(name() + ": Initialized. Compiled with " + info.compiler + " on " + info.os + " for " + info.arch +
                   " Architecture.").enqueue();
     }
 
     void SystemPlatform::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemPlatformInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemPlatformInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemPlatformInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemPlatformInternal::on_shutdown>();
         Log::Info("Removed", name()).enqueue();
     }
 }

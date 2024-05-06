@@ -79,10 +79,10 @@ namespace Bcg {
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
                 if (ImGui::MenuItem("Mesh", nullptr, &show_gui)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
                 }
                 if (ImGui::MenuItem("MeshResourceContainer", nullptr, &show_gui_resource_container)) {
-                    Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().connect<&on_update_gui_resource_container>();
+                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_resource_container>();
                 }
                 ImGui::EndMenu();
             }
@@ -90,7 +90,7 @@ namespace Bcg {
 
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
                 return;
             }
 
@@ -110,7 +110,7 @@ namespace Bcg {
 
         void on_update_gui_resource_container(const Events::Update<Gui> &event) {
             if (!show_gui_resource_container) {
-                Engine::Instance()->dispatcher.sink<Events::Update<Gui>>().disconnect<&on_update_gui_resource_container>();
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_resource_container>();
                 return;
             }
 
@@ -331,23 +331,23 @@ namespace Bcg {
     }
 
     void SystemMesh::init() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().connect<&SystemMeshInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().connect<&SystemMeshInternal::on_shutdown>();
-        Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().connect<&SystemMeshInternal::on_update_gui_menu>();
-        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().connect<&SystemMeshInternal::on_update_input_drop>();
-        Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().connect<&SystemMeshInternal::on_load_mesh>();
-        Engine::Instance()->dispatcher.sink<Events::RemoveAll<Component<Mesh>>>().connect<&SystemMeshInternal::on_remove_all>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemMeshInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemMeshInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemMeshInternal::on_update_gui_menu>();
+        Engine::Dispatcher().sink<Events::Update<Input::Drop>>().connect<&SystemMeshInternal::on_update_input_drop>();
+        Engine::Dispatcher().sink<Events::Load<Mesh>>().connect<&SystemMeshInternal::on_load_mesh>();
+        Engine::Dispatcher().sink<Events::RemoveAll<Component<Mesh>>>().connect<&SystemMeshInternal::on_remove_all>();
 
         Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemMesh::remove() {
-        Engine::Instance()->dispatcher.sink<Events::Startup<Engine>>().disconnect<&SystemMeshInternal::on_startup>();
-        Engine::Instance()->dispatcher.sink<Events::Shutdown<Engine>>().disconnect<&SystemMeshInternal::on_shutdown>();
-        Engine::Instance()->dispatcher.sink<Events::Update<GuiMenu>>().disconnect<&SystemMeshInternal::on_update_gui_menu>();
-        Engine::Instance()->dispatcher.sink<Events::Update<Input::Drop>>().disconnect<&SystemMeshInternal::on_update_input_drop>();
-        Engine::Instance()->dispatcher.sink<Events::Load<Mesh>>().disconnect<&SystemMeshInternal::on_load_mesh>();
-        Engine::Instance()->dispatcher.sink<Events::RemoveAll<Component<Mesh>>>().disconnect<&SystemMeshInternal::on_remove_all>();
+        Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemMeshInternal::on_startup>();
+        Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemMeshInternal::on_shutdown>();
+        Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemMeshInternal::on_update_gui_menu>();
+        Engine::Dispatcher().sink<Events::Update<Input::Drop>>().disconnect<&SystemMeshInternal::on_update_input_drop>();
+        Engine::Dispatcher().sink<Events::Load<Mesh>>().disconnect<&SystemMeshInternal::on_load_mesh>();
+        Engine::Dispatcher().sink<Events::RemoveAll<Component<Mesh>>>().disconnect<&SystemMeshInternal::on_remove_all>();
 
         Engine::Context().erase<ResourceContainerMesh>();
         Log::Info("Removed", name()).enqueue();
