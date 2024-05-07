@@ -20,20 +20,17 @@
 #include "CommandDoubleBuffer.h"
 #include "Input.h"
 #include "Picker.h"
-#include "ResourceContainer.h"
-#include "Component.h"
 #include "Entity.h"
 #include "SystemTransform.h"
 #include "SystemAABB.h"
 #include "SystemAsset.h"
+#include "Components.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    using ResourceContainerMesh = ResourceContainer<Mesh>;
-            
     namespace SystemMeshInternal {
         static bool show_gui = false;
         static bool show_gui_resource_container = false;
@@ -99,9 +96,8 @@ namespace Bcg {
                 auto entity_id = picker.id.entity;
 
                 if (entity_id != entt::null && Engine::State().all_of<Component<Mesh>>(entity_id)) {
-                    auto &instances = Engine::Context().get<ResourceContainerMesh>();
-                    auto instance_id = Engine::State().get<Component<Mesh>>(entity_id).index;
-                    auto &mesh = instances.pool[instance_id];
+                    Components<Mesh> components(SystemMesh::component_name());
+                    auto &mesh = components.get_instance(entity_id);
                     ComponentGui<Mesh>::Show(mesh);
                 }
             }
@@ -115,10 +111,10 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("MeshResourceContainer", &show_gui_resource_container)) {
-                auto &instances = Engine::Context().get<ResourceContainerMesh>();
-                for (size_t instance_id = 0; instance_id < instances.get_size(); ++instance_id) {
+                Components<Mesh> components(SystemMesh::component_name());
+                for (size_t instance_id = 0; instance_id < components.get_size(); ++instance_id) {
                     if (ImGui::TreeNode(std::to_string(instance_id).c_str())) {
-                        ComponentGui<Mesh>::Show(instances.pool[instance_id]);
+                        ComponentGui<Mesh>::Show(components.get_instance(instance_id));
                         ImGui::TreePop();
                     }
                 }
@@ -135,9 +131,8 @@ namespace Bcg {
                 Engine::Dispatcher().trigger(Events::Load<Mesh>{entity_id, path});
                 CompositeCommand prepare_entity("prepare_entity");
                 prepare_entity.add_task("compute_vertex_normals", [entity_id]() {
-                    auto &instances = Engine::Context().get<ResourceContainerMesh>();
-                    auto instance_id = Engine::State().get<Component<Mesh>>(entity_id).index;
-                    auto &mesh = instances.pool[instance_id];
+                    Components<Mesh> components(SystemMesh::component_name());
+                    auto &mesh = components.get_instance(entity_id);
 
                     auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
                     if (!normals) {
@@ -153,9 +148,8 @@ namespace Bcg {
 
                 prepare_entity.add_task("upload_to_gpu", [entity_id]() {
                     if (!Engine::State().all_of<OpenGL::RenderableTriangles>(entity_id)) {
-                        auto &instances = Engine::Context().get<ResourceContainerMesh>();
-                        auto instance_id = Engine::State().get<Component<Mesh>>(entity_id).index;
-                        auto &mesh = instances.pool[instance_id];
+                        Components<Mesh> components(SystemMesh::component_name());
+                        auto &mesh = components.get_instance(entity_id);
 
                         auto positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
                         auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
@@ -249,10 +243,11 @@ namespace Bcg {
 
     bool SystemMesh::load(const std::string &filepath, entt::entity entity_id) {
         MeshIo reader(filepath);
-        auto instance_id = create_instance();
-        add_to_entity(entity_id, instance_id);
-        auto &instances = Engine::Context().get<ResourceContainerMesh>();
-        auto &mesh = instances.pool[instance_id];
+        Components<Mesh> components(SystemMesh::component_name());
+        auto instance_id = components.create_instance();
+        components.add_to_entity(entity_id, instance_id);
+
+        auto &mesh = components.get_instance(instance_id);
 
         if (!reader.read(mesh)) {
             Log::Warn("Failed to load mesh from file: " + filepath).enqueue();
@@ -293,41 +288,8 @@ namespace Bcg {
         return true;
     }
 
-    unsigned int SystemMesh::create_instance() {
-        auto &instances = Engine::Context().get<ResourceContainerMesh>();
-        if (!instances.free_list.empty()) {
-            unsigned int instance_id = instances.free_list.back();
-            instances.free_list.pop_back();
-            instances.pool[instance_id] = Mesh();
-            Log::Info("Reuse Mesh instance with instance_id: " + std::to_string(instance_id)).enqueue();
-            return instance_id;
-        } else {
-            unsigned int instance_id = instances.get_size();
-            instances.push_back();
-            Log::Info("Created Mesh instance with instance_id: " + std::to_string(instance_id)).enqueue();
-            return instance_id;
-        }
-    }
-
-    void SystemMesh::destroy_instance(unsigned int instance_id) {
-        auto &instances = Engine::Context().get<ResourceContainerMesh>();
-        instances.free_list.push_back(instance_id);
-        Log::Info("Destroy Mesh instance with instance_id: " + std::to_string(instance_id)).enqueue();
-    }
-
-    void SystemMesh::add_to_entity(entt::entity entity_id, unsigned int instance_id) {
-        Engine::State().emplace_or_replace<Component<Mesh>>(entity_id, instance_id);
-        Log::Info("Add Component<Mesh> with instance_id: " + std::to_string(instance_id) + " to entity_id: " +
-                  AsString(entity_id)).enqueue();
-    }
-
-    void SystemMesh::remove_from_entity(entt::entity entity_id) {
-        Engine::State().remove<Component<Mesh>>(entity_id);
-        Log::Info("Removed Component<Mesh> from entity_id: " + AsString(entity_id)).enqueue();
-    }
-
     void SystemMesh::pre_init() {
-        Engine::Context().emplace<ResourceContainerMesh>();
+
     }
 
     void SystemMesh::init() {
@@ -349,7 +311,6 @@ namespace Bcg {
         Engine::Dispatcher().sink<Events::Load<Mesh>>().disconnect<&SystemMeshInternal::on_load_mesh>();
         Engine::Dispatcher().sink<Events::RemoveAll<Component<Mesh>>>().disconnect<&SystemMeshInternal::on_remove_all>();
 
-        Engine::Context().erase<ResourceContainerMesh>();
         Log::Info("Removed", name()).enqueue();
     }
 }

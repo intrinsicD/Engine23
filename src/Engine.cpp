@@ -14,14 +14,6 @@
 #include "GLFW/glfw3.h"
 
 namespace Bcg {
-    void CreateWindow(int width, int height, const std::string &title) {
-        auto *h_window = glfwCreateWindow(width, height, title.c_str(),nullptr, nullptr);
-    }
-
-    void RegisterCallbacks(){
-
-    }
-
     Engine::Engine() {
         //The engine is a singleton
         //Has an entt::registry as state to store and represent the current state of the engine or application
@@ -36,6 +28,7 @@ namespace Bcg {
         //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
 
         entt::locator<Engine *>::emplace<Engine *>(this);
+
 
         SystemTimer::pre_init();
         SystemCommandBuffers::pre_init();

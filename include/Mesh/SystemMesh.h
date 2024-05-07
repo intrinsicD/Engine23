@@ -22,14 +22,6 @@ namespace Bcg {
 
         static bool load(const std::string &filepath, entt::entity entity);
 
-        static unsigned int create_instance();
-
-        static void destroy_instance(unsigned int instance_id);
-
-        static void add_to_entity(entt::entity entity_id, unsigned int instance_id);
-
-        static void remove_from_entity(entt::entity entity_id);
-
     protected:
         friend Engine;
 
