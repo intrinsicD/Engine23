@@ -7,10 +7,9 @@
 
 #include "ComponentGui.h"
 #include "Component.h"
+#include "Asset.h"
 
 namespace Bcg {
-    struct Asset;
-
     template<>
     struct ComponentGui<Asset> {
         static void Show(entt::entity entity_id);
