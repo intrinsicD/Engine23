@@ -13,16 +13,13 @@
 #include "fmt/core.h"
 #include "Picker.h"
 #include "SystemsUtils.h"
-#include "ResourceContainer.h"
-#include "Component.h"
+#include "Components.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    using ResourceContainerAABB = ResourceContainer<AABB3>;
-
     namespace SystemAABBInternal {
         static bool show_gui = false;
 
@@ -104,18 +101,15 @@ namespace Bcg {
                 return;
             }
 
-            AABB3 aabb;
-            aabb.fit(MapConst(positions));
-
-            auto &aabbs = Engine::Context().get<ResourceContainerAABB>();
+            Components<AABB3> components(SystemAABB::component_name());
 
             if (!entity.all_of<Component<AABB3>>()) {
-                auto aabb_id = SystemAABB::create_instance();
-                SystemAABB::add_to_entity(entity_id, aabb_id);
-                aabbs.pool[aabb_id] = aabb;
+                auto aabb_id = components.create_instance();
+                components.add_to_entity(entity_id, aabb_id);
+                components.get_instance(aabb_id).fit(MapConst(positions));
             } else {
                 auto &component = Engine::State().get<Component<AABB3>>(entity_id);
-                aabbs.pool[component.index] = aabb;
+                components.get_instance(component.index).fit(MapConst(positions));
             }
         }
     }
@@ -134,45 +128,8 @@ namespace Bcg {
         return "AABB";
     }
 
-    unsigned int SystemAABB::create_instance() {
-        auto &instances = Engine::Context().get<ResourceContainerAABB>();
-        if (!instances.free_list.empty()) {
-            unsigned int instance_id = instances.free_list.back();
-            instances.free_list.pop_back();
-            instances.pool[instance_id] = AABB3();
-            Log::Info("Reuse " + component_name() + " instance with instance_id: " +
-                      std::to_string(instance_id)).enqueue();
-            return instance_id;
-        } else {
-            unsigned int instance_id = instances.get_size();
-            instances.push_back();
-            Log::Info("Created " + component_name() + " instance with instance_id: " +
-                      std::to_string(instance_id)).enqueue();
-            return instance_id;
-        }
-    }
-
-    void SystemAABB::destroy_instance(unsigned int instance_id) {
-        auto &instances = Engine::Context().get<ResourceContainerAABB>();
-        instances.free_list.push_back(instance_id);
-        Log::Info(
-                "Destroy " + component_name() + " instance with instance_id: " + std::to_string(instance_id)).enqueue();
-    }
-
-    void SystemAABB::add_to_entity(entt::entity entity_id, unsigned int instance_id) {
-        Engine::State().emplace_or_replace<Component<AABB3>>(entity_id, instance_id);
-        Log::Info(
-                "Add " + component_name() + " with instance_id: " + std::to_string(instance_id) + " to entity_id: " +
-                AsString(entity_id)).enqueue();
-    }
-
-    void SystemAABB::remove_from_entity(entt::entity entity_id) {
-        Engine::State().remove<Component<AABB3>>(entity_id);
-        Log::Info("Removed " + component_name() + " from entity_id: " + AsString(entity_id)).enqueue();
-    }
-
     void SystemAABB::pre_init() {
-        Engine::Context().emplace<ResourceContainerAABB>();
+
     }
 
     void SystemAABB::init() {

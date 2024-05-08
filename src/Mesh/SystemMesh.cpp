@@ -250,20 +250,16 @@ namespace Bcg {
         auto &mesh = components.get_instance(instance_id);
 
         if (!reader.read(mesh)) {
-            Log::Warn("Failed to load mesh from file: " + filepath).enqueue();
+            Log::Warn(component_name() + ": load from file FAILED: " + filepath).enqueue();
             return false;
         } else {
-            Log::Info("Loaded mesh from file: " + filepath).enqueue();
+            Log::Info(component_name() + ": loaded from file: " + filepath).enqueue();
         }
 
-        auto asset_id = SystemAsset::create_instance();
-        SystemAsset::add_to_entity(entity_id, asset_id);
-        auto &assets = Engine::Context().get<ResourceContainer<Asset>>();
-        auto &asset = assets.pool[asset_id];
-
-        asset.name = FilePath::Filename(filepath);
-        asset.filepath = filepath;
-        asset.type = "Mesh";
+        Components<Asset> assets(SystemAsset::component_name());
+        auto asset_id = assets.create_instance();
+        assets.add_to_entity(entity_id, asset_id);
+        assets.get_instance(asset_id) = Asset(FilePath::Filename(filepath), filepath, component_name());
 
         auto positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
         auto aabb = AABB3();
@@ -276,14 +272,14 @@ namespace Bcg {
             positions[v] = (positions[v] - center) / scaling;
         }
 
-        auto transform_id = SystemTransform::create_instance();
-        SystemTransform::add_to_entity(entity_id, transform_id);
+        Components<Transform<float>> transforms(SystemTransform::component_name());
+        auto transform_id = transforms.create_instance();
+        transforms.add_to_entity(entity_id, transform_id);
 
-        auto aabb_id = SystemAABB::create_instance();
-        SystemAABB::add_to_entity(entity_id, aabb_id);
-
-        auto &aabbs = Engine::Context().get<ResourceContainer<AABB3>>();
-        aabbs.pool[aabb_id].fit(MapConst(positions));
+        Components<AABB3> aabbs(SystemAABB::component_name());
+        auto aabb_id = aabbs.create_instance();
+        aabbs.add_to_entity(entity_id, aabb_id);
+        aabbs.get_instance(aabb_id).fit(MapConst(positions));
 
         return true;
     }

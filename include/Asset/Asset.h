@@ -10,6 +10,12 @@
 
 namespace Bcg {
     struct Asset {
+        Asset() = default;
+
+        Asset(std::string name, std::string filepath, std::string type) : name(std::move(name)),
+                                                                          filepath(std::move(filepath)),
+                                                                          type(std::move(type)) {}
+
         std::string name;
         std::string filepath;
         std::string type;
