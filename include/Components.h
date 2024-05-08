@@ -29,9 +29,11 @@ namespace Bcg {
                 container.free_list.pop_back();
                 container.pool[instance_id] = T();
                 Log::Info(name + ": reuse instance with instance_id: " + std::to_string(instance_id)).enqueue();
+                container.used_list.emplace(instance_id);
                 return instance_id;
             } else {
                 unsigned int instance_id = container.get_size();
+                container.used_list.emplace(instance_id);
                 container.push_back();
                 Log::Info(name + ": create instance with instance_id: " + std::to_string(instance_id)).enqueue();
                 return instance_id;
@@ -40,6 +42,7 @@ namespace Bcg {
 
         void destroy_instance(unsigned int instance_id) {
             if (instance_id < container.get_size()) {
+                container.used_list.erase(instance_id);
                 container.free_list.push_back(instance_id);
                 Log::Info(name + ": destroy instance with instance_id: " + std::to_string(instance_id)).enqueue();
             } else {

@@ -16,6 +16,8 @@ namespace Bcg{
 
         static std::string name();
 
+        static std::string component_name();
+
         static void swap_and_poll_events();
 
     protected:

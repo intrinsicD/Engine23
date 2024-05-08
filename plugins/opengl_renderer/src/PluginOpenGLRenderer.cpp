@@ -169,7 +169,7 @@ namespace Bcg {
             if (engine->window_size_callback) {
                 engine->window_size_callback();
             }
-            engine->dispatcher.trigger(Events::Callback::WindowSize{h_window, width, height});
+            Engine::Dispatcher().trigger(Events::Callback::WindowSize{h_window, width, height});
         });
 
         glfwSetMouseButtonCallback(context.glfWwindow, [](GLFWwindow *h_window, int button, int action, int mods) {
@@ -177,7 +177,7 @@ namespace Bcg {
             if (engine->mouse_button_callback) {
                 engine->mouse_button_callback();
             }
-            engine->dispatcher.trigger(Events::Callback::MouseButton{0, button, action, mods});
+            Engine::Dispatcher().trigger(Events::Callback::MouseButton{0, button, action, mods});
         });
 
         glfwSetCursorPosCallback(context.glfWwindow, [](GLFWwindow *h_window, double xpos, double ypos) {
@@ -185,7 +185,7 @@ namespace Bcg {
             if (engine->cursor_pos_callback) {
                 engine->cursor_pos_callback();
             }
-            engine->dispatcher.trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
+            Engine::Dispatcher().trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
         });
 
         glfwSetScrollCallback(context.glfWwindow, [](GLFWwindow *h_window, double xoffset, double yoffset) {
@@ -193,7 +193,7 @@ namespace Bcg {
             if (engine->scroll_callback) {
                 engine->scroll_callback();
             }
-            engine->dispatcher.trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
+            Engine::Dispatcher().trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
         });
 
         glfwSetKeyCallback(context.glfWwindow, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
@@ -201,7 +201,7 @@ namespace Bcg {
             if (engine->key_callback) {
                 engine->key_callback();
             }
-            engine->dispatcher.trigger(Events::Callback::Key{h_window, scancode, action, mods});
+            Engine::Dispatcher().trigger(Events::Callback::Key{h_window, scancode, action, mods});
         });
 
         glfwSetDropCallback(context.glfWwindow, [](GLFWwindow *h_window, int count, const char **paths) {
@@ -212,7 +212,7 @@ namespace Bcg {
             //Figure out how to handle file drop...
             //Option 1: Systems or plugins register to this callback and process all paths
             //Option 2: Preprocess to determine what files were dropped and how to continue with them...
-            engine->dispatcher.trigger(Events::Callback::Drop{h_window, count, paths});
+            Engine::Dispatcher().trigger(Events::Callback::Drop{h_window, count, paths});
         });
 
         Log::Info("Initialized", name()).enqueue();

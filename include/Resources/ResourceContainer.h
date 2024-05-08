@@ -17,6 +17,7 @@ namespace Bcg{
 
         Property<T> pool;
         std::vector<unsigned int> free_list;
+        std::set<unsigned int> used_list;
     };
 }
 

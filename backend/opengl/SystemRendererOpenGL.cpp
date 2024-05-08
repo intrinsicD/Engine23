@@ -23,6 +23,8 @@
 #include "Picker.h"
 #include "OpenGLUtils.h"
 #include "GLMeshRenderPass.h"
+#include "Components.h"
+#include "SystemWindowGLFW.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -60,8 +62,12 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
         void on_update_viewport(const Events::Update<Viewport> &event) {
-            auto &window = Engine::Context().get<Window>();
-            SystemRendererOpenGL::set_viewport(window.width, window.height);
+            Components<Window> windows(SystemWindowGLFW::component_name());
+            auto &component_window = Engine::Context().get<Component<Window>>();
+            auto &window = windows.get_instance(component_window);
+
+            auto size = window.get_size();
+            SystemRendererOpenGL::set_viewport(size[0], size[1]);
         }
 
         void on_update_gui(const Events::Update<Gui> &event) {
@@ -80,7 +86,7 @@ namespace Bcg {
             ImGui::End();
         }
 
-        void on_update_gui_renderable_triangles(const Events::Update<Gui> &event){
+        void on_update_gui_renderable_triangles(const Events::Update<Gui> &event) {
             if (!show_gui_renderable_triangles) {
                 Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 return;
@@ -88,7 +94,7 @@ namespace Bcg {
 
             auto &picker = Engine::Context().get<Picker>();
             if (ImGui::Begin("RenderableTriangles", &show_gui_renderable_triangles)) {
-                if(picker.id.entity != entt::null) {
+                if (picker.id.entity != entt::null) {
                     auto &renderable = Engine::State().get<OpenGL::RenderableTriangles>(picker.id.entity);
                     ComponentGui<OpenGL::RenderableTriangles>::Show(renderable);
                 }
@@ -101,7 +107,7 @@ namespace Bcg {
                 if (ImGui::MenuItem("Info", nullptr, &show_gui)) {
                     Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui>();
                 }
-                if(ImGui::MenuItem("RenderableTriangles", nullptr, &show_gui_renderable_triangles)){
+                if (ImGui::MenuItem("RenderableTriangles", nullptr, &show_gui_renderable_triangles)) {
                     Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemRendererOpenGLInternal::on_update_gui_renderable_triangles>();
                 }
                 ImGui::EndMenu();
@@ -109,7 +115,18 @@ namespace Bcg {
         }
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Components<Window> windows(SystemWindowGLFW::component_name());
+            auto &component_window = Engine::Context().get<Component<Window>>();
+
+            for(auto window_index : windows.container.used_list){
+                auto &window = windows.get_instance(window_index);
+                auto &bg = window.background_color;
+                glfwMakeContextCurrent(static_cast<GLFWwindow *>(window.window_handle));
+
+                glClearColor(bg[0], bg[1], bg[2], bg[3]);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            }
+
             auto view = Engine::State().view<RenderCommand>();
             for (auto entity_id: view) {
                 auto &render_command = view.get<RenderCommand>(entity_id);
@@ -119,8 +136,6 @@ namespace Bcg {
         }
 
         void on_update_frame(const Events::Update<Frame> &event) {
-            auto &double_buffer = Engine::Context().get<RenderCommandDoubleBuffer>();
-            double_buffer.enqueue_next(forward_render);
             GLMeshRenderPass meshes;
             meshes.execute();
         }
@@ -149,7 +164,7 @@ namespace Bcg {
                 opengl_config.renderer = (const char *) glGetString(GL_RENDERER);
                 opengl_config.version = (const char *) glGetString(GL_VERSION);
                 opengl_config.glsl_version = (const char *) glGetString(GL_SHADING_LANGUAGE_VERSION);
-                Log::Info(SystemRendererOpenGL::name() , "Startup").enqueue();
+                Log::Info(SystemRendererOpenGL::name(), "Startup").enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL vendor:       " + opengl_config.vendor).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL renderer:     " + opengl_config.renderer).enqueue();
                 Log::Info(SystemRendererOpenGL::name() + ": OpenGL version:      " + opengl_config.version).enqueue();
@@ -159,19 +174,6 @@ namespace Bcg {
 
             auto &bg = Engine::Context().get<Window>().background_color;
             glClearColor(bg[0], bg[1], bg[2], bg[3]);
-
-            forward_render = std::make_shared<TaskCommand>("Render", []() {
-                auto &render_batches = Engine::Context().get<RenderBatches>();
-                for (const auto &[shader_id, batch]: render_batches.batches) {
-                    glUseProgram(shader_id);
-                    batch->update_global_uniforms(shader_id);
-                    for (const auto &renderable: batch->renderables) {
-                        renderable->update_local_uniforms(shader_id);
-                        renderable->draw();
-                    }
-                }
-                return 1;
-            });
 
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
             OpenGL::ShaderProgram program;
@@ -188,17 +190,17 @@ namespace Bcg {
                 Log::Error(m_name + ": " + program.name + " Error: " + program.error_message).enqueue();
             }
 
-            Log::Info(SystemRendererOpenGL::name() , "Startup").enqueue();
+            Log::Info(SystemRendererOpenGL::name(), "Startup").enqueue();
         }
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event) {
             Engine::Dispatcher().sink<Events::Begin<Frame>>().disconnect<&SystemRendererOpenGLInternal::on_begin_frame>();
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
-            Log::Info(SystemRendererOpenGL::name() , "Shutdown").enqueue();
+            Log::Info(SystemRendererOpenGL::name(), "Shutdown").enqueue();
         }
 
 
-        void register_callbacks(GLFWwindow *h_window){
+        void register_callbacks(GLFWwindow *h_window) {
             glfwSetWindowCloseCallback(h_window, [](GLFWwindow *h_window) {
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 if (engine->window_close_callback) {
@@ -212,7 +214,7 @@ namespace Bcg {
                 if (engine->window_size_callback) {
                     engine->window_size_callback();
                 }
-                engine->dispatcher.trigger(Events::Callback::WindowSize{h_window, width, height});
+                Engine::Dispatcher().trigger(Events::Callback::WindowSize{h_window, width, height});
             });
 
             glfwSetMouseButtonCallback(h_window, [](GLFWwindow *h_window, int button, int action, int mods) {
@@ -220,7 +222,7 @@ namespace Bcg {
                 if (engine->mouse_button_callback) {
                     engine->mouse_button_callback();
                 }
-                engine->dispatcher.trigger(Events::Callback::MouseButton{0, button, action, mods});
+                Engine::Dispatcher().trigger(Events::Callback::MouseButton{0, button, action, mods});
             });
 
             glfwSetCursorPosCallback(h_window, [](GLFWwindow *h_window, double xpos, double ypos) {
@@ -228,7 +230,7 @@ namespace Bcg {
                 if (engine->cursor_pos_callback) {
                     engine->cursor_pos_callback();
                 }
-                engine->dispatcher.trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
+                Engine::Dispatcher().trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
             });
 
             glfwSetScrollCallback(h_window, [](GLFWwindow *h_window, double xoffset, double yoffset) {
@@ -236,7 +238,7 @@ namespace Bcg {
                 if (engine->scroll_callback) {
                     engine->scroll_callback();
                 }
-                engine->dispatcher.trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
+                Engine::Dispatcher().trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
             });
 
             glfwSetKeyCallback(h_window, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
@@ -244,7 +246,7 @@ namespace Bcg {
                 if (engine->key_callback) {
                     engine->key_callback();
                 }
-                engine->dispatcher.trigger(Events::Callback::Key{h_window, scancode, action, mods});
+                Engine::Dispatcher().trigger(Events::Callback::Key{h_window, scancode, action, mods});
             });
 
             glfwSetDropCallback(h_window, [](GLFWwindow *h_window, int count, const char **paths) {
@@ -255,7 +257,7 @@ namespace Bcg {
                 //Figure out how to handle file drop...
                 //Option 1: Systems or plugins register to this callback and process all paths
                 //Option 2: Preprocess to determine what files were dropped and how to continue with them...
-                engine->dispatcher.trigger(Events::Callback::Drop{h_window, count, paths});
+                Engine::Dispatcher().trigger(Events::Callback::Drop{h_window, count, paths});
             });
         }
     }
@@ -275,27 +277,27 @@ namespace Bcg {
         set_viewport(0, 0, width, height);
     }
 
-    void *SystemRendererOpenGL::create_window(int width, int height, const std::string &title){
+    void *SystemRendererOpenGL::create_window(int width, int height, const std::string &title) {
         return glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     }
 
-    void SystemRendererOpenGL::destroy(void *window_handle){
+    void SystemRendererOpenGL::destroy(void *window_handle) {
         glfwDestroyWindow(static_cast<GLFWwindow *>(window_handle));
     }
 
-    void SystemRendererOpenGL::make_current(void *window_handle){
+    void SystemRendererOpenGL::make_current(void *window_handle) {
         glfwMakeContextCurrent(static_cast<GLFWwindow *>(window_handle));
     }
 
-    void SystemRendererOpenGL::swap_buffers(void *window_handle){
+    void SystemRendererOpenGL::swap_buffers(void *window_handle) {
         glfwSwapBuffers(static_cast<GLFWwindow *>(window_handle));
     }
 
-    void SystemRendererOpenGL::set_window_size(void *window_handle, int width, int height){
+    void SystemRendererOpenGL::set_window_size(void *window_handle, int width, int height) {
         glfwSetWindowSize(static_cast<GLFWwindow *>(window_handle), width, height);
     }
 
-    double SystemRendererOpenGL::get_dpi_for_monitor(void *monitor){
+    double SystemRendererOpenGL::get_dpi_for_monitor(void *monitor) {
         if (!monitor) {
             return 1.0; // Default scale factor
         }

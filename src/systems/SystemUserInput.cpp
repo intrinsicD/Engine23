@@ -91,8 +91,7 @@ namespace Bcg{
         }
 
         void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event){
-            auto *engine = Engine::Instance();
-            auto &input = engine->state.ctx().get<Input>();
+            auto &input = Engine::Context().get<Input>();
             if(input.mouse.button.left){
                 input.mouse.last_left_click = input.mouse.position;
             }
@@ -105,8 +104,7 @@ namespace Bcg{
         }
 
         void on_update_input_drop(const Events::Update<Input::Drop> &event) {
-            auto *engine = Engine::Instance();
-            auto &input = engine->state.ctx().get<Input>();
+            auto &input = Engine::Context().get<Input>();
 
             for(auto &path : input.drop.paths){
                 Log::Info("Dropped: " + path).enqueue();
