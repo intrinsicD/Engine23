@@ -7,8 +7,8 @@
 
 #include <string>
 
-namespace Bcg{
-    struct Window{
+namespace Bcg {
+    struct Window {
         std::string title = "Viewer";
         int width = 800;
         int height = 600;
