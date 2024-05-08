@@ -14,6 +14,7 @@
 #include "Picker.h"
 #include "SystemsUtils.h"
 #include "Components.h"
+#include "ImGuiUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -21,7 +22,8 @@
 
 namespace Bcg {
     namespace SystemAABBInternal {
-        static bool show_gui = false;
+        static bool show_gui_instance = false;
+        static bool show_gui_components = false;
 
         void on_startup(const Events::Startup<Engine> &event);
 
@@ -29,7 +31,9 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
-        void on_update_gui(const Events::Update<Gui> &event);
+        void on_update_gui_instance(const Events::Update<Gui> &event);
+
+        void on_update_gui_components(const Events::Update<Gui> &event);
 
         void on_update_aabb(const Events::Update<AABB3, entt::entity> &event);
     }
@@ -61,22 +65,42 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if (ImGui::MenuItem("AABB", nullptr, &show_gui)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                if(ImGui::BeginMenu(SystemAABB::component_name().c_str())){
+                    if (ImGui::MenuItem("Instance", nullptr, &show_gui_instance)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_instance>();
+                    }
+                    if (ImGui::MenuItem("Components", nullptr, &show_gui_components)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_components>();
+                    }
+                    ImGui::EndMenu();
                 }
+
                 ImGui::EndMenu();
             }
         }
 
-        void on_update_gui(const Events::Update<Gui> &event) {
-            if (!show_gui) {
-                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+        void on_update_gui_instance(const Events::Update<Gui> &event) {
+            if (!show_gui_instance) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_instance>();
                 return;
             }
 
-            if (ImGui::Begin("AABB", &show_gui)) {
+            if (ImGui::Begin(SystemAABB::component_name().c_str(), &show_gui_instance)) {
                 auto &picker = Engine::Context().get<Picker>();
                 ComponentGui<AABB3>::Show(picker.id.entity);
+            }
+            ImGui::End();
+        }
+
+        void on_update_gui_components(const Events::Update<Gui> &event){
+            if (!show_gui_components) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_components>();
+                return;
+            }
+
+            if (ImGui::Begin("AABBComponents", &show_gui_components)) {
+                Components<AABB3> components(SystemAABB::component_name());
+                ImGuiUtils::Show(components);
             }
             ImGui::End();
         }

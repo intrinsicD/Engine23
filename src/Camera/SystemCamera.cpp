@@ -13,10 +13,13 @@
 #include "Input.h"
 #include "Time.h"
 #include "Camera.h"
+#include "CameraGui.h"
 #include "SafeAcos.h"
 #include "Rotation3DAngleAxis.h"
 #include "Components.h"
 #include "SystemWindowGLFW.h"
+#include "ImGuiUtils.h"
+#include "Picker.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -24,9 +27,12 @@
 
 namespace Bcg {
     namespace SystemCameraInternal {
-        static bool show_gui = false;
+        static bool show_gui_instance = false;
+        static bool show_gui_components = false;
 
-        void on_update_gui(const Events::Update<Gui> &event);
+        void on_update_gui_instance(const Events::Update<Gui> &event);
+
+        void on_update_gui_components(const Events::Update<Gui> &event);
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
@@ -57,171 +63,48 @@ namespace Bcg {
 
 namespace Bcg {
     namespace SystemCameraInternal {
-        void on_update_gui(const Events::Update<Gui> &event) {
-            if (!show_gui) {
-                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+        void on_update_gui_instance(const Events::Update<Gui> &event) {
+            if (!show_gui_instance) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_instance>();
                 return;
             }
 
-            if (ImGui::Begin("Camera", &show_gui)) {
-                auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-                Components<Camera<float>> cameras(SystemCamera::component_name());
-                auto &camera = cameras.get_instance(component_camera);
-
-                auto model = camera.get_model();
-                ImGui::Text("Model:");
-                ImGui::Separator();
-                ImGui::Text("%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n",
-                            model(0, 0), model(0, 1), model(0, 2), model(0, 3),
-                            model(1, 0), model(1, 1), model(1, 2), model(1, 3),
-                            model(2, 0), model(2, 1), model(2, 2), model(2, 3),
-                            model(3, 0), model(3, 1), model(3, 2), model(3, 3));
-
-                auto view = camera.get_view();
-                ImGui::Text("View:");
-                ImGui::Separator();
-                ImGui::Text("%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n",
-                            view(0, 0), view(0, 1), view(0, 2), view(0, 3),
-                            view(1, 0), view(1, 1), view(1, 2), view(1, 3),
-                            view(2, 0), view(2, 1), view(2, 2), view(2, 3),
-                            view(3, 0), view(3, 1), view(3, 2), view(3, 3));
-
-                auto proj = camera.get_projection();
-                ImGui::Text("Projection:");
-                ImGui::Separator();
-                ImGui::Text("%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n"
-                            "%f %f %f %f\n",
-                            proj(0, 0), proj(0, 1), proj(0, 2), proj(0, 3),
-                            proj(1, 0), proj(1, 1), proj(1, 2), proj(1, 3),
-                            proj(2, 0), proj(2, 1), proj(2, 2), proj(2, 3),
-                            proj(3, 0), proj(3, 1), proj(3, 2), proj(3, 3));
-                static bool edit = false;
-                ImGui::InputFloat("Mov Speed", &camera.sensitivity.move);
-                ImGui::InputFloat("Zoom Speed", &camera.sensitivity.zoom);
-                ImGui::InputFloat("Rot Speed", &camera.sensitivity.rotate);
-                ImGui::InputFloat("Drag Speed", &camera.sensitivity.drag);
-                ImGui::Checkbox("Edit", &edit);
-
-                if (ImGui::CollapsingHeader("View Parameters")) {
-                    auto parameters = camera.view;
-                    auto position = parameters.position;
-                    auto front = parameters.front;
-                    auto up = parameters.up;
-                    auto world_up = parameters.world_up;
-                    auto right = parameters.right;
-                    if (!edit) {
-                        ImGui::Text("Position: %f %f %f", position[0], position[1], position[2]);
-                        ImGui::Text("Front: %f %f %f", front[0], front[1], front[2]);
-                        ImGui::Text("Up: %f %f %f", up[0], up[1], up[2]);
-                        ImGui::Text("Right: %f %f %f", right[0], right[1], right[2]);
-                        ImGui::Text("World Up: %f %f %f", world_up[0], world_up[1], world_up[2]);
-                    } else {
-                        if (ImGui::InputFloat3("Position", position.data())) {
-                            camera.set_position(position);
-                        }
-                        if (ImGui::InputFloat3("Front", front.data())) {
-                            camera.set_front(front);
-                        }
-                        ImGui::Text("Right: %f %f %f", right[0], right[1], right[2]);
-                        if (ImGui::InputFloat3("World Up", up.data())) {
-                            camera.set_worldup(up);
-                        }
-                    }
-                    if (ImGui::Button("Reset##View")) {
-                        camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
-                        camera.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
-                        camera.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
-                    }
+            if (ImGui::Begin(SystemCamera::component_name().c_str(), &show_gui_instance)) {
+                if (ImGui::CollapsingHeader("Main Camera")) {
+                    auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
+                    ComponentGui<Camera<float>>::Show(component_camera);
                 }
-                if (ImGui::CollapsingHeader("Projection Parameters")) {
-                    bool is_orthographic = camera.is_orthographic;
-                    if (is_orthographic) {
-                        Camera<float>::Projection::Orthographic orthographic = camera.projection.orthographic_parameters;
-                        if (!edit) {
-                            ImGui::Text("Left: %f", orthographic.left);
-                            ImGui::Text("Right: %f", orthographic.right);
-                            ImGui::Text("Bottom: %f", orthographic.bottom);
-                            ImGui::Text("Top: %f", orthographic.top);
-                            ImGui::Text("Near##Orthographic: %f", orthographic.near);
-                            ImGui::Text("Far##Orthographic: %f", orthographic.far);
-                        } else {
-                            static bool changed_ortho = false;
-                            static Camera<float>::Projection::Orthographic orthographic_new = orthographic;
-                            changed_ortho |= ImGui::InputFloat("Left", &orthographic_new.left);
-                            changed_ortho |= ImGui::InputFloat("Right", &orthographic_new.right);
-                            changed_ortho |= ImGui::InputFloat("Bottom", &orthographic_new.bottom);
-                            changed_ortho |= ImGui::InputFloat("Top", &orthographic_new.top);
-                            changed_ortho |= ImGui::InputFloat("Near##Orthographic", &orthographic_new.near);
-                            changed_ortho |= ImGui::InputFloat("Far##Orthographic", &orthographic_new.far);
-                            if (changed_ortho) {
-                                if (ImGui::Button("Apply##Orthographic")) {
-                                    changed_ortho = false;
-                                    camera.set_orthographic_parameters(orthographic_new);
-                                }
-                            }
-                        }
-                        if (ImGui::Button("Reset##Orthographic")) {
-                            camera.set_orthographic_parameters({-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f});
-                        }
-                    } else {
-                        Camera<float>::Projection::Perspective perspective = camera.projection.perspective_parameters;
-                        if (!edit) {
-                            ImGui::Text("Fovy: %f", perspective.fovy_degrees);
-                            ImGui::Text("Aspect: %f", perspective.aspect);
-                            ImGui::Text("Near##Orthographic: %f", perspective.near);
-                            ImGui::Text("Far##Orthographic: %f", perspective.far);
-                        } else {
-                            static bool changed_perspective = false;
-                            static Camera<float>::Projection::Perspective perspective_new = perspective;
-                            changed_perspective |= ImGui::InputFloat("Fovy", &perspective_new.fovy_degrees);
-                            changed_perspective |= ImGui::InputFloat("Aspect", &perspective_new.aspect);
-                            changed_perspective |= ImGui::InputFloat("Near##Perspective", &perspective_new.near);
-                            changed_perspective |= ImGui::InputFloat("Far##Perspective", &perspective_new.far);
-                            if (changed_perspective) {
-                                if (ImGui::Button("Apply##Perspective")) {
-                                    changed_perspective = false;
-                                    camera.set_perspective_parameters(perspective_new);
-                                }
-                            }
-                        }
-                        if (ImGui::Button("Reset##Perspective")) {
-                            Components<Window> windows(SystemWindowGLFW::component_name());
-                            auto &component_window = Engine::Context().get<Component<Window>>();
-                            auto &window = windows.get_instance(component_window);
-                            camera.set_perspective_parameters(
-                                    {45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
-                        }
-                    }
-                }
-                ImGui::Separator();
+                auto &picker = Engine::Context().get<Picker>();
+                ComponentGui<Camera<float>>::Show(picker.id.entity);
+            }
+            ImGui::End();
+        }
 
-                ImGui::Text("last_point_ok: %d", camera.arc_ball_parameters.last_point_ok);
-                ImGui::Text("last_point_2d: %f %f", camera.arc_ball_parameters.last_point_2d[0],
-                            camera.arc_ball_parameters.last_point_2d[1]);
-                ImGui::Text("last_point_3d: %f %f %f", camera.arc_ball_parameters.last_point_3d[0],
-                            camera.arc_ball_parameters.last_point_3d[1],
-                            camera.arc_ball_parameters.last_point_3d[2]);
-                if (ImGui::InputFloat3("target", camera.arc_ball_parameters.target.data())) {
-                    camera.set_target(camera.arc_ball_parameters.target);
-                }
+        void on_update_gui_components(const Events::Update<Gui> &event) {
+            if (!show_gui_components) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_components>();
+                return;
+            }
 
+            if (ImGui::Begin("CameraComponents", &show_gui_components)) {
+                Components<Camera<float>> components(SystemCamera::component_name());
+                ImGuiUtils::Show(components);
             }
             ImGui::End();
         }
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if (ImGui::MenuItem("Camera", nullptr, &show_gui)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                if (ImGui::BeginMenu(SystemCamera::component_name().c_str())) {
+                    if (ImGui::MenuItem("Instance", nullptr, &show_gui_instance)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_instance>();
+                    }
+                    if (ImGui::MenuItem("Components", nullptr, &show_gui_components)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_components>();
+                    }
+                    ImGui::EndMenu();
                 }
+
                 ImGui::EndMenu();
             }
         }

@@ -25,6 +25,7 @@
 #include "SystemAABB.h"
 #include "SystemAsset.h"
 #include "Components.h"
+#include "ImGuiUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -32,8 +33,8 @@
 
 namespace Bcg {
     namespace SystemMeshInternal {
-        static bool show_gui = false;
-        static bool show_gui_resource_container = false;
+        static bool show_gui_instance = false;
+        static bool show_gui_components = false;
 
         void on_startup(const Events::Startup<Engine> &event);
 
@@ -41,9 +42,9 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
-        void on_update_gui(const Events::Update<Gui> &event);
+        void on_update_gui_instance(const Events::Update<Gui> &event);
 
-        void on_update_gui_resource_container(const Events::Update<Gui> &event);
+        void on_update_gui_components(const Events::Update<Gui> &event);
 
         void on_update_input_drop(const Events::Update<Input::Drop> &event);
 
@@ -75,49 +76,42 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if (ImGui::MenuItem("Mesh", nullptr, &show_gui)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                if(ImGui::BeginMenu(SystemMesh::component_name().c_str())){
+                    if (ImGui::MenuItem("Instance", nullptr, &show_gui_instance)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_instance>();
+                    }
+                    if (ImGui::MenuItem("Components", nullptr, &show_gui_components)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_components>();
+                    }
+                    ImGui::EndMenu();
                 }
-                if (ImGui::MenuItem("MeshResourceContainer", nullptr, &show_gui_resource_container)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_resource_container>();
-                }
+
                 ImGui::EndMenu();
             }
         }
 
-        void on_update_gui(const Events::Update<Gui> &event) {
-            if (!show_gui) {
-                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui>();
+        void on_update_gui_instance(const Events::Update<Gui> &event) {
+            if (!show_gui_instance) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_instance>();
                 return;
             }
 
-            if (ImGui::Begin("Mesh", &show_gui)) {
+            if (ImGui::Begin(SystemMesh::component_name().c_str(), &show_gui_instance)) {
                 auto &picker = Engine::Context().get<Picker>();
-                auto entity_id = picker.id.entity;
-
-                if (entity_id != entt::null && Engine::State().all_of<Component<Mesh>>(entity_id)) {
-                    Components<Mesh> components(SystemMesh::component_name());
-                    auto &mesh = components.get_instance(entity_id);
-                    ComponentGui<Mesh>::Show(mesh);
-                }
+                ComponentGui<Mesh>::Show(picker.id.entity);
             }
             ImGui::End();
         }
 
-        void on_update_gui_resource_container(const Events::Update<Gui> &event) {
-            if (!show_gui_resource_container) {
-                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_resource_container>();
+        void on_update_gui_components(const Events::Update<Gui> &event) {
+            if (!show_gui_components) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_components>();
                 return;
             }
 
-            if (ImGui::Begin("MeshResourceContainer", &show_gui_resource_container)) {
+            if (ImGui::Begin("MeshComponents", &show_gui_components)) {
                 Components<Mesh> components(SystemMesh::component_name());
-                for (size_t instance_id = 0; instance_id < components.get_size(); ++instance_id) {
-                    if (ImGui::TreeNode(std::to_string(instance_id).c_str())) {
-                        ComponentGui<Mesh>::Show(components.get_instance(instance_id));
-                        ImGui::TreePop();
-                    }
-                }
+                ImGuiUtils::Show(components);
             }
             ImGui::End();
         }

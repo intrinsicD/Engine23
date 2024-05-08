@@ -6,7 +6,8 @@
 #include "Engine.h"
 #include "imgui.h"
 #include <sstream>
-#include "ResourceContainer.h"
+#include "Components.h"
+#include "SystemAABB.h"
 
 namespace Bcg {
     void ComponentGui<AABB3>::Show(entt::entity entity_id) {
@@ -16,8 +17,8 @@ namespace Bcg {
     }
 
     void ComponentGui<AABB3>::Show(Component<AABB3> &component) {
-        auto &aabbs = Engine::Context().get<ResourceContainer<AABB3>>();
-        return Show(aabbs.pool[component.index]);
+        Components<AABB3> aabbs(SystemAABB::component_name());
+        return Show(aabbs.get_instance(component));
     }
 
     void ComponentGui<AABB3>::Show(AABB3 &aabb) {

@@ -11,17 +11,6 @@
 
 namespace Bcg {
     template<>
-    struct ComponentGui<Transform<double>> {
-        static void Show(entt::entity entity_id);
-
-        static void Show(Component<Transform<double>> &component);
-
-        static void Show(Transform<double> &transform);
-
-        static void Edit(Transform<double> &transform);
-    };
-
-    template<>
     struct ComponentGui<Transform<float>> {
         static void Show(entt::entity entity_id);
 

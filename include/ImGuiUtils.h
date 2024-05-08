@@ -10,6 +10,7 @@
 #include <vector>
 #include "imgui.h"
 #include "glm/glm.hpp"
+#include "Components.h"
 
 namespace Bcg {
     namespace ImGuiUtils {
@@ -32,6 +33,16 @@ namespace Bcg {
         bool Combo(const char *label, int *current_item, const std::vector<glm::uvec3> &items);
 
         bool Combo(const char *label, int *current_item, const std::vector<glm::uvec4> &items);
+
+        template<typename T>
+        void Show(Components<T> &components) {
+            for (size_t instance_id = 0; instance_id < components.get_size(); ++instance_id) {
+                if (ImGui::TreeNode(std::to_string(instance_id).c_str())) {
+                    ComponentGui<T>::Show(components.get_instance(instance_id));
+                    ImGui::TreePop();
+                }
+            }
+        }
     }
 }
 

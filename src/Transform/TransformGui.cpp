@@ -3,13 +3,13 @@
 //
 
 #include "TransformGui.h"
-#include "Transform.h"
 #include "Engine.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "Camera.h"
-#include "Component.h"
-#include "ResourceContainer.h"
+#include "Components.h"
+#include "SystemTransform.h"
+#include "SystemCamera.h"
 
 namespace Bcg {
     static bool show_guizmo = false;
@@ -75,12 +75,9 @@ namespace Bcg {
     }
 
     void ComponentGui<Transform<float>>::Show(entt::entity entity_id) {
-        if (entity_id == entt::null || !Engine::State().all_of<Component<Transform<float>>>(entity_id)) {
-            return;
+        if (entity_id != entt::null && Engine::State().all_of<Component<Transform<float>>>(entity_id)) {
+            ComponentGui<Transform<float>>::Show(Engine::State().get<Component<Transform<float>>>(entity_id));
         }
-
-        auto &transform = Engine::State().get<Component<Transform<float>>>(entity_id);
-        ComponentGui<Transform<float>>::Show(transform);
     }
 
     void ComponentGui<Transform<float>>::Edit(Transform<float> &transform){
@@ -92,14 +89,15 @@ namespace Bcg {
             }
         }
         if (show_guizmo) {
-            auto &camera = Engine::Context().get<Camera<float>>();
-            EditTransform(camera, transform.model.matrix());
+            auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
+            Components<Camera<float>> cameras(SystemCamera::component_name());
+;            EditTransform(cameras.get_instance(component_camera), transform.model.matrix());
         }
     }
 
     void ComponentGui<Transform<float>>::Show(Component<Transform<float>> &component){
-        auto &instances = Engine::Context().get<ResourceContainer<Transform<float>>>();
-        return Show(instances.pool[component.index]);
+        Components<Transform<float>> transforms(SystemTransform::component_name());
+        return Show(transforms.get_instance(component));
     }
 
     void ComponentGui<Transform<float>>::Show(Transform<float> &transform) {
@@ -116,66 +114,6 @@ namespace Bcg {
         ImGui::Text("scale:    (%f, %f, %f)", transform.get_scale()[0], transform.get_scale()[1],
                     transform.get_scale()[2]);
         Eigen::Vector<float, 3> angle_axis = transform.get_angles_axis();
-        ImGui::Text("rotation: (%f, %f, %f)", angle_axis[0], angle_axis[1], angle_axis[2]);
-
-        ImGui::Separator();
-
-        ImGui::Text("model matrix: %f %f %f %f\n"
-                    "              %f %f %f %f\n"
-                    "              %f %f %f %f\n"
-                    "              %f %f %f %f\n",
-                    transform.model(0, 0), transform.model(0, 1), transform.model(0, 2), transform.model(0, 3),
-                    transform.model(1, 0), transform.model(1, 1), transform.model(1, 2), transform.model(1, 3),
-                    transform.model(2, 0), transform.model(2, 1), transform.model(2, 2), transform.model(2, 3),
-                    transform.model(3, 0), transform.model(3, 1), transform.model(3, 2), transform.model(3, 3));
-
-    }
-
-
-    void ComponentGui<Transform<double>>::Show(entt::entity entity_id) {
-        if (entity_id == entt::null || !Engine::State().all_of<Component<Transform<double>>>(entity_id)) {
-            return;
-        }
-
-        auto &component = Engine::State().get<Component<Transform<double>>>(entity_id);
-        ComponentGui<Transform<double>>::Show(component);
-    }
-
-    void ComponentGui<Transform<double>>::Edit(Transform<double> &transform){
-        if (ImGui::Checkbox("Guizmo", &show_guizmo)) {
-            if (show_guizmo) {
-                ImGuizmo::Enable(true);
-            } else {
-                ImGuizmo::Enable(false);
-            }
-        }
-        if (show_guizmo) {
-            auto &camera = Engine::Context().get<Camera<float>>();
-            auto model = transform.model.cast<float>();
-            EditTransform(camera, model.matrix());
-            transform.model = model.cast<double>();
-        }
-    }
-
-    void ComponentGui<Transform<double>>::Show(Component<Transform<double>> &component) {
-        auto &instances = Engine::Context().get<ResourceContainer<Transform<double>>>();
-        return Show(instances.pool[component.index]);
-    }
-
-    void ComponentGui<Transform<double>>::Show(Transform<double> &transform) {
-        Edit(transform);
-        ImGui::Separator();
-
-        if (ImGui::Button("Reset")) {
-            transform.model.setIdentity();
-        }
-
-
-        ImGui::Text("position: (%f, %f, %f)", transform.get_position()[0], transform.get_position()[1],
-                    transform.get_position()[2]);
-        ImGui::Text("scale:    (%f, %f, %f)", transform.get_scale()[0], transform.get_scale()[1],
-                    transform.get_scale()[2]);
-        Eigen::Vector<double, 3> angle_axis = transform.get_angles_axis();
         ImGui::Text("rotation: (%f, %f, %f)", angle_axis[0], angle_axis[1], angle_axis[2]);
 
         ImGui::Separator();

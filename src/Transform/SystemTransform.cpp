@@ -12,6 +12,7 @@
 #include "Entity.h"
 #include "imgui.h"
 #include "Components.h"
+#include "ImGuiUtils.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -19,9 +20,12 @@
 
 namespace Bcg {
     namespace SystemTransformInternal {
-        static bool show_gui = false;
+        static bool show_gui_instance = false;
+        static bool show_gui_components = false;
 
-        void on_update_gui(const Events::Update<Gui> &event);
+        void on_update_gui_instance(const Events::Update<Gui> &event);
+
+        void on_update_gui_components(const Events::Update<Gui> &event);
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event);
 
@@ -38,24 +42,42 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemTransformInternal {
 
-        void on_update_gui(const Events::Update<Gui> &event) {
-            if (!show_gui) {
-                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemTransformInternal::on_update_gui>();
+        void on_update_gui_instance(const Events::Update<Gui> &event) {
+            if (!show_gui_instance) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemTransformInternal::on_update_gui_instance>();
                 return;
             }
 
-            if (ImGui::Begin("Transform", &show_gui, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::Begin(SystemTransform::component_name().c_str(), &show_gui_instance, ImGuiWindowFlags_AlwaysAutoResize)) {
                 auto &picker = Engine::Context().get<Picker>();
                 ComponentGui<Transform<float>>::Show(picker.id.entity);
             }
             ImGui::End();
         }
 
+        void on_update_gui_components(const Events::Update<Gui> &event) {
+            if (!show_gui_components) {
+                Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&on_update_gui_components>();
+                return;
+            }
+
+            if (ImGui::Begin("TransformComponents", &show_gui_components)) {
+                Components<Transform<float>> components(SystemTransform::component_name());
+                ImGuiUtils::Show(components);
+            }
+            ImGui::End();
+        }
+
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-
-                if (ImGui::MenuItem("Transform", nullptr, &show_gui)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&SystemTransformInternal::on_update_gui>();
+                if(ImGui::BeginMenu(SystemTransform::component_name().c_str())){
+                    if (ImGui::MenuItem("Instance", nullptr, &show_gui_instance)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_instance>();
+                    }
+                    if (ImGui::MenuItem("Components", nullptr, &show_gui_components)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_components>();
+                    }
+                    ImGui::EndMenu();
                 }
 
                 ImGui::EndMenu();

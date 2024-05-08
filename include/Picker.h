@@ -18,7 +18,7 @@ namespace Bcg {
             size_t edge{};
             size_t face{};
 
-            bool check_entity() const;
+            bool check_entity() const { return entity != entt::null; }
         } id;
 
         struct Point {

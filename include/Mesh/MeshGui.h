@@ -8,12 +8,16 @@
 #include "Mesh.h"
 #include "EngineFwd.h"
 #include "ComponentGui.h"
+#include "Component.h"
 
 namespace Bcg{
 
     template<>
     struct ComponentGui<Mesh> {
         static void Show(entt::entity entity_id);
+
+        static void Show(Component<Mesh> &component);
+
         static void Show(Mesh &mesh);
     };
 

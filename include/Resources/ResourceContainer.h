@@ -6,6 +6,7 @@
 #define ENGINE23_RESOURCECONTAINER_H
 
 #include "PropertyContainer.h"
+#include <set>
 
 namespace Bcg{
     template<typename T>
