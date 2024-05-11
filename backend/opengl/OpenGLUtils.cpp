@@ -646,7 +646,7 @@ namespace Bcg::OpenGL {
         return result;
     }
 
-    ShaderProgram::operator unsigned int() const{
+    ShaderProgram::operator unsigned int() const {
         return id;
     }
 
@@ -881,8 +881,10 @@ namespace Bcg::OpenGL {
     }
 
 
-    void VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride, const void *pointer){
-        auto &attribute = layout.attributes.emplace_back(index, size, GL_FLOAT, normalized, stride,pointer);
+    void
+    VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride,
+                                           const void *pointer) {
+        auto &attribute = layout.attributes.emplace_back(index, size, GL_FLOAT, normalized, stride, pointer);
         attribute.enable();
         glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride,
                               attribute.pointer);
@@ -971,6 +973,193 @@ namespace Bcg::OpenGL {
     void RenderablePoints::draw() {
         glDrawArrays(mode, offset, count);
         OpenGL::AssertNoOglError();
+    }
+
+    void State::change_to_new_state(const Bcg::OpenGL::State &new_state) {
+        if (new_state.depth_test.enabled != depth_test.enabled) {
+            if (new_state.depth_test.enabled) {
+                glEnable(GL_DEPTH_TEST);
+            } else {
+                glDisable(GL_DEPTH_TEST);
+            }
+            OpenGL::AssertNoOglError();
+            depth_test.enabled = new_state.depth_test.enabled;
+        }
+        if (new_state.depth_test.mask != depth_test.mask) {
+            glDepthMask(new_state.depth_test.mask);
+            OpenGL::AssertNoOglError();
+            depth_test.mask = new_state.depth_test.mask;
+        }
+        if (new_state.depth_test.func != depth_test.func) {
+            glDepthFunc(new_state.depth_test.func);
+            OpenGL::AssertNoOglError();
+            depth_test.func = new_state.depth_test.func;
+        }
+
+        if (new_state.blending.enabled != blending.enabled) {
+            if (new_state.blending.enabled) {
+                glEnable(GL_BLEND);
+            } else {
+                glDisable(GL_BLEND);
+            }
+            OpenGL::AssertNoOglError();
+            blending.enabled = new_state.blending.enabled;
+        }
+        if (new_state.blending.src != blending.src || new_state.blending.dst != blending.dst) {
+            glBlendFunc(new_state.blending.src, new_state.blending.dst);
+            OpenGL::AssertNoOglError();
+            blending.src = new_state.blending.src;
+            blending.dst = new_state.blending.dst;
+        }
+        if (new_state.blending.equation != blending.equation) {
+            glBlendEquation(new_state.blending.equation);
+            OpenGL::AssertNoOglError();
+            blending.equation = new_state.blending.equation;
+        }
+        if (new_state.culling.enabled != culling.enabled) {
+            if (new_state.culling.enabled) {
+                glEnable(GL_CULL_FACE);
+            } else {
+                glDisable(GL_CULL_FACE);
+            }
+            OpenGL::AssertNoOglError();
+            culling.enabled = new_state.culling.enabled;
+        }
+        if (new_state.culling.mode != culling.mode) {
+            glCullFace(new_state.culling.mode);
+            OpenGL::AssertNoOglError();
+            culling.mode = new_state.culling.mode;
+        }
+        if (new_state.polygon_mode.enabled != polygon_mode.enabled) {
+            if (new_state.polygon_mode.enabled) {
+                glEnable(GL_POLYGON_MODE);
+            } else {
+                glDisable(GL_POLYGON_MODE);
+            }
+            OpenGL::AssertNoOglError();
+            polygon_mode.enabled = new_state.polygon_mode.enabled;
+        }
+
+        if (new_state.polygon_mode.mode != polygon_mode.mode) {
+            glPolygonMode(new_state.polygon_mode.face, new_state.polygon_mode.mode);
+            OpenGL::AssertNoOglError();
+            polygon_mode.mode = new_state.polygon_mode.mode;
+        }
+
+        if (new_state.scissor_test.enabled != scissor_test.enabled) {
+            if (new_state.scissor_test.enabled) {
+                glEnable(GL_SCISSOR_TEST);
+            } else {
+                glDisable(GL_SCISSOR_TEST);
+            }
+            OpenGL::AssertNoOglError();
+            scissor_test.enabled = new_state.scissor_test.enabled;
+        }
+
+        if (new_state.scissor_test.box != scissor_test.box) {
+            glScissor(new_state.scissor_test.box.x, new_state.scissor_test.box.y, new_state.scissor_test.box.width,
+                      new_state.scissor_test.box.height);
+            OpenGL::AssertNoOglError();
+            scissor_test.box = new_state.scissor_test.box;
+        }
+
+        if (new_state.viewport != viewport) {
+            glViewport(new_state.viewport.x, new_state.viewport.y, new_state.viewport.width, new_state.viewport.height);
+            OpenGL::AssertNoOglError();
+            viewport = new_state.viewport;
+        }
+
+        if (new_state.clear_color != clear_color) {
+            glClearColor(new_state.clear_color.r, new_state.clear_color.g, new_state.clear_color.b,
+                         new_state.clear_color.a);
+            OpenGL::AssertNoOglError();
+            clear_color = new_state.clear_color;
+        }
+
+        if (new_state.clear_depth.depth != clear_depth.depth) {
+            glClearDepth(new_state.clear_depth.depth);
+            OpenGL::AssertNoOglError();
+            clear_depth = new_state.clear_depth;
+        }
+
+        if (new_state.clear_stencil.stencil != clear_stencil.stencil) {
+            glClearStencil(new_state.clear_stencil.stencil);
+            OpenGL::AssertNoOglError();
+            clear_stencil = new_state.clear_stencil;
+        }
+
+        if (new_state.point_size.enabled != point_size.enabled) {
+            if (new_state.point_size.enabled) {
+                glEnable(GL_PROGRAM_POINT_SIZE);
+            } else {
+                glDisable(GL_PROGRAM_POINT_SIZE);
+            }
+            OpenGL::AssertNoOglError();
+            point_size.enabled = new_state.point_size.enabled;
+        }
+
+        if (new_state.point_size.size != point_size.size) {
+            glPointSize(new_state.point_size.size);
+            OpenGL::AssertNoOglError();
+            point_size = new_state.point_size;
+        }
+
+        if (new_state.line_width.enabled != line_width.enabled) {
+            if (new_state.line_width.enabled) {
+                glEnable(GL_LINE_WIDTH);
+            } else {
+                glDisable(GL_LINE_WIDTH);
+            }
+            OpenGL::AssertNoOglError();
+            line_width.enabled = new_state.line_width.enabled;
+        }
+
+        if (new_state.line_width.width != line_width.width) {
+            glLineWidth(new_state.line_width.width);
+            OpenGL::AssertNoOglError();
+            line_width = new_state.line_width;
+        }
+
+        if (new_state.stencil_test.enabled != stencil_test.enabled) {
+            if (new_state.stencil_test.enabled) {
+                glEnable(GL_STENCIL_TEST);
+            } else {
+                glDisable(GL_STENCIL_TEST);
+            }
+            OpenGL::AssertNoOglError();
+            stencil_test.enabled = new_state.stencil_test.enabled;
+        }
+
+        if (new_state.stencil_test.func != stencil_test.func || new_state.stencil_test.ref != stencil_test.ref ||
+            new_state.stencil_test.mask != stencil_test.mask) {
+            glStencilFunc(new_state.stencil_test.func, new_state.stencil_test.ref, new_state.stencil_test.mask);
+            OpenGL::AssertNoOglError();
+            stencil_test.func = new_state.stencil_test.func;
+            stencil_test.ref = new_state.stencil_test.ref;
+            stencil_test.mask = new_state.stencil_test.mask;
+        }
+
+        if (new_state.stencil_test.sfail != stencil_test.sfail ||
+            new_state.stencil_test.dpfail != stencil_test.dpfail ||
+            new_state.stencil_test.dppass != stencil_test.dppass) {
+            glStencilOp(new_state.stencil_test.sfail, new_state.stencil_test.dpfail, new_state.stencil_test.dppass);
+            OpenGL::AssertNoOglError();
+            stencil_test.sfail = new_state.stencil_test.sfail;
+            stencil_test.dpfail = new_state.stencil_test.dpfail;
+            stencil_test.dppass = new_state.stencil_test.dppass;
+        }
+
+        if (new_state.stencil_test.mask != stencil_test.mask) {
+            glStencilMask(new_state.stencil_test.mask);
+            OpenGL::AssertNoOglError();
+            stencil_test.mask = new_state.stencil_test.mask;
+        }
+
+        if (new_state.color_mask != color_mask) {
+            glColorMask(new_state.color_mask.r, new_state.color_mask.g, new_state.color_mask.b, new_state.color_mask.a);
+            OpenGL::AssertNoOglError();
+            color_mask = new_state.color_mask;
+        }
     }
 }
 

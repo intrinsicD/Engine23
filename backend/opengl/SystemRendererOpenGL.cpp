@@ -173,7 +173,7 @@ namespace Bcg {
             }
 
             auto &bg = Engine::Context().get<Window>().background_color;
-            glClearColor(bg[0], bg[1], bg[2], bg[3]);
+            //glClearColor(bg[0], bg[1], bg[2], bg[3]);
 
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
             OpenGL::ShaderProgram program;
@@ -190,6 +190,15 @@ namespace Bcg {
                 Log::Error(m_name + ": " + program.name + " Error: " + program.error_message).enqueue();
             }
 
+            auto &state = Engine::Context().emplace<OpenGL::State>();
+
+            auto new_state = OpenGL::State();
+            new_state.depth_test.enabled = true;
+            new_state.depth_test.func = GL_LESS;
+            new_state.clear_color = {bg[0], bg[1], bg[2], bg[3]};
+
+            state.change_to_new_state(new_state);
+
             Log::Info(SystemRendererOpenGL::name(), "Startup").enqueue();
         }
 
@@ -198,7 +207,6 @@ namespace Bcg {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
             Log::Info(SystemRendererOpenGL::name(), "Shutdown").enqueue();
         }
-
 
         void register_callbacks(GLFWwindow *h_window) {
             glfwSetWindowCloseCallback(h_window, [](GLFWwindow *h_window) {

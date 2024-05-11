@@ -79,6 +79,18 @@ namespace Bcg::Events{
     struct Destroy{
         T *value;
     };
+
+    namespace Internal{
+        namespace Callback{
+            struct WindowClose{};
+            struct WindowResize{};
+            struct MouseButton{};
+            struct MouseMove{};
+            struct MouseScroll{};
+            struct Key{};
+            struct FileDrop{};
+        }
+    }
 }
 
 #endif //ENGINE23_EVENTS_H

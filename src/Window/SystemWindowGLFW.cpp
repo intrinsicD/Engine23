@@ -128,15 +128,23 @@ namespace Bcg {
             glfwSwapInterval(1);
 
             glfwSetWindowCloseCallback(glfw_handle, [](GLFWwindow *h_window) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                engine->is_running = false;
+                Engine::Instance()->is_running = false;
+
+                if (Engine::Instance()->window_close_callback) {
+                    Engine::Instance()->window_close_callback();
+                }
+                Engine::Dispatcher().trigger<Events::Internal::Callback::WindowClose>();
             });
             glfwSetWindowSizeCallback(glfw_handle, [](GLFWwindow *h_window, int width, int height) {
+
+                if(Engine::Instance()->window_size_callback){
+                    Engine::Instance()->window_size_callback();
+                }
+                Engine::Dispatcher().trigger<Events::Internal::Callback::WindowResize>();
                 Engine::Dispatcher().trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(glfw_handle, [](GLFWwindow *h_window, int button, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                auto &input = engine->state.ctx().get<Input>();
+                auto &input = Engine::Context().get<Input>();
                 if (button == GLFW_MOUSE_BUTTON_LEFT) {
                     input.mouse.button.left = action == GLFW_PRESS;
                 } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {

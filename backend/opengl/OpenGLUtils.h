@@ -243,6 +243,114 @@ namespace Bcg::OpenGL {
 
         void draw() override;
     };
+
+
+    struct State {
+        struct DepthTest {
+            bool enabled = false;
+            bool mask = false;
+            unsigned int func = 0;
+        } depth_test;
+        struct Blend {
+            bool enabled = false;
+            unsigned int src = 0;
+            unsigned int dst = 0;
+            unsigned int equation = 0;
+        } blending;
+        struct CullFace {
+            bool enabled = false;
+            unsigned int mode = 0;
+        } culling;
+        struct PolygonMode {
+            bool enabled = false;
+            unsigned int face = 0;
+            unsigned int mode = 0;
+        } polygon_mode;
+        struct ScissorTest {
+            bool enabled = false;
+
+            struct Box {
+                int x = 0;
+                int y = 0;
+                int width = 0;
+                int height = 0;
+
+                bool operator==(const Box &other) const {
+                    return x == other.x && y == other.y && width == other.width && height == other.height;
+                }
+            } box;
+        } scissor_test;
+
+        struct Viewport {
+            int x = 0;
+            int y = 0;
+            int width = 0;
+            int height = 0;
+
+            bool operator==(const Viewport &other) const {
+                return x == other.x && y == other.y && width == other.width && height == other.height;
+            }
+        } viewport;
+
+        struct ClearColor {
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            float a = 0;
+
+            bool operator==(const ClearColor &other) const {
+                return r == other.r && g == other.g && b == other.b && a == other.a;
+            }
+        } clear_color;
+
+        struct ClearDepth {
+            float depth = 1.0f;
+        } clear_depth;
+
+        struct ClearStencil {
+            int stencil = 0;
+        } clear_stencil;
+
+        struct PointSize {
+            bool enabled = false;
+            float size = 1.0f;
+        } point_size;
+
+        struct LineWidth {
+            bool enabled = false;
+            float width = 1.0f;
+        } line_width;
+
+        struct PolygonOffset {
+            bool enabled = false;
+            float factor = 0.0f;
+            float units = 0.0f;
+        } polygon_offset;
+
+        struct StencilTest {
+            bool enabled = false;
+            unsigned int func = 0;
+            int ref = 0;
+            unsigned int mask = 0;
+            unsigned int sfail = 0;
+            unsigned int dpfail = 0;
+            unsigned int dppass = 0;
+        } stencil_test;
+
+        struct ColorMask {
+            bool enabled = true;
+            bool r = true;
+            bool g = true;
+            bool b = true;
+            bool a = true;
+
+            bool operator==(const ColorMask &other) const {
+                return r == other.r && g == other.g && b == other.b && a == other.a;
+            }
+        } color_mask;
+
+        void change_to_new_state(const State &new_state);
+    };
 }
 
 namespace Bcg {
@@ -323,6 +431,7 @@ namespace Bcg {
     struct Material {
 
     };
+
 }
 
 #endif //ENGINE23_OPENGLUTILS_H

@@ -6,6 +6,7 @@
 #define ENGINE23_PERSPECTIVERH_NO_H
 
 #include "Eigen/Core"
+#include <cassert>
 
 namespace Bcg {
     template<typename T>
