@@ -8,7 +8,7 @@
 namespace Bcg{
     Eigen::Vector<int, 2> Window::get_size() const{
         if(!window_handle){
-            return {create_width, create_height};
+            return {width, height};
         }
 
         Eigen::Vector<int, 2> size;

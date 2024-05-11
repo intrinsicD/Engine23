@@ -16,6 +16,12 @@ namespace Bcg{
 
         static std::string name();
 
+        static std::string component_name();
+
+        static void set_mouse_button(int button, int action, int mods);
+
+        static void set_mouse_position(double x, double y);
+
     protected:
         friend Engine;
 

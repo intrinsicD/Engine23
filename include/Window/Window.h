@@ -8,11 +8,12 @@
 #include <string>
 #include "Eigen/Core"
 
+
 namespace Bcg {
     struct Window {
         std::string title = "Viewer";
-        int create_width = 800;
-        int create_height = 600;
+        int width = 800;
+        int height = 600;
         Eigen::Vector<float, 4> background_color = {0.1f, 0.3f, 0.6f, 1.0f};
 
         double dpi = 1.0;
@@ -32,6 +33,8 @@ namespace Bcg {
             return stream;
         }
     };
+
+    using WindowRegister = std::unordered_map<void *, unsigned int>;
 }
 
 #endif //ENGINE23_WINDOW_H

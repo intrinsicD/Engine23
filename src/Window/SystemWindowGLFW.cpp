@@ -13,6 +13,7 @@
 #include "Input.h"
 #include "imgui.h"
 #include "Components.h"
+#include "SystemMouse.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -119,16 +120,19 @@ namespace Bcg {
             window.dpi = GetDpiScale();
             Log::Info(SystemWindowGLFW::name() + ": Detected DPI: " + std::to_string(window.dpi)).enqueue();
 
-            window.window_handle = glfwCreateWindow(window.create_width, window.create_height, window.title.c_str(),
+            window.window_handle = glfwCreateWindow(window.width, window.height, window.title.c_str(),
                                                     nullptr, nullptr);
 
             auto *glfw_handle = static_cast<GLFWwindow *>(window.window_handle);
+            auto &window_register = Engine::Context().get<WindowRegister>();
+            window_register[glfw_handle] = component_window.index;
+
             glfwSetWindowUserPointer(glfw_handle, Engine::Instance());
             glfwMakeContextCurrent(glfw_handle);
             glfwSwapInterval(1);
 
             glfwSetWindowCloseCallback(glfw_handle, [](GLFWwindow *h_window) {
-                Engine::Instance()->is_running = false;
+                SystemWindowGLFW::set_window_close(h_window);
 
                 if (Engine::Instance()->window_close_callback) {
                     Engine::Instance()->window_close_callback();
@@ -136,14 +140,20 @@ namespace Bcg {
                 Engine::Dispatcher().trigger<Events::Internal::Callback::WindowClose>();
             });
             glfwSetWindowSizeCallback(glfw_handle, [](GLFWwindow *h_window, int width, int height) {
-
-                if(Engine::Instance()->window_size_callback){
+                SystemWindowGLFW::set_window_resize(h_window, width, height);
+                if (Engine::Instance()->window_size_callback) {
                     Engine::Instance()->window_size_callback();
                 }
                 Engine::Dispatcher().trigger<Events::Internal::Callback::WindowResize>();
                 Engine::Dispatcher().trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(glfw_handle, [](GLFWwindow *h_window, int button, int action, int mods) {
+                //SystemMouse::set_mouse_button(button, action, mods); TODO uncomment when Mouse<float> is added to Context
+                if (Engine::Instance()->mouse_button_callback) {
+                    Engine::Instance()->mouse_button_callback();
+                }
+
+                //TODO remove Input and use Mouse and Keyboard agian
                 auto &input = Engine::Context().get<Input>();
                 if (button == GLFW_MOUSE_BUTTON_LEFT) {
                     input.mouse.button.left = action == GLFW_PRESS;
@@ -227,6 +237,19 @@ namespace Bcg {
         return "WindowGLFW";
     }
 
+    void SystemWindowGLFW::set_window_close(void *window_handle) {
+        Engine::Instance()->is_running = false;
+    }
+
+    void SystemWindowGLFW::set_window_resize(void *window_handle, int width, int height) {
+        auto &window_register = Engine::Context().get<WindowRegister>();
+        auto &windwo_id = window_register[window_handle];
+        auto &windows = Engine::Context().get<Components<Window>>();
+        auto &window = windows.get_instance(windwo_id);
+        window.width = width;
+        window.height = height;
+    }
+
     void SystemWindowGLFW::swap_and_poll_events() {
         glfwSwapBuffers(glfwGetCurrentContext());
         glfwPollEvents();
@@ -237,6 +260,7 @@ namespace Bcg {
         Components<Window> windows(component_name());
         auto window_id = windows.create_instance();
         Engine::Context().emplace<Component<Window>>(window_id);
+        Engine::Context().emplace<WindowRegister>();
     }
 
     void SystemWindowGLFW::init() {

@@ -174,7 +174,29 @@ namespace Bcg {
 
 namespace Bcg {
     std::string SystemMouse::name() {
-        return "SystemMouse";
+        return "System" + component_name();
+    }
+
+    std::string SystemMouse::component_name() {
+        return "Mouse";
+    }
+
+    void SystemMouse::set_mouse_button(int button, int action, int mods) {
+        auto &mouse = Engine::Context().get<Mouse<float>>();
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            mouse.button.left = action == GLFW_PRESS;
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            mouse.button.right = action == GLFW_PRESS;
+        } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+            mouse.button.middle = action == GLFW_PRESS;
+        }
+
+        if (mouse.button.any()) {
+            mouse.position.last_drag_pos = mouse.position.current;
+            mouse.state = Mouse<float>::State::DRAG;
+        } else {
+            mouse.state = Mouse<float>::State::IDLE;
+        }
     }
 
     void SystemMouse::pre_init() {

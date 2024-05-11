@@ -18,6 +18,10 @@ namespace Bcg{
 
         static std::string component_name();
 
+        static void set_window_close(void *window_handle);
+
+        static void set_window_resize(void *window_handle, int width, int height);
+
         static void swap_and_poll_events();
 
     protected:
