@@ -21,6 +21,10 @@ namespace Bcg {
         }state;
 
         struct Button {
+            int button = -1;
+            int action = -1;
+            int mods = -1;
+
             bool left = false;
             bool right = false;
             bool middle = false;
@@ -34,7 +38,6 @@ namespace Bcg {
             Eigen::Vector<T, 2> last_left_click;
             Eigen::Vector<T, 2> last_middle_click;
             Eigen::Vector<T, 2> last_right_click;
-            Eigen::Vector<T, 2> last_drag_pos;
         } position;
 
         Eigen::Vector<T, 2> scroll;

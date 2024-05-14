@@ -183,6 +183,10 @@ namespace Bcg {
 
     void SystemMouse::set_mouse_button(int button, int action, int mods) {
         auto &mouse = Engine::Context().get<Mouse<float>>();
+        mouse.button.button = button;
+        mouse.button.action = action;
+        mouse.button.mods = mods;
+
         if (button == GLFW_MOUSE_BUTTON_LEFT) {
             mouse.button.left = action == GLFW_PRESS;
         } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {

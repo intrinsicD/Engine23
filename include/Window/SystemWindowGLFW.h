@@ -7,7 +7,7 @@
 
 #include "EngineFwd.h"
 
-namespace Bcg{
+namespace Bcg {
     class SystemWindowGLFW {
     public:
         SystemWindowGLFW() = default;
@@ -21,6 +21,16 @@ namespace Bcg{
         static void set_window_close(void *window_handle);
 
         static void set_window_resize(void *window_handle, int width, int height);
+
+        static void set_mouse_button(int button, int action, int mods);
+
+        static void set_mouse_cursor_pos(void *window_handle, double xpos, double ypos);
+
+        static void set_mouse_scroll(void *window_handle, double xoffset, double yoffset);
+
+        static void set_keyboard(void *window_handle, int key, int scancode, int action, int mods);
+
+        static void set_drop(void *window_handle, int count, const char **paths);
 
         static void swap_and_poll_events();
 

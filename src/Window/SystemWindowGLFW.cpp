@@ -10,10 +10,11 @@
 #include "systems/SystemDearImGui.h"
 #include "Window.h"
 #include "Viewport.h"
+#include "Mouse.h"
+#include "Keyboard.h"
 #include "Input.h"
 #include "imgui.h"
 #include "Components.h"
-#include "SystemMouse.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -148,7 +149,7 @@ namespace Bcg {
                 Engine::Dispatcher().trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(glfw_handle, [](GLFWwindow *h_window, int button, int action, int mods) {
-                //SystemMouse::set_mouse_button(button, action, mods); TODO uncomment when Mouse<float> is added to Context
+                SystemWindowGLFW::set_mouse_button(button, action, mods);
                 if (Engine::Instance()->mouse_button_callback) {
                     Engine::Instance()->mouse_button_callback();
                 }
@@ -165,6 +166,11 @@ namespace Bcg {
                 Engine::Dispatcher().trigger(Events::Update<Input::Mouse::Button>{});
             });
             glfwSetCursorPosCallback(glfw_handle, [](GLFWwindow *h_window, double xpos, double ypos) {
+                SystemWindowGLFW::set_mouse_cursor_pos(h_window, xpos, ypos);
+                if (Engine::Instance()->cursor_pos_callback) {
+                    Engine::Instance()->cursor_pos_callback();
+                }
+
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.position_delta[0] = xpos - input.mouse.position[0];
@@ -174,6 +180,11 @@ namespace Bcg {
                 Engine::Dispatcher().trigger(Events::Update<Input::Mouse::Position>{});
             });
             glfwSetScrollCallback(glfw_handle, [](GLFWwindow *h_window, double xoffset, double yoffset) {
+                SystemWindowGLFW::set_mouse_scroll(h_window, xoffset, yoffset);
+                if (Engine::Instance()->scroll_callback) {
+                    Engine::Instance()->scroll_callback();
+                }
+
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
                 input.mouse.scroll[0] = xoffset;
@@ -194,12 +205,14 @@ namespace Bcg {
                 };
             });
             glfwSetDropCallback(glfw_handle, [](GLFWwindow *h_window, int count, const char **paths) {
+                SystemWindowGLFW::set_drop(h_window, count, paths);
+                if (Engine::Instance()->drop_callback) {
+                    Engine::Instance()->drop_callback();
+                }
+
                 auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
                 auto &input = engine->state.ctx().get<Input>();
-                input.drop.paths.clear();
-                for (int i = 0; i < count; ++i) {
-                    input.drop.paths.emplace_back(paths[i]);
-                }
+
                 Engine::Dispatcher().trigger(Events::Update<Input::Drop>{});
                 input.drop.paths.clear();
             });
@@ -248,6 +261,350 @@ namespace Bcg {
         auto &window = windows.get_instance(windwo_id);
         window.width = width;
         window.height = height;
+    }
+
+    void SystemWindowGLFW::set_mouse_button(int button, int action, int mods) {
+        auto &mouse = Engine::Context().get<Mouse<float>>();
+        mouse.button.button = button;
+        mouse.button.action = action;
+        mouse.button.mods = mods;
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            mouse.button.left = action == GLFW_PRESS;
+            if (mouse.button.left) {
+                mouse.position.last_left_click = mouse.position.current;
+            }
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            mouse.button.right = action == GLFW_PRESS;
+            if (mouse.button.right) {
+                mouse.position.last_right_click = mouse.position.current;
+            }
+        } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+            mouse.button.middle = action == GLFW_PRESS;
+            if (mouse.button.middle) {
+                mouse.position.last_middle_click = mouse.position.current;
+            }
+        }
+
+        if (!mouse.button.any()) {
+            mouse.state = Mouse<float>::State::IDLE;
+        }
+    }
+
+    void SystemWindowGLFW::set_mouse_cursor_pos(void *window_handle, double xpos, double ypos) {
+        auto &mouse = Engine::Context().get<Mouse<float>>();
+
+        if (mouse.button.any()) {
+            mouse.position.delta[0] = xpos - mouse.position.current[0];
+            mouse.position.delta[1] = ypos - mouse.position.current[1];
+            mouse.state = Mouse<float>::State::DRAG;
+        } else {
+            mouse.state = Mouse<float>::State::MOVE;
+        }
+
+        mouse.position.current[0] = xpos;
+        mouse.position.current[1] = ypos;
+    }
+
+    void SystemWindowGLFW::set_mouse_scroll(void *window_handle, double xoffset, double yoffset) {
+        auto &mouse = Engine::Context().get<Mouse<float>>();
+
+        mouse.scroll[0] = xoffset;
+        mouse.scroll[1] = yoffset;
+    }
+
+    void SystemWindowGLFW::set_keyboard(void *window_handle, int key, int scancode, int action, int mods) {
+        auto &keyboard = Engine::Context().get<Keyboard>();
+        keyboard.key = key;
+        keyboard.scancode = scancode;
+        keyboard.action = action;
+        keyboard.mods = mods;
+
+        bool is_pressed = action == GLFW_PRESS;
+        bool is_released = action == GLFW_RELEASE;
+
+        if (is_pressed) {
+            keyboard.keys[key] = true;
+            ++keyboard.count_pressed;
+        } else if (is_released) {
+            keyboard.keys[key] = false;
+            keyboard.count_pressed = std::max(0, keyboard.count_pressed - 1);
+        }
+
+        switch (key) {
+            case GLFW_KEY_A: {
+                keyboard.set_key(Keyboard::KEY::_A, is_pressed);
+                break;
+            }
+            case GLFW_KEY_B: {
+                keyboard.set_key(Keyboard::KEY::_B, is_pressed);
+                break;
+            }
+            case GLFW_KEY_C: {
+                keyboard.set_key(Keyboard::KEY::_C, is_pressed);
+                break;
+            }
+            case GLFW_KEY_D: {
+                keyboard.set_key(Keyboard::KEY::_D, is_pressed);
+                break;
+            }
+            case GLFW_KEY_E: {
+                keyboard.set_key(Keyboard::KEY::_E, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F: {
+                keyboard.set_key(Keyboard::KEY::_F, is_pressed);
+                break;
+            }
+            case GLFW_KEY_G: {
+                keyboard.set_key(Keyboard::KEY::_G, is_pressed);
+                break;
+            }
+            case GLFW_KEY_H: {
+                keyboard.set_key(Keyboard::KEY::_H, is_pressed);
+                break;
+            }
+            case GLFW_KEY_I: {
+                keyboard.set_key(Keyboard::KEY::_I, is_pressed);
+                break;
+            }
+            case GLFW_KEY_J: {
+                keyboard.set_key(Keyboard::KEY::_J, is_pressed);
+                break;
+            }
+            case GLFW_KEY_K: {
+                keyboard.set_key(Keyboard::KEY::_K, is_pressed);
+                break;
+            }
+            case GLFW_KEY_L: {
+                keyboard.set_key(Keyboard::KEY::_L, is_pressed);
+                break;
+            }
+            case GLFW_KEY_M: {
+                keyboard.set_key(Keyboard::KEY::_M, is_pressed);
+                break;
+            }
+            case GLFW_KEY_N: {
+                keyboard.set_key(Keyboard::KEY::_N, is_pressed);
+                break;
+            }
+            case GLFW_KEY_O: {
+                keyboard.set_key(Keyboard::KEY::_O, is_pressed);
+                break;
+            }
+            case GLFW_KEY_P: {
+                keyboard.set_key(Keyboard::KEY::_P, is_pressed);
+                break;
+            }
+            case GLFW_KEY_Q: {
+                keyboard.set_key(Keyboard::KEY::_Q, is_pressed);
+                break;
+            }
+            case GLFW_KEY_R: {
+                keyboard.set_key(Keyboard::KEY::_R, is_pressed);
+                break;
+            }
+            case GLFW_KEY_S: {
+                keyboard.set_key(Keyboard::KEY::_S, is_pressed);
+                break;
+            }
+            case GLFW_KEY_T: {
+                keyboard.set_key(Keyboard::KEY::_T, is_pressed);
+                break;
+            }
+            case GLFW_KEY_U: {
+                keyboard.set_key(Keyboard::KEY::_U, is_pressed);
+                break;
+            }
+            case GLFW_KEY_V: {
+                keyboard.set_key(Keyboard::KEY::_V, is_pressed);
+                break;
+            }
+            case GLFW_KEY_W: {
+                keyboard.set_key(Keyboard::KEY::_W, is_pressed);
+                break;
+            }
+            case GLFW_KEY_X: {
+                keyboard.set_key(Keyboard::KEY::_X, is_pressed);
+                break;
+            }
+            case GLFW_KEY_Y: {
+                keyboard.set_key(Keyboard::KEY::_Y, is_pressed);
+                break;
+            }
+            case GLFW_KEY_Z: {
+                keyboard.set_key(Keyboard::KEY::_Z, is_pressed);
+                break;
+            }
+            case GLFW_KEY_0: {
+                keyboard.set_key(Keyboard::KEY::_0, is_pressed);
+                break;
+            }
+            case GLFW_KEY_1: {
+                keyboard.set_key(Keyboard::KEY::_1, is_pressed);
+                break;
+            }
+            case GLFW_KEY_2: {
+                keyboard.set_key(Keyboard::KEY::_2, is_pressed);
+                break;
+            }
+            case GLFW_KEY_3: {
+                keyboard.set_key(Keyboard::KEY::_3, is_pressed);
+                break;
+            }
+            case GLFW_KEY_4: {
+                keyboard.set_key(Keyboard::KEY::_4, is_pressed);
+                break;
+            }
+            case GLFW_KEY_5: {
+                keyboard.set_key(Keyboard::KEY::_5, is_pressed);
+                break;
+            }
+            case GLFW_KEY_6: {
+                keyboard.set_key(Keyboard::KEY::_6, is_pressed);
+                break;
+            }
+            case GLFW_KEY_7: {
+                keyboard.set_key(Keyboard::KEY::_7, is_pressed);
+                break;
+            }
+            case GLFW_KEY_8: {
+                keyboard.set_key(Keyboard::KEY::_8, is_pressed);
+                break;
+            }
+            case GLFW_KEY_9: {
+                keyboard.set_key(Keyboard::KEY::_9, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F1: {
+                keyboard.set_key(Keyboard::KEY::_F1, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F2: {
+                keyboard.set_key(Keyboard::KEY::_F2, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F3: {
+                keyboard.set_key(Keyboard::KEY::_F3, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F4: {
+                keyboard.set_key(Keyboard::KEY::_F4, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F5: {
+                keyboard.set_key(Keyboard::KEY::_F5, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F6: {
+                keyboard.set_key(Keyboard::KEY::_F6, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F7: {
+                keyboard.set_key(Keyboard::KEY::_F7, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F8: {
+                keyboard.set_key(Keyboard::KEY::_F8, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F9: {
+                keyboard.set_key(Keyboard::KEY::_F9, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F10: {
+                keyboard.set_key(Keyboard::KEY::_F10, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F11: {
+                keyboard.set_key(Keyboard::KEY::_F11, is_pressed);
+                break;
+            }
+            case GLFW_KEY_F12: {
+                keyboard.set_key(Keyboard::KEY::_F12, is_pressed);
+                break;
+            }
+            case GLFW_KEY_UP: {
+                keyboard.set_key(Keyboard::KEY::_UP, is_pressed);
+                break;
+            }
+            case GLFW_KEY_DOWN: {
+                keyboard.set_key(Keyboard::KEY::_DOWN, is_pressed);
+                break;
+            }
+            case GLFW_KEY_LEFT: {
+                keyboard.set_key(Keyboard::KEY::_LEFT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_RIGHT: {
+                keyboard.set_key(Keyboard::KEY::_RIGHT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_SPACE: {
+                keyboard.set_key(Keyboard::KEY::_SPACE, is_pressed);
+                break;
+            }
+            case GLFW_KEY_BACKSPACE: {
+                keyboard.set_key(Keyboard::KEY::_BACKSPACE, is_pressed);
+                break;
+            }
+            case GLFW_KEY_DELETE: {
+                keyboard.set_key(Keyboard::KEY::_DELETE, is_pressed);
+                break;
+            }
+            case GLFW_KEY_ENTER: {
+                keyboard.enter = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_ENTER, is_pressed);
+                break;
+            }
+            case GLFW_KEY_ESCAPE: {
+                keyboard.esc = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_ESCAPE, is_pressed);
+                break;
+            }
+            case GLFW_KEY_LEFT_SHIFT: {
+                keyboard.shift = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_SHIFT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_RIGHT_SHIFT: {
+                keyboard.shift = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_SHIFT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_LEFT_CONTROL: {
+                keyboard.ctrl = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_CTRL, is_pressed);
+                break;
+            }
+            case GLFW_KEY_RIGHT_CONTROL: {
+                keyboard.ctrl = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_CTRL, is_pressed);
+                break;
+            }
+            case GLFW_KEY_LEFT_ALT: {
+                keyboard.alt = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_ALT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_RIGHT_ALT: {
+                keyboard.alt = is_pressed;
+                keyboard.set_key(Keyboard::KEY::_ALT, is_pressed);
+                break;
+            }
+            case GLFW_KEY_TAB: {
+                keyboard.set_key(Keyboard::KEY::_TAB, is_pressed);
+                break;
+            }
+        }
+    }
+
+    void SystemWindowGLFW::set_drop(void *window_handle, int count, const char **paths) {
+        auto &input = Engine::Context().get<Input>();
+        input.drop.paths.clear();
+        for (int i = 0; i < count; ++i) {
+            input.drop.paths.emplace_back(paths[i]);
+        }
     }
 
     void SystemWindowGLFW::swap_and_poll_events() {

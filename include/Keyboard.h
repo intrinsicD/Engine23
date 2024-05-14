@@ -71,30 +71,35 @@ namespace Bcg {
             _ENTER,
             _ESCAPE,
             _ALT,
-            _STRG,
+            _CTRL,
             _SHIFT,
             _TAB,
-            _BACKTAB,
             last_counter
         };
 
-        struct Key {
-            Key() : which(KEY::last_counter){
-
-            }
-
-            unsigned int count_pressed;
-            unsigned int last_action;
-            unsigned int last_pressed;
-            unsigned int last_released;
-
-            bool any() const { return count_pressed > 0; }
-
-            std::vector<bool> which;
-        } key;
+        int key;
+        int scancode;
+        int action;
+        int mods;
+        int count_pressed;
+        bool shift = false;
+        bool alt = false;
+        bool ctrl = false;
+        bool esc = false;
+        bool enter = false;
 
         std::vector<bool> keys;
+        std::set<KEY> which;
         bool gui_capture = false;
+
+        void set_key(KEY key, bool is_pressed) {
+            keys[key] = is_pressed;
+            if(is_pressed){
+                which.emplace(key);
+            }else{
+                which.erase(key);
+            }
+        }
     };
 }
 
