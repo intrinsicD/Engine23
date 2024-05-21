@@ -10,7 +10,6 @@
 #include "imgui.h"
 #include "Window.h"
 #include "Viewport.h"
-#include "Input.h"
 #include "Time.h"
 #include "Camera.h"
 #include "CameraGui.h"
@@ -20,6 +19,9 @@
 #include "SystemWindowGLFW.h"
 #include "ImGuiUtils.h"
 #include "Picker.h"
+#include "Keyboard.h"
+#include "Mouse.h"
+#include "SystemRendererOpenGL.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -38,13 +40,13 @@ namespace Bcg {
 
         void on_update_viewport(const Events::Update<Viewport> &event);
 
-        void on_update_input(const Events::Update<Input> &event);
+        void on_update_keyboard(const Events::Update<Keyboard> &event);
 
-        void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event);
+        void on_update_mouse_button(const Events::Update<Mouse<float>::Button> &event);
 
-        void on_update_mouse_position(const Events::Update<Input::Mouse::Position> &event);
+        void on_update_mouse_position(const Events::Update<Mouse<float>::Position> &event);
 
-        void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event);
+        void on_update_mouse_scroll(const Events::Update<Mouse<float>::Scroll> &event);
 
         inline bool
         MapToSphere(const Eigen::Vector<float, 2> &point, int width, int height, Eigen::Vector<float, 3> &result);
@@ -130,9 +132,9 @@ namespace Bcg {
             }
         }
 
-        void on_update_input(const Events::Update<Input> &event) {
+        void on_update_keyboard(const Events::Update<Keyboard> &event) {
             if (ImGui::GetIO().WantCaptureKeyboard) return;
-            auto &keyboard = Engine::Context().get<Input>().keyboard;
+            auto &keyboard = Engine::Context().get<Keyboard>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
             Components<Camera<float>> cameras(SystemCamera::component_name());
             auto &camera = cameras.get_instance(component_camera);
@@ -157,47 +159,82 @@ namespace Bcg {
             }
         }
 
-        void on_update_mouse_button(const Events::Update<Input::Mouse::Button> &event) {
-            auto &input = Engine::Context().get<Input>();
+        void on_update_mouse_button(const Events::Update<Mouse<float>::Button> &event) {
+            auto &mouse = Engine::Context().get<Mouse<float>>();
 
-            if (input.mouse.button.middle) {
-                input.mouse.last_drag_pos = input.mouse.last_middle_click;
+            if (mouse.button.middle) {
+                mouse.position.last_drag_pos = mouse.position.last_middle_click;
             }
         }
 
-        void on_update_mouse_position(const Events::Update<Input::Mouse::Position> &event) {
-            auto &input = Engine::Context().get<Input>();
+
+        float GetDepthValueAtScreenPosition(const Eigen::Vector<float, 2> &screen_pos) {
+            // Assuming you have a way to get the depth value from the depth buffer
+            // This is a placeholder function and should be replaced with actual depth buffer access
+            return SystemRendererOpenGL::get_depth_at_screen_position(screen_pos[0], screen_pos[1]);
+        }
+
+        // Helper function to convert screen coordinates to world coordinates
+        void ScreenToWorld(const Eigen::Vector<float, 2> &screen_pos, Camera<float> &camera,
+                           Eigen::Vector<float, 3> &world_pos) {
+            Components<Window> windows(SystemWindowGLFW::component_name());
+            auto &component_window = Engine::Context().get<Component<Window>>();
+            auto &window = windows.get_instance(component_window);
+            auto size = window.get_size();
+
+            // Get the depth value at the screen position (assuming a depth buffer is available)
+            float depth = GetDepthValueAtScreenPosition(screen_pos);
+
+            float x = (2.0f * screen_pos[0]) / size[0] - 1.0f;
+            float y = 1.0f - (2.0f * screen_pos[1]) / size[1];
+            float z = depth; // Use the actual depth value
+
+            Eigen::Vector<float, 4> screen_space_pos(x, y, z, 1.0f);
+            Eigen::Vector<float, 4> world_space_pos = camera.get_projection().inverse() * screen_space_pos;
+            world_space_pos /= world_space_pos.w();
+
+            world_pos = world_space_pos.head<3>();
+        }
+
+        void on_update_mouse_position(const Events::Update<Mouse<float>::Position> &event) {
+            auto &mouse = Engine::Context().get<Mouse<float>>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
             Components<Camera<float>> cameras(SystemCamera::component_name());
             auto &camera = cameras.get_instance(component_camera);
-            if (input.mouse.button.middle) {
-                Eigen::Vector<float, 2> pos_delta =
-                        (input.mouse.position - input.mouse.last_drag_pos) * camera.sensitivity.drag;
-                Eigen::Vector<float, 3> delta =
-                        camera.view.up * pos_delta[1] - camera.view.right * pos_delta[0];
-                camera.view.position += delta;
-                camera.arc_ball_parameters.target += delta;
 
-                input.mouse.last_drag_pos = input.mouse.position;
+            if (mouse.button.middle) {
+                Eigen::Vector<float, 2> pos_delta =
+                        (mouse.position.current - mouse.position.last_drag_pos);// * camera.sensitivity.drag;
+
+                // Compute the world position under the mouse cursor before and after the drag
+                Eigen::Vector<float, 3> initial_world_pos, current_world_pos;
+                ScreenToWorld(mouse.position.last_drag_pos, camera, initial_world_pos);
+                ScreenToWorld(mouse.position.current, camera, current_world_pos);
+
+                // Compute the difference in world space
+                Eigen::Vector<float, 3> world_delta = current_world_pos - initial_world_pos;
+
+                // Apply the world delta to the camera's position
+                camera.view.position -= world_delta;
+                camera.arc_ball_parameters.target -= world_delta;
+
+                mouse.position.last_drag_pos = mouse.position.current;
             }
 
-            //TODO: implement arc ball camera controller
-            //Rotate the camera around the target_point
-            if (camera.arc_ball_parameters.last_point_ok && input.mouse.button.right) {
+            // Handle other mouse events, e.g., right button for arc ball camera controller
+            if (camera.arc_ball_parameters.last_point_ok && mouse.button.right) {
                 auto model = camera.get_model();
                 Eigen::Vector<float, 3> new_point_3d;
                 Components<Window> windows(SystemWindowGLFW::component_name());
                 auto &component_window = Engine::Context().get<Component<Window>>();
                 auto &window = windows.get_instance(component_window);
                 auto size = window.get_size();
-                if (MapToSphere(input.mouse.position, size[0], size[1], new_point_3d)) {
-                    if (new_point_3d[0] != camera.arc_ball_parameters.last_point_3d[0] ||
-                        new_point_3d[1] != camera.arc_ball_parameters.last_point_3d[1] ||
-                        new_point_3d[2] != camera.arc_ball_parameters.last_point_3d[2]) {
-                        Eigen::Vector<float, 3> axis =
-                                model.topLeftCorner<3, 3>() *
-                                new_point_3d.cross(camera.arc_ball_parameters.last_point_3d).normalized();
-                        float cos_angle = camera.arc_ball_parameters.last_point_3d.transpose() * new_point_3d;
+                if (MapToSphere(mouse.position.current, size[0], size[1], new_point_3d)) {
+                    if (new_point_3d != camera.arc_ball_parameters.last_point_3d) {
+                        Eigen::Vector<float, 3> axis = model.topLeftCorner<3, 3>() *
+                                                       new_point_3d.cross(
+                                                               camera.arc_ball_parameters.last_point_3d).normalized();
+                        float cos_angle = camera.arc_ball_parameters.last_point_3d.dot(new_point_3d);
                         float angle = SafeAcos(std::min(1.0f, cos_angle)) * camera.sensitivity.rotate;
                         Rotation3DAngleAxis<float> rot;
                         rot.m_angle_axis = angle * axis;
@@ -205,23 +242,23 @@ namespace Bcg {
                         Eigen::Vector<float, 3> position = camera.view.position;
                         Eigen::Vector<float, 3> direction = position - camera.arc_ball_parameters.target;
                         direction = rot.matrix() * direction;
-                        //if direction is nan, then dont update
+
 
                         camera.set_position(camera.arc_ball_parameters.target + direction);
                         camera.set_target(camera.arc_ball_parameters.target);
+
                     }
                 }
             }
-
         }
 
-        void on_update_mouse_scroll(const Events::Update<Input::Mouse::Scroll> &event) {
+        void on_update_mouse_scroll(const Events::Update<Mouse<float>::Scroll> &event) {
             if (ImGui::GetIO().WantCaptureMouse) return;
 
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
             Components<Camera<float>> cameras(SystemCamera::component_name());
             auto &camera = cameras.get_instance(component_camera);
-            auto &scroll = Engine::Context().get<Input>().mouse.scroll;
+            auto &scroll = Engine::Context().get<Mouse<float>>().scroll;
             auto &time = Engine::Context().get<Time>();
 
             if (camera.is_orthographic) {
@@ -257,7 +294,7 @@ namespace Bcg {
         }
 
         void on_end_main_loop(const Events::End<MainLoop> &event) {
-            auto &input = Engine::Context().get<Input>();
+            auto &mouse = Engine::Context().get<Mouse<float>>();
             Components<Window> windows(SystemWindowGLFW::component_name());
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
@@ -265,17 +302,17 @@ namespace Bcg {
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
             Components<Camera<float>> cameras(SystemCamera::component_name());
             auto &camera = cameras.get_instance(component_camera);
-            camera.arc_ball_parameters.last_point_2d = input.mouse.position;
+            camera.arc_ball_parameters.last_point_2d = mouse.position.current;
             camera.arc_ball_parameters.last_point_ok = MapToSphere(camera.arc_ball_parameters.last_point_2d,
                                                                    size[0], size[1],
                                                                    camera.arc_ball_parameters.last_point_3d);
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Dispatcher().sink<Events::Update<Input>>().connect<&on_update_input>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Scroll>>().connect<&on_update_mouse_scroll>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Position>>().connect<&on_update_mouse_position>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().connect<&on_update_mouse_button>();
+            Engine::Dispatcher().sink<Events::Update<Keyboard>>().connect<&on_update_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Scroll>>().connect<&on_update_mouse_scroll>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Position>>().connect<&on_update_mouse_position>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button>>().connect<&on_update_mouse_button>();
             Engine::Dispatcher().sink<Events::End<MainLoop>>().connect<&on_end_main_loop>();
             Engine::Dispatcher().sink<Events::Update<Viewport>>().connect<&on_update_viewport>();
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
@@ -283,10 +320,10 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Dispatcher().sink<Events::Update<Input>>().disconnect<&on_update_input>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Scroll>>().disconnect<&on_update_mouse_scroll>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Position>>().disconnect<&on_update_mouse_position>();
-            Engine::Dispatcher().sink<Events::Update<Input::Mouse::Button>>().disconnect<&on_update_mouse_button>();
+            Engine::Dispatcher().sink<Events::Update<Keyboard>>().disconnect<&on_update_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Scroll>>().disconnect<&on_update_mouse_scroll>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Position>>().disconnect<&on_update_mouse_position>();
+            Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button>>().disconnect<&on_update_mouse_button>();
             Engine::Dispatcher().sink<Events::Update<Viewport>>().disconnect<&on_update_viewport>();
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&on_update_gui_menu>();
             Log::Info(SystemCamera::name(), "Shutdown").enqueue();

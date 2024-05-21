@@ -16,6 +16,7 @@
 #include "imgui.h"
 #include "Components.h"
 
+
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
 //----------------------------------------------------------------------------------------------------------------------
@@ -134,87 +135,26 @@ namespace Bcg {
 
             glfwSetWindowCloseCallback(glfw_handle, [](GLFWwindow *h_window) {
                 SystemWindowGLFW::set_window_close(h_window);
-
-                if (Engine::Instance()->window_close_callback) {
-                    Engine::Instance()->window_close_callback();
-                }
-                Engine::Dispatcher().trigger<Events::Internal::Callback::WindowClose>();
             });
             glfwSetWindowSizeCallback(glfw_handle, [](GLFWwindow *h_window, int width, int height) {
                 SystemWindowGLFW::set_window_resize(h_window, width, height);
-                if (Engine::Instance()->window_size_callback) {
-                    Engine::Instance()->window_size_callback();
-                }
-                Engine::Dispatcher().trigger<Events::Internal::Callback::WindowResize>();
-                Engine::Dispatcher().trigger(Events::Update<Viewport>{});
             });
             glfwSetMouseButtonCallback(glfw_handle, [](GLFWwindow *h_window, int button, int action, int mods) {
                 SystemWindowGLFW::set_mouse_button(button, action, mods);
-                if (Engine::Instance()->mouse_button_callback) {
-                    Engine::Instance()->mouse_button_callback();
-                }
-
-                //TODO remove Input and use Mouse and Keyboard agian
-                auto &input = Engine::Context().get<Input>();
-                if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                    input.mouse.button.left = action == GLFW_PRESS;
-                } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-                    input.mouse.button.right = action == GLFW_PRESS;
-                } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
-                    input.mouse.button.middle = action == GLFW_PRESS;
-                }
-                Engine::Dispatcher().trigger(Events::Update<Input::Mouse::Button>{});
             });
             glfwSetCursorPosCallback(glfw_handle, [](GLFWwindow *h_window, double xpos, double ypos) {
                 SystemWindowGLFW::set_mouse_cursor_pos(h_window, xpos, ypos);
-                if (Engine::Instance()->cursor_pos_callback) {
-                    Engine::Instance()->cursor_pos_callback();
-                }
 
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                auto &input = engine->state.ctx().get<Input>();
-                input.mouse.position_delta[0] = xpos - input.mouse.position[0];
-                input.mouse.position_delta[1] = ypos - input.mouse.position[1];
-                input.mouse.position[0] = xpos;
-                input.mouse.position[1] = ypos;
-                Engine::Dispatcher().trigger(Events::Update<Input::Mouse::Position>{});
             });
             glfwSetScrollCallback(glfw_handle, [](GLFWwindow *h_window, double xoffset, double yoffset) {
                 SystemWindowGLFW::set_mouse_scroll(h_window, xoffset, yoffset);
-                if (Engine::Instance()->scroll_callback) {
-                    Engine::Instance()->scroll_callback();
-                }
-
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                auto &input = engine->state.ctx().get<Input>();
-                input.mouse.scroll[0] = xoffset;
-                input.mouse.scroll[1] = yoffset;
-                Engine::Dispatcher().trigger(Events::Update<Input::Mouse::Scroll>{});
             });
             glfwSetKeyCallback(glfw_handle, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                auto &input = engine->state.ctx().get<Input>();
-                if (key >= input.keyboard.keys.size()) input.keyboard.keys.resize(key + 1);
                 if (GLFW_REPEAT == action) return;
-                input.keyboard.keys[key] = action == GLFW_PRESS;
-                Engine::Dispatcher().trigger(Events::Update<Input::Keyboard>{});
-                if (action == GLFW_PRESS) {
-                    Log::Info("Key: " + std::to_string(key) + " Press").enqueue();
-                } else {
-                    Log::Info("Key: " + std::to_string(key) + " Release").enqueue();
-                };
+                SystemWindowGLFW::set_keyboard(h_window, key, scancode, action, mods);
             });
             glfwSetDropCallback(glfw_handle, [](GLFWwindow *h_window, int count, const char **paths) {
                 SystemWindowGLFW::set_drop(h_window, count, paths);
-                if (Engine::Instance()->drop_callback) {
-                    Engine::Instance()->drop_callback();
-                }
-
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                auto &input = engine->state.ctx().get<Input>();
-
-                Engine::Dispatcher().trigger(Events::Update<Input::Drop>{});
-                input.drop.paths.clear();
             });
 
             Engine::Dispatcher().trigger(Events::Startup<Renderer>{});
@@ -252,6 +192,11 @@ namespace Bcg {
 
     void SystemWindowGLFW::set_window_close(void *window_handle) {
         Engine::Instance()->is_running = false;
+
+        if (Engine::Instance()->window_close_callback) {
+            Engine::Instance()->window_close_callback();
+        }
+        Engine::Dispatcher().trigger<Events::Internal::Callback::WindowClose>();
     }
 
     void SystemWindowGLFW::set_window_resize(void *window_handle, int width, int height) {
@@ -261,6 +206,13 @@ namespace Bcg {
         auto &window = windows.get_instance(windwo_id);
         window.width = width;
         window.height = height;
+
+        if (Engine::Instance()->window_size_callback) {
+            Engine::Instance()->window_size_callback();
+        }
+        Engine::Dispatcher().trigger<Events::Internal::Callback::WindowResize>();
+        //TODO cleanup events... pick which one is triggered
+        Engine::Dispatcher().trigger(Events::Update<Viewport>{});
     }
 
     void SystemWindowGLFW::set_mouse_button(int button, int action, int mods) {
@@ -289,6 +241,12 @@ namespace Bcg {
         if (!mouse.button.any()) {
             mouse.state = Mouse<float>::State::IDLE;
         }
+
+        if (Engine::Instance()->mouse_button_callback) {
+            Engine::Instance()->mouse_button_callback();
+        }
+
+        Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Button>{});
     }
 
     void SystemWindowGLFW::set_mouse_cursor_pos(void *window_handle, double xpos, double ypos) {
@@ -304,6 +262,12 @@ namespace Bcg {
 
         mouse.position.current[0] = xpos;
         mouse.position.current[1] = ypos;
+
+        if (Engine::Instance()->cursor_pos_callback) {
+            Engine::Instance()->cursor_pos_callback();
+        }
+
+        Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Position>{});
     }
 
     void SystemWindowGLFW::set_mouse_scroll(void *window_handle, double xoffset, double yoffset) {
@@ -311,6 +275,12 @@ namespace Bcg {
 
         mouse.scroll[0] = xoffset;
         mouse.scroll[1] = yoffset;
+
+        if (Engine::Instance()->scroll_callback) {
+            Engine::Instance()->scroll_callback();
+        }
+
+        Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Scroll>{});
     }
 
     void SystemWindowGLFW::set_keyboard(void *window_handle, int key, int scancode, int action, int mods) {
@@ -330,6 +300,12 @@ namespace Bcg {
             keyboard.keys[key] = false;
             keyboard.count_pressed = std::max(0, keyboard.count_pressed - 1);
         }
+
+        if (action == GLFW_PRESS) {
+            Log::Info("Key: " + std::to_string(key) + " Press").enqueue();
+        } else {
+            Log::Info("Key: " + std::to_string(key) + " Release").enqueue();
+        };
 
         switch (key) {
             case GLFW_KEY_A: {
@@ -597,6 +573,12 @@ namespace Bcg {
                 break;
             }
         }
+
+        if (Engine::Instance()->key_callback) {
+            Engine::Instance()->key_callback();
+        }
+
+        Engine::Dispatcher().trigger(Events::Update<Keyboard>{});
     }
 
     void SystemWindowGLFW::set_drop(void *window_handle, int count, const char **paths) {
@@ -605,6 +587,12 @@ namespace Bcg {
         for (int i = 0; i < count; ++i) {
             input.drop.paths.emplace_back(paths[i]);
         }
+
+        if (Engine::Instance()->drop_callback) {
+            Engine::Instance()->drop_callback();
+        }
+
+        Engine::Dispatcher().trigger(Events::Update<Input::Drop>{});
     }
 
     void SystemWindowGLFW::swap_and_poll_events() {
@@ -614,6 +602,7 @@ namespace Bcg {
 
     void SystemWindowGLFW::pre_init() {
         Engine::Context().emplace<Window>();
+        Engine::Context().emplace<Input>();
         Components<Window> windows(component_name());
         auto window_id = windows.create_instance();
         Engine::Context().emplace<Component<Window>>(window_id);

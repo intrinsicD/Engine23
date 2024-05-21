@@ -1,18 +1,18 @@
 //
-// Created by alex on 26.04.24.
+// Created by alex on 21.05.24.
 //
 
-#ifndef ENGINE23_SYSTEMMOUSE_H
-#define ENGINE23_SYSTEMMOUSE_H
+#ifndef ENGINE23_SYSTEMKEYBOARD_H
+#define ENGINE23_SYSTEMKEYBOARD_H
 
 #include "EngineFwd.h"
 
 namespace Bcg{
-    class SystemMouse {
+    class SystemKeyboard {
     public:
-        SystemMouse() = default;
+        SystemKeyboard() = default;
 
-        ~SystemMouse() = default;
+        ~SystemKeyboard() = default;
 
         static std::string name();
 
@@ -29,4 +29,4 @@ namespace Bcg{
     };
 }
 
-#endif //ENGINE23_SYSTEMMOUSE_H
+#endif //ENGINE23_SYSTEMKEYBOARD_H

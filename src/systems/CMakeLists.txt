@@ -7,6 +7,7 @@ target_sources(Engine23Lib PRIVATE
         SystemPlatform.cpp
         SystemPlugins.cpp
         SystemTimer.cpp
-        SystemUserInput.cpp
         SystemMouse.cpp
+        SystemKeyboard.cpp
+        SystemPicker.cpp
 )

@@ -35,8 +35,6 @@ namespace Bcg {
         void on_startup_engine(const Events::Startup<Engine> &event);
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event);
-
-        void on_input_keyboard(const Events::Update<Input::Keyboard> &event);
     }
 }
 
@@ -176,7 +174,6 @@ namespace Bcg {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemEntityInternal::on_update_gui_menu>();
             Engine::Dispatcher().sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Dispatcher().sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
-            Engine::Dispatcher().sink<Events::Update<Input::Keyboard>>().connect<&SystemEntityInternal::on_input_keyboard>();
             Log::Info(SystemEntity::name(), "Startup").enqueue();
         }
 
@@ -185,16 +182,6 @@ namespace Bcg {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemEntityInternal::on_update_gui_menu>();
             Engine::Dispatcher().sink<Events::Create<entt::entity>>().connect<&SystemEntityInternal::on_create>();
             Engine::Dispatcher().sink<Events::Destroy<entt::entity>>().connect<&SystemEntityInternal::on_destroy>();
-            Engine::Dispatcher().sink<Events::Update<Input::Keyboard>>().disconnect<&SystemEntityInternal::on_input_keyboard>();
-        }
-
-
-        void on_input_keyboard(const Events::Update<Input::Keyboard> &event) {
-            auto &input = Engine::Context().get<Input>();
-
-            if (input.keyboard.keys[GLFW_KEY_DELETE]) {
-                Engine::Dispatcher().trigger(Events::Destroy<entt::entity>{&Engine::Context().get<Picker>().id.entity});
-            }
         }
     }
 }
@@ -226,7 +213,7 @@ namespace Bcg {
     }
 
     void SystemEntity::pre_init() {
-        Engine::Context().emplace<Picker>();
+
     }
 
     void SystemEntity::init() {

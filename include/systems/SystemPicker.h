@@ -1,18 +1,19 @@
 //
-// Created by alex on 26.04.24.
+// Created by alex on 21.05.24.
 //
 
-#ifndef ENGINE23_SYSTEMMOUSE_H
-#define ENGINE23_SYSTEMMOUSE_H
+#ifndef ENGINE23_SYSTEMPICKER_H
+#define ENGINE23_SYSTEMPICKER_H
+
 
 #include "EngineFwd.h"
 
-namespace Bcg{
-    class SystemMouse {
+namespace Bcg {
+    class SystemPicker {
     public:
-        SystemMouse() = default;
+        SystemPicker() = default;
 
-        ~SystemMouse() = default;
+        ~SystemPicker() = default;
 
         static std::string name();
 
@@ -29,4 +30,4 @@ namespace Bcg{
     };
 }
 
-#endif //ENGINE23_SYSTEMMOUSE_H
+#endif //ENGINE23_SYSTEMPICKER_H

@@ -62,7 +62,6 @@ namespace Bcg {
             ImGui::Text("LastLeftClick:    (%f %f)", position.last_left_click[0], position.last_left_click[1]);
             ImGui::Text("LastMiddleClick:  (%f %f)", position.last_middle_click[0], position.last_middle_click[1]);
             ImGui::Text("LastRightClick:   (%f %f)", position.last_right_click[0], position.last_right_click[1]);
-            ImGui::Text("LastDragPosition: (%f %f)", position.last_drag_pos[0], position.last_drag_pos[1]);
         }
 
         void RenderGuiMouseScroll(Eigen::Vector<float, 2> &scroll) {
@@ -83,7 +82,7 @@ namespace Bcg {
             }
 
 
-            if (ImGui::Begin("Input", &show_gui)) {
+            if (ImGui::Begin("Mouse", &show_gui)) {
                 auto &mouse = Engine::Context().get<Mouse<float>>();
                 RenderGuiMouse(mouse);
             }
@@ -92,8 +91,11 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if (ImGui::MenuItem("Mouse", nullptr, &show_gui)) {
-                    Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                if (ImGui::BeginMenu("Input")) {
+                    if (ImGui::MenuItem("Mouse", nullptr, &show_gui)) {
+                        Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui>();
+                    }
+                    ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
             }
@@ -179,28 +181,6 @@ namespace Bcg {
 
     std::string SystemMouse::component_name() {
         return "Mouse";
-    }
-
-    void SystemMouse::set_mouse_button(int button, int action, int mods) {
-        auto &mouse = Engine::Context().get<Mouse<float>>();
-        mouse.button.button = button;
-        mouse.button.action = action;
-        mouse.button.mods = mods;
-
-        if (button == GLFW_MOUSE_BUTTON_LEFT) {
-            mouse.button.left = action == GLFW_PRESS;
-        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-            mouse.button.right = action == GLFW_PRESS;
-        } else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
-            mouse.button.middle = action == GLFW_PRESS;
-        }
-
-        if (mouse.button.any()) {
-            mouse.position.last_drag_pos = mouse.position.current;
-            mouse.state = Mouse<float>::State::DRAG;
-        } else {
-            mouse.state = Mouse<float>::State::IDLE;
-        }
     }
 
     void SystemMouse::pre_init() {

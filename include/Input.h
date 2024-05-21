@@ -11,7 +11,7 @@
 
 namespace Bcg {
     struct Input {
-        struct Mouse {
+/*        struct Mouse {
             struct Position : public Eigen::Vector<float, 2> {
             };
             struct Button {
@@ -30,11 +30,11 @@ namespace Bcg {
             Scroll scroll;
             Button button;
             bool gui_capture = false;
-        } mouse;
-        struct Keyboard {
+        } mouse;*/
+/*        struct Keyboard {
             std::vector<bool> keys;
             bool gui_capture = false;
-        } keyboard;
+        } keyboard;*/
         struct Drop {
             std::vector<std::string> paths;
         } drop;

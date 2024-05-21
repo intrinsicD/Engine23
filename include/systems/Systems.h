@@ -7,7 +7,6 @@
 
 #include "SystemLogger.h"
 #include "SystemWindowGLFW.h"
-#include "SystemUserInput.h"
 #include "SystemCamera.h"
 #include "SystemDearImGui.h"
 #include "SystemHierarchy.h"
@@ -22,6 +21,9 @@
 #include "SystemAABB.h"
 #include "SystemMesh.h"
 #include "SystemAsset.h"
+#include "SystemMouse.h"
+#include "SystemKeyboard.h"
+#include "SystemPicker.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

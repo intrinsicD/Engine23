@@ -13,12 +13,12 @@ namespace Bcg {
     public:
         Mouse() = default;
 
-        enum State{
+        enum State {
             IDLE = 0,
             MOVE,
             DRAG,
             SCROLL
-        }state;
+        } state;
 
         struct Button {
             int button = -1;
@@ -38,10 +38,11 @@ namespace Bcg {
             Eigen::Vector<T, 2> last_left_click;
             Eigen::Vector<T, 2> last_middle_click;
             Eigen::Vector<T, 2> last_right_click;
+            Eigen::Vector<T, 2> last_drag_pos;
         } position;
 
-        Eigen::Vector<T, 2> scroll;
-
+        using Scroll = Eigen::Vector<T, 2>;
+        Scroll scroll;
         bool gui_capture = false;
     };
 }

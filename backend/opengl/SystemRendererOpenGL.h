@@ -32,6 +32,8 @@ namespace Bcg {
 
         static double get_dpi_for_monitor(void *monitor);
 
+        static float get_depth_at_screen_position(float x, float y);
+
     protected:
         friend Engine;
 

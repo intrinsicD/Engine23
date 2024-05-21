@@ -50,8 +50,6 @@ namespace Bcg {
         void on_startup_renderer(const Events::Startup<Renderer> &event);
 
         void on_shutdown_renderer(const Events::Shutdown<Renderer> &event);
-
-        void register_callbacks(GLFWwindow *h_window);
     }
 }
 
@@ -118,7 +116,7 @@ namespace Bcg {
             Components<Window> windows(SystemWindowGLFW::component_name());
             auto &component_window = Engine::Context().get<Component<Window>>();
 
-            for(auto window_index : windows.container.used_list){
+            for (auto window_index: windows.container.used_list) {
                 auto &window = windows.get_instance(window_index);
                 auto &bg = window.background_color;
                 glfwMakeContextCurrent(static_cast<GLFWwindow *>(window.window_handle));
@@ -207,67 +205,6 @@ namespace Bcg {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemRendererOpenGLInternal::on_update_gui_menu>();
             Log::Info(SystemRendererOpenGL::name(), "Shutdown").enqueue();
         }
-
-        void register_callbacks(GLFWwindow *h_window) {
-            glfwSetWindowCloseCallback(h_window, [](GLFWwindow *h_window) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->window_close_callback) {
-                    engine->window_close_callback();
-                }
-                engine->is_running = false;
-            });
-
-            glfwSetWindowSizeCallback(h_window, [](GLFWwindow *h_window, int width, int height) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->window_size_callback) {
-                    engine->window_size_callback();
-                }
-                Engine::Dispatcher().trigger(Events::Callback::WindowSize{h_window, width, height});
-            });
-
-            glfwSetMouseButtonCallback(h_window, [](GLFWwindow *h_window, int button, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->mouse_button_callback) {
-                    engine->mouse_button_callback();
-                }
-                Engine::Dispatcher().trigger(Events::Callback::MouseButton{0, button, action, mods});
-            });
-
-            glfwSetCursorPosCallback(h_window, [](GLFWwindow *h_window, double xpos, double ypos) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->cursor_pos_callback) {
-                    engine->cursor_pos_callback();
-                }
-                Engine::Dispatcher().trigger(Events::Callback::MouseCursorPosition{0, float(xpos), float(ypos)});
-            });
-
-            glfwSetScrollCallback(h_window, [](GLFWwindow *h_window, double xoffset, double yoffset) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->scroll_callback) {
-                    engine->scroll_callback();
-                }
-                Engine::Dispatcher().trigger(Events::Callback::MouseScroll{h_window, float(xoffset), float(yoffset)});
-            });
-
-            glfwSetKeyCallback(h_window, [](GLFWwindow *h_window, int key, int scancode, int action, int mods) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->key_callback) {
-                    engine->key_callback();
-                }
-                Engine::Dispatcher().trigger(Events::Callback::Key{h_window, scancode, action, mods});
-            });
-
-            glfwSetDropCallback(h_window, [](GLFWwindow *h_window, int count, const char **paths) {
-                auto *engine = static_cast<Engine *>(glfwGetWindowUserPointer(h_window));
-                if (engine->drop_callback) {
-                    engine->drop_callback();
-                }
-                //Figure out how to handle file drop...
-                //Option 1: Systems or plugins register to this callback and process all paths
-                //Option 2: Preprocess to determine what files were dropped and how to continue with them...
-                Engine::Dispatcher().trigger(Events::Callback::Drop{h_window, count, paths});
-            });
-        }
     }
 }
 
@@ -335,6 +272,22 @@ namespace Bcg {
         return dpiScale;
     }
 
+    float SystemRendererOpenGL::get_depth_at_screen_position(float x, float y){
+        Components<Window> windows(SystemWindowGLFW::component_name());
+        auto &component_window = Engine::Context().get<Component<Window>>();
+        auto &window = windows.get_instance(component_window);
+        auto size = window.get_size();
+
+        // Convert screen position to window coordinates
+        // OpenGL's origin is at the bottom-left corner
+
+        // Read the depth value at the specified window coordinates
+        float depth;
+        glReadPixels(x, size[1] - y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+        return depth;
+    }
+
     std::string SystemRendererOpenGL::name() {
         return "SystemRenderer";
     }
@@ -366,8 +319,7 @@ namespace Bcg {
     void SystemRendererOpenGL::remove() {
         SystemBuffers().remove();
         SystemShaderPrograms().remove();
-        Engine::Dispatcher().sink<Events::Startup<
-                Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
+        Engine::Dispatcher().sink<Events::Startup<Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_startup_renderer>();
         Engine::Dispatcher().sink<Events::Shutdown<
                 Renderer >>().disconnect<&SystemRendererOpenGLInternal::on_shutdown_renderer>();
         Log::Info("Removed", name()).enqueue();

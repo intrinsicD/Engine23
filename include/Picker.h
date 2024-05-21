@@ -7,7 +7,7 @@
 
 #include "EngineFwd.h"
 #include "entt/entity/entity.hpp"
-#include "glm/glm.hpp"
+#include "Eigen/Core"
 #include <set>
 
 namespace Bcg {
@@ -22,12 +22,12 @@ namespace Bcg {
         } id;
 
         struct Point {
-            glm::vec3 object{};
-            glm::vec3 world{};
-            glm::vec3 view{};
+            Eigen::Vector<float, 3> object{};
+            Eigen::Vector<float, 3> world{};
+            Eigen::Vector<float, 3> view{};
         } point;
 
-        bool is_backgound = false;
+        bool is_background = false;
 
         float point_selection_radius = 0.00001;
         std::set<entt::entity> selected_entities{};
