@@ -11,6 +11,9 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "Commands.h"
 #include "Window.h"
+#include "Components.h"
+#include "SystemWindowGLFW.h"
+#include "GLFW/glfw3.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -40,6 +43,27 @@ namespace Bcg{
 
 namespace Bcg{
     namespace SystemGuiInternal {
+        float GetWindowDpiScale(GLFWwindow* window) {
+            int windowWidth, windowHeight;
+            int framebufferWidth, framebufferHeight;
+
+            glfwGetWindowSize(window, &windowWidth, &windowHeight);
+            glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+
+            float dpiScale = (float)framebufferWidth / windowWidth;
+            return dpiScale;
+        }
+
+        void UpdateDpiScale(ImGuiIO& io, float dpiScale) {
+            io.FontGlobalScale = dpiScale;
+        }
+
+        void LoadFonts(ImGuiIO& io, float dpiScale) {
+            io.Fonts->Clear();
+            io.Fonts->AddFontFromFileTTF("../ext/imgui/misc/fonts/ProggyClean.ttf", 16.0f * dpiScale);
+            io.Fonts->Build();
+        }
+
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_demo_imgui) {
                 Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemGuiInternal::on_update_gui>();
@@ -59,6 +83,18 @@ namespace Bcg{
         }
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
+            Components<Window> windows(SystemWindowGLFW::component_name());
+            auto &component_window = Engine::Context().get<Component<Window>>();
+            auto &window = windows.get_instance(component_window);
+
+            ImGuiIO& io = ImGui::GetIO();
+            //float dpiScale = GetWindowDpiScale(static_cast<GLFWwindow *>(window.window_handle));
+            float dpiScale = window.dpi * 0.75;
+            if (dpiScale != io.FontGlobalScale) {
+                UpdateDpiScale(io, dpiScale);
+                LoadFonts(io, dpiScale);
+            }
+
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
@@ -70,6 +106,16 @@ namespace Bcg{
             ImGui::EndMainMenuBar();
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            // Update and Render additional Platform Windows
+            auto &io = ImGui::GetIO();
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+            {
+                GLFWwindow* backup_current_context = glfwGetCurrentContext();
+                ImGui::UpdatePlatformWindows();
+                ImGui::RenderPlatformWindowsDefault();
+                glfwMakeContextCurrent(backup_current_context);
+            }
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
@@ -122,10 +168,20 @@ namespace Bcg {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         auto &io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
         io.IniFilename = nullptr;
 
+
+
         auto &style = ImGui::GetStyle();
-        style.WindowRounding = 0;
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
         //io.FontGlobalScale = Engine::Context().get<Window>().dpi;
         ImGui::StyleColorsDark(&style);
         ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow *>(window), true);

@@ -144,7 +144,6 @@ namespace Bcg {
             });
             glfwSetCursorPosCallback(glfw_handle, [](GLFWwindow *h_window, double xpos, double ypos) {
                 SystemWindowGLFW::set_mouse_cursor_pos(h_window, xpos, ypos);
-
             });
             glfwSetScrollCallback(glfw_handle, [](GLFWwindow *h_window, double xoffset, double yoffset) {
                 SystemWindowGLFW::set_mouse_scroll(h_window, xoffset, yoffset);
@@ -202,7 +201,7 @@ namespace Bcg {
     void SystemWindowGLFW::set_window_resize(void *window_handle, int width, int height) {
         auto &window_register = Engine::Context().get<WindowRegister>();
         auto &windwo_id = window_register[window_handle];
-        auto &windows = Engine::Context().get<Components<Window>>();
+        Components<Window> windows(SystemWindowGLFW::component_name());
         auto &window = windows.get_instance(windwo_id);
         window.width = width;
         window.height = height;
@@ -247,6 +246,12 @@ namespace Bcg {
         }
 
         Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Button>{});
+
+        if (action == GLFW_PRESS) {
+            Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Button::Press>{});
+        } else if (action == GLFW_RELEASE) {
+            Engine::Dispatcher().trigger(Events::Update<Mouse<float>::Button::Release>{});
+        }
     }
 
     void SystemWindowGLFW::set_mouse_cursor_pos(void *window_handle, double xpos, double ypos) {

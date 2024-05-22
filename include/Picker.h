@@ -22,15 +22,16 @@ namespace Bcg {
         } id;
 
         struct Point {
+            bool is_background = false;
             Eigen::Vector<float, 3> object{};
             Eigen::Vector<float, 3> world{};
             Eigen::Vector<float, 3> view{};
+            Eigen::Vector<float, 2> win_coords{};
+            Eigen::Vector<float, 2> norm_dev_coords{};
         } point;
 
-        bool is_background = false;
-
         float point_selection_radius = 0.00001;
-        std::set<entt::entity> selected_entities{};
+        std::vector<entt::entity> selected_entities{};
 
         enum class SelectionMode {
             entities,

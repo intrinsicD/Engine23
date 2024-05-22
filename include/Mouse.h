@@ -21,6 +21,9 @@ namespace Bcg {
         } state;
 
         struct Button {
+            struct Press{};
+            struct Release{};
+
             int button = -1;
             int action = -1;
             int mods = -1;

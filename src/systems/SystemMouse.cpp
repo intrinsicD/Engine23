@@ -53,7 +53,7 @@ namespace Bcg {
             std::string button_string = (button.left ? "left" : (button.middle ? "middle"
                                                                                : (button.right
                                                                                   ? "right" : "None")));
-            ImGui::Text("Button: %s (%d, %d, %d)", button_string.c_str(), button.left, button.middle, button.right);
+            ImGui::Text("Button: (%d, %d, %d) %s", button.left, button.middle, button.right, button_string.c_str());
         }
 
         void RenderGuiMousePosition(Mouse<float>::Position &position) {
