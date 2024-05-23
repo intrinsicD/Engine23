@@ -37,3 +37,6 @@
 [submodule "ext/googletest"]
 	path = ext/googletest
 	url = https://github.com/google/googletest.git
+[submodule "ext/nanoflann"]
+	path = ext/nanoflann
+	url = https://github.com/jlblancoc/nanoflann.git

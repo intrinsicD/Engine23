@@ -54,10 +54,6 @@ namespace Bcg{
             return dpiScale;
         }
 
-        void UpdateDpiScale(ImGuiIO& io, float dpiScale) {
-            io.FontGlobalScale = dpiScale;
-        }
-
         void LoadFonts(ImGuiIO& io, float dpiScale) {
             io.Fonts->Clear();
             io.Fonts->AddFontFromFileTTF("../ext/imgui/misc/fonts/ProggyClean.ttf", 16.0f * dpiScale);
@@ -89,10 +85,12 @@ namespace Bcg{
 
             ImGuiIO& io = ImGui::GetIO();
             //float dpiScale = GetWindowDpiScale(static_cast<GLFWwindow *>(window.window_handle));
-            float dpiScale = window.dpi * 0.75;
-            if (dpiScale != io.FontGlobalScale) {
-                UpdateDpiScale(io, dpiScale);
+            static float global_dpi = 1.0;
+            float dpiScale = window.dpi;
+            if (dpiScale != global_dpi) {
+                global_dpi = dpiScale;
                 LoadFonts(io, dpiScale);
+                ImGui::GetStyle().ScaleAllSizes(dpiScale);
             }
 
             ImGui_ImplOpenGL3_NewFrame();
