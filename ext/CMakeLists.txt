@@ -1,5 +1,6 @@
 target_include_directories(Engine23Lib SYSTEM PUBLIC imgui)
 target_include_directories(Engine23Lib SYSTEM PUBLIC ImGuizmo)
+target_include_directories(Engine23Lib SYSTEM PUBLIC imnodes)
 target_include_directories(Engine23Lib SYSTEM PUBLIC soil/include)
 target_include_directories(Engine23Lib SYSTEM PUBLIC happly)
 target_include_directories(Engine23Lib SYSTEM PUBLIC nanoflann/include)
@@ -18,6 +19,7 @@ target_sources(Engine23Lib PRIVATE
         imgui/backends/imgui_impl_glfw.cpp
         imgui/backends/imgui_impl_opengl3.cpp
         ImGuizmo/ImGuizmo.cpp
+        imnodes/imnodes.cpp
         soil/src/soil.c
         soil/src/image_helper.c
         soil/src/stb_image_aug.c

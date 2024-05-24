@@ -40,3 +40,6 @@
 [submodule "ext/nanoflann"]
 	path = ext/nanoflann
 	url = https://github.com/jlblancoc/nanoflann.git
+[submodule "ext/imnodes"]
+	path = ext/imnodes
+	url = https://github.com/Nelarius/imnodes.git

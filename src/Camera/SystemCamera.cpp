@@ -203,6 +203,10 @@ namespace Bcg {
             auto &camera = cameras.get_instance(component_camera);
 
             if (mouse.button.middle) {
+                auto &picker = Engine::Context().get<Picker>();
+                if(picker.id.entity != entt::null){
+
+                }
                 Eigen::Vector<float, 2> pos_delta =
                         (mouse.position.current - mouse.position.last_drag_pos);// * camera.sensitivity.drag;
 
