@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <functional>
+#include <sstream>
 
 #include "EngineFwd.h"
 

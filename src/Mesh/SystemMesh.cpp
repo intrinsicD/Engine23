@@ -120,6 +120,10 @@ namespace Bcg {
             auto &input = Engine::Context().get<Input>();
 
             for (const auto &path: input.drop.paths) {
+                //Check if loader for extension exists
+                if (!MeshIo::has_file_extension(FilePath::Extension(path))) {
+                    continue;
+                }
                 entt::entity entity_id = entt::null;
                 Engine::Dispatcher().trigger(Events::Create<entt::entity>{&entity_id});
                 Engine::Dispatcher().trigger(Events::Load<Mesh>{entity_id, path});

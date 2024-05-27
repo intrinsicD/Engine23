@@ -24,6 +24,7 @@
 #include "SystemMouse.h"
 #include "SystemKeyboard.h"
 #include "SystemPicker.h"
+#include "SystemTexture.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

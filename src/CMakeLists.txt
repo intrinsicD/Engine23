@@ -1,6 +1,7 @@
 target_sources(Engine23Lib PRIVATE
         Commands.cpp
         CommandGraph.cpp
+        ClickPoint.cpp
         Engine.cpp
         Entity.cpp
         FilePath.cpp
@@ -14,9 +15,11 @@ add_subdirectory(Camera)
 add_subdirectory(File)
 add_subdirectory(Graph)
 add_subdirectory(Hierarchy)
+add_subdirectory(Image)
 add_subdirectory(Mesh)
 add_subdirectory(Property)
 add_subdirectory(PointCloud)
 add_subdirectory(systems)
 add_subdirectory(Transform)
+add_subdirectory(Texture)
 add_subdirectory(Window)

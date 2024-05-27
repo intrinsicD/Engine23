@@ -30,7 +30,7 @@ namespace Bcg {
 
         static std::vector<std::string> formats();
 
-        bool has_file_extension(const std::string &filename);
+        static bool has_file_extension(const std::string &filename);
 
     private:
 

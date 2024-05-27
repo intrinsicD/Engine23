@@ -4,6 +4,9 @@
 
 #ifndef ENGINE23_TEXTURE_H
 #define ENGINE23_TEXTURE_H
+
+#include <ostream>
+
 namespace Bcg {
     struct Texture {
         unsigned int id;
@@ -11,6 +14,8 @@ namespace Bcg {
         int height;
         int depth;
         unsigned int format;
+
+        friend std::ostream &operator<<(std::ostream &stream, const Texture &texture) { return stream; }
     };
 }
 

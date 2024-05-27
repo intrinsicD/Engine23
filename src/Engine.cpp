@@ -45,6 +45,7 @@ namespace Bcg {
         SystemEntity::pre_init();
         SystemPicker::pre_init();
         SystemTransform::pre_init();
+        SystemTexture::pre_init();
         SystemHierarchy::pre_init();
         SystemAABB::pre_init();
         SystemMesh::pre_init();
@@ -68,6 +69,7 @@ namespace Bcg {
         SystemEntity::init();
         SystemPicker::init();
         SystemTransform::init();
+        SystemTexture::init();
         SystemHierarchy::init();
         SystemAABB::init();
         SystemMesh::init();
@@ -85,6 +87,7 @@ namespace Bcg {
         SystemAABB::remove();
         SystemHierarchy::remove();
         SystemTransform::remove();
+        SystemTexture::remove();
         SystemEntity::remove();
         SystemPicker::remove();
         SystemCamera::remove();

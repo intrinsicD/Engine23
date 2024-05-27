@@ -97,7 +97,7 @@ namespace Bcg {
             Eigen::Vector<float, 4> p = {point.norm_dev_coords[0], point.norm_dev_coords[1], depth * 2.0f - 1.0f, 1.0};
             p = (proj * view).inverse() * p;
             point.world = p.head<3>() / p[3];
-            point.view = (view.inverse() * point.world.homogeneous()).head<3>();
+            point.view = (view * point.world.homogeneous()).head<3>();
             return point;
         }
 
