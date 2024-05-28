@@ -121,7 +121,7 @@ namespace Bcg {
 
             for (const auto &path: input.drop.paths) {
                 //Check if loader for extension exists
-                if (!MeshIo::has_file_extension(FilePath::Extension(path))) {
+                if (!MeshIo::has_file_extension(path)) {
                     continue;
                 }
                 entt::entity entity_id = entt::null;

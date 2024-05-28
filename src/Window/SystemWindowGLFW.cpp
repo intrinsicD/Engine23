@@ -122,8 +122,7 @@ namespace Bcg {
             window.dpi = GetDpiScale();
             Log::Info(SystemWindowGLFW::name() + ": Detected DPI: " + std::to_string(window.dpi)).enqueue();
 
-            window.window_handle = glfwCreateWindow(window.width, window.height, window.title.c_str(),
-                                                    nullptr, nullptr);
+            window.window_handle = glfwCreateWindow(window.width, window.height, window.title.c_str(),nullptr, nullptr);
 
             auto *glfw_handle = static_cast<GLFWwindow *>(window.window_handle);
             auto &window_register = Engine::Context().get<WindowRegister>();

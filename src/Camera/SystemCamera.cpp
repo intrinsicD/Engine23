@@ -22,6 +22,7 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "SystemRendererOpenGL.h"
+#include <iostream>
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -181,19 +182,28 @@ namespace Bcg {
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
             auto size = window.get_size();
+            //clip screenpos at window borders:
+            Eigen::Vector<float, 2> clipped_pos = screen_pos;
+            clipped_pos[0] = std::max(0.0f, std::min(clipped_pos[0], float(size[0])));
+            clipped_pos[1] = std::max(0.0f, std::min(clipped_pos[1], float(size[1])));
 
             // Get the depth value at the screen position (assuming a depth buffer is available)
-            float depth = GetDepthValueAtScreenPosition(screen_pos);
+            float depth = GetDepthValueAtScreenPosition(clipped_pos);
 
-            float x = (2.0f * screen_pos[0]) / size[0] - 1.0f;
-            float y = 1.0f - (2.0f * screen_pos[1]) / size[1];
-            float z = depth; // Use the actual depth value
+            Eigen::Vector<float, 2> ndc = WindowCoordsToNormalizedDeviceCoordinates(clipped_pos, size[0], size[1]);
+            Eigen::Vector<float, 3> view = NormalizedDeviceCoordinatesToViewCoords(ndc, depth, camera.get_projection());
+            world_pos = ViewCoordsToWorldCoords(view, camera.get_view());
+            //TODO fix camera when dragging and rotating
 
-            Eigen::Vector<float, 4> screen_space_pos(x, y, z, 1.0f);
-            Eigen::Vector<float, 4> world_space_pos = camera.get_projection().inverse() * screen_space_pos;
-            world_space_pos /= world_space_pos.w();
+            /*        float x = (2.0f * screen_pos[0]) / size[0] - 1.0f;
+                    float y = 1.0f - (2.0f * screen_pos[1]) / size[1];
+                    float z = depth; // Use the actual depth value
 
-            world_pos = world_space_pos.head<3>();
+                    Eigen::Vector<float, 4> screen_space_pos(x, y, z, 1.0f);
+                    Eigen::Vector<float, 4> world_space_pos = camera.get_projection().inverse() * screen_space_pos;
+                    world_space_pos /= world_space_pos.w();
+
+                    world_pos = world_space_pos.head<3>();*/
         }
 
         void on_update_mouse_position(const Events::Update<Mouse<float>::Position> &event) {
@@ -204,25 +214,30 @@ namespace Bcg {
 
             if (mouse.button.middle) {
                 auto &picker = Engine::Context().get<Picker>();
-                if(picker.id.entity != entt::null){
+                if (picker.id.entity != entt::null) {
 
                 }
-                Eigen::Vector<float, 2> pos_delta =
-                        (mouse.position.current - mouse.position.last_drag_pos);// * camera.sensitivity.drag;
+                //------------------------------------------------------------------------------------------------------
 
-                // Compute the world position under the mouse cursor before and after the drag
-                Eigen::Vector<float, 3> initial_world_pos, current_world_pos;
-                ScreenToWorld(mouse.position.last_drag_pos, camera, initial_world_pos);
-                ScreenToWorld(mouse.position.current, camera, current_world_pos);
+                Components<Window> windows(SystemWindowGLFW::component_name());
+                auto &component_window = Engine::Context().get<Component<Window>>();
+                auto &window = windows.get_instance(component_window);
+                auto size = window.get_size();
 
-                // Compute the difference in world space
-                Eigen::Vector<float, 3> world_delta = current_world_pos - initial_world_pos;
-
-                // Apply the world delta to the camera's position
-                camera.view.position -= world_delta;
-                camera.arc_ball_parameters.target -= world_delta;
-
-                mouse.position.last_drag_pos = mouse.position.current;
+                if (!(mouse.position.current[0] < 0.0f || mouse.position.current[0] > size[0] ||
+                      mouse.position.current[1] < 0.0f || mouse.position.current[1] > size[1])) {
+                    Eigen::Vector<float, 3> start;
+                    ScreenToWorld(mouse.position.last_drag_pos, camera, start);
+                    Eigen::Vector<float, 3> end;
+                    ScreenToWorld(mouse.position.current, camera, end);
+                    Eigen::Vector<float, 3> world_delta = end - start;
+                    world_delta[2] = 0;
+                    if (!picker.point.is_background) {
+                        camera.view.position -= world_delta;
+                        camera.arc_ball_parameters.target -= world_delta;
+                        mouse.position.last_drag_pos = mouse.position.current;
+                    }
+                }
             }
 
             // Handle other mouse events, e.g., right button for arc ball camera controller

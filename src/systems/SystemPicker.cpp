@@ -83,45 +83,25 @@ namespace Bcg {
             }
         }
 
-        Picker::Point
+        Point
         GetPickerPointFromWinCoords(float x, float y,
                                     int width, int height,
                                     const Eigen::Matrix<float, 4, 4> &view, const Eigen::Matrix<float, 4, 4> &proj,
                                     float hdpi = 1.0) {
-            Picker::Point point;
+            Point point;
             point.win_coords = {x * hdpi, y * hdpi};
-            point.norm_dev_coords = {x / (width * 2.0) - 1, (y - 1) / (height * 2.0) - 1};
             float depth = SystemRendererOpenGL::get_depth_at_screen_position(x, y);
             point.is_background = depth >= 1.0;
-
-            Eigen::Vector<float, 4> p = {point.norm_dev_coords[0], point.norm_dev_coords[1], depth * 2.0f - 1.0f, 1.0};
-            p = (proj * view).inverse() * p;
-            point.world = p.head<3>() / p[3];
-            point.view = (view * point.world.homogeneous()).head<3>();
+            point.norm_dev_coords = WindowCoordsToNormalizedDeviceCoordinates(point.win_coords, width, height);
+            point.view = NormalizedDeviceCoordinatesToViewCoords(point.norm_dev_coords, depth, proj);
+            point.world = ViewCoordsToWorldCoords(point.view, view);
             return point;
         }
 
         void on_update_mouse_button_press(const Events::Update<Mouse<float>::Button::Press> &event) {
             auto &mouse = Engine::Context().get<Mouse<float>>();
             auto &picker = Engine::Context().get<Picker>();
-
-            Components<Window> windows(SystemWindowGLFW::component_name());
-            auto &component_window = Engine::Context().get<Component<Window>>();
-            auto &window = windows.get_instance(component_window);
-            auto win_size = window.get_size();
-
-            Components<Camera<float>> cameras(SystemCamera::component_name());
-            auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            auto &camera = cameras.get_instance(component_camera);
-
-            float hdpi = 1.0;
-            picker.point = GetPickerPointFromWinCoords(mouse.position.current[0],
-                                                       mouse.position.current[1],
-                                                       win_size[0],
-                                                       win_size[1],
-                                                       camera.get_view(),
-                                                       camera.get_projection(),
-                                                       hdpi);
+            picker.point = SystemPicker::get_picker_point_from_win_coords(mouse.position.current[0], mouse.position.current[1]);
         }
     }
 }
@@ -137,6 +117,23 @@ namespace Bcg {
 
     std::string SystemPicker::component_name() {
         return "Picker";
+    }
+
+    Point SystemPicker::get_picker_point_from_win_coords(float x, float y){
+        Components<Window> windows(SystemWindowGLFW::component_name());
+        auto &component_window = Engine::Context().get<Component<Window>>();
+        auto &window = windows.get_instance(component_window);
+        auto win_size = window.get_size();
+
+        Components<Camera<float>> cameras(SystemCamera::component_name());
+        auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
+        auto &camera = cameras.get_instance(component_camera);
+        return SystemPickerInternal::GetPickerPointFromWinCoords(x, y,
+                                    win_size[0],
+                                    win_size[1],
+                                    camera.get_view(),
+                                    camera.get_projection(),
+                                    window.dpi);
     }
 
     void SystemPicker::pre_init() {

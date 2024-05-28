@@ -6,8 +6,8 @@
 #define ENGINE23_PICKER_H
 
 #include "EngineFwd.h"
+#include "ClickPoint.h"
 #include "entt/entity/entity.hpp"
-#include "Eigen/Core"
 #include <set>
 
 namespace Bcg {
@@ -21,14 +21,7 @@ namespace Bcg {
             bool check_entity() const { return entity != entt::null; }
         } id;
 
-        struct Point {
-            bool is_background = false;
-            Eigen::Vector<float, 3> object{};
-            Eigen::Vector<float, 3> world{};
-            Eigen::Vector<float, 3> view{};
-            Eigen::Vector<float, 2> win_coords{};
-            Eigen::Vector<float, 2> norm_dev_coords{};
-        } point;
+        Point point;
 
         float point_selection_radius = 0.00001;
         std::vector<entt::entity> selected_entities{};

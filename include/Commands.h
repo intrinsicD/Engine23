@@ -13,6 +13,15 @@
 #include "EngineFwd.h"
 
 namespace Bcg {
+    template<typename Result=void, typename... Args>
+    struct TestCommand {
+        explicit TestCommand(std::function<Result(Args... args)> task) : task(std::move(task)) {}
+
+        Result operator()(Args... args) { return task(args...); }
+
+        std::function<Result(Args... args)> task;
+    };
+
     struct AbstractCommand {
         explicit AbstractCommand(std::string name);
 

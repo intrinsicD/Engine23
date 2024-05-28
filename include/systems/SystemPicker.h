@@ -5,8 +5,8 @@
 #ifndef ENGINE23_SYSTEMPICKER_H
 #define ENGINE23_SYSTEMPICKER_H
 
-
 #include "EngineFwd.h"
+#include "ClickPoint.h"
 
 namespace Bcg {
     class SystemPicker {
@@ -18,6 +18,8 @@ namespace Bcg {
         static std::string name();
 
         static std::string component_name();
+
+        static Point get_picker_point_from_win_coords(float x, float y);
 
     protected:
         friend Engine;

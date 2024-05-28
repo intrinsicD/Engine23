@@ -6,6 +6,7 @@
 #define ENGINE23_MOUSE_H
 
 #include "Eigen/Core"
+#include "ClickPoint.h"
 
 namespace Bcg {
     template<typename T>

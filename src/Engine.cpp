@@ -11,24 +11,11 @@
 #include "Time.h"
 #include "CommandDoubleBufferSimulation.h"
 #include "CommandDoubleBufferRender.h"
-#include "GLFW/glfw3.h"
 
 namespace Bcg {
+
     Engine::Engine() {
-        //The engine is a singleton
-        //Has an entt::registry as state to store and represent the current state of the engine or application
-        //Has an entt::dispatcher as dispatcher for decoupled communication between parts of the engine or application
-
-        //The engine has a set of commands that are executed in a specific order
-        //The command buffer is double buffered. It always contains the following commands:
-        //ProcessUserCommands, UpdateStateCommand, RenderCommand, PostRenderCommand in that order.
-        //Each command is Composite, it can contain other commands. This should be flexible enough for most cases, but can be of course extended if needed.
-
-        //The main way to interact with the engine is via commands and events over the dispatcher or via direct state access.
-        //The main way to extend the engines functionality is via plugins, systems and managers. But of course the engine can be extended in any way.
-
         entt::locator<Engine *>::emplace<Engine *>(this);
-
 
         SystemTimer::pre_init();
         SystemCommandBuffers::pre_init();

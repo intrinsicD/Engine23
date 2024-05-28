@@ -27,7 +27,6 @@ namespace Bcg {
                                                                     const Eigen::Matrix<float, 4, 4> &proj) {
         Eigen::Vector4f clip_coords = proj * view_coords.homogeneous();
         return {clip_coords[0] / clip_coords[3], clip_coords[1] / clip_coords[3]};
-
     }
 
     Eigen::Vector<float, 3> ViewCoordsToWorldCoords(const Eigen::Vector<float, 3> &view_coords,
