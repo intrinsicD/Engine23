@@ -21,6 +21,7 @@
 #include "Picker.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Input.h"
 #include "SystemRendererOpenGL.h"
 #include <iostream>
 
@@ -42,6 +43,8 @@ namespace Bcg {
         void on_update_viewport(const Events::Update<Viewport> &event);
 
         void on_update_keyboard(const Events::Update<Keyboard> &event);
+
+        void on_update_input(const Events::Update<Input> &event);
 
         void on_update_mouse_button(const Events::Update<Mouse<float>::Button> &event);
 
@@ -134,6 +137,33 @@ namespace Bcg {
         }
 
         void on_update_keyboard(const Events::Update<Keyboard> &event) {
+            if (ImGui::GetIO().WantCaptureKeyboard) return;
+            auto &keyboard = Engine::Context().get<Keyboard>();
+            auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
+            Components<Camera<float>> cameras(SystemCamera::component_name());
+            auto &camera = cameras.get_instance(component_camera);
+            auto &time = Engine::Context().get<Time>();
+
+            auto delta = float(time.mainloop.duration) * camera.sensitivity.move;
+            if (keyboard.keys[GLFW_KEY_W]) {
+                //move forward
+                camera.view.position += camera.view.front * delta;
+            }
+            if (keyboard.keys[GLFW_KEY_S]) {
+                //move backward
+                camera.view.position -= camera.view.front * delta;
+            }
+            if (keyboard.keys[GLFW_KEY_D]) {
+                //move right
+                camera.view.position += camera.view.right * delta;
+            }
+            if (keyboard.keys[GLFW_KEY_A]) {
+                //move left
+                camera.view.position -= camera.view.right * delta;
+            }
+        }
+
+        void on_update_input(const Events::Update<Input> &event){
             if (ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Keyboard>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
@@ -328,7 +358,8 @@ namespace Bcg {
         }
 
         void on_startup(const Events::Startup<Engine> &event) {
-            Engine::Dispatcher().sink<Events::Update<Keyboard>>().connect<&on_update_keyboard>();
+            //Engine::Dispatcher().sink<Events::Update<Keyboard>>().connect<&on_update_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<Input>>().connect<&on_update_input>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Scroll>>().connect<&on_update_mouse_scroll>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Position>>().connect<&on_update_mouse_position>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button>>().connect<&on_update_mouse_button>();
@@ -339,7 +370,8 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            Engine::Dispatcher().sink<Events::Update<Keyboard>>().disconnect<&on_update_keyboard>();
+            //Engine::Dispatcher().sink<Events::Update<Keyboard>>().disconnect<&on_update_keyboard>();
+            Engine::Dispatcher().sink<Events::Update<Input>>().disconnect<&on_update_input>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Scroll>>().disconnect<&on_update_mouse_scroll>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Position>>().disconnect<&on_update_mouse_position>();
             Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button>>().disconnect<&on_update_mouse_button>();

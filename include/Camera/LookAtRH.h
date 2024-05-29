@@ -16,7 +16,7 @@ namespace Bcg {
         const Eigen::Vector<T, 3> u(s.cross(f));
 
         Eigen::Matrix<T, 4, 4> Result = Eigen::Matrix<T, 4, 4>::Identity();
-        //TODO::Maybe switch rows and cols, because of different storage order in glm!?
+        //hide TODO::Maybe switch rows and cols, because of different storage order in glm!?
         Result(0, 0) = s[0];
         Result(0, 1) = s[1];
         Result(0, 2) = s[2];
