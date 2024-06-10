@@ -66,9 +66,6 @@ namespace Bcg {
         [[nodiscard]] FaceContainer *faces() const;
     };
 
-    template<>
-    struct ComponentGui<Entity> {
-        static void Show(entt::entity entity_id);
-    };
+
 }
 #endif //ENGINE23_ENTITY_H

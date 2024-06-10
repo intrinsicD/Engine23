@@ -55,7 +55,7 @@ namespace Bcg {
 
             if (ImGui::Begin("ShaderPrograms", &show_gui)) {
                 auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
-                for (auto &program : programs) {
+                for (auto &program: programs) {
                     if (ImGui::TreeNode(program.first.c_str())) {
                         ComponentGui<OpenGL::ShaderProgram>::Show(program.second);
                         ImGui::TreePop();
@@ -70,19 +70,44 @@ namespace Bcg {
             watcher.check();
         }
 
-        void on_startup(const Events::Startup<Engine> &event) {
-            Log::Info(SystemShaderPrograms::name() , "Startup").enqueue();;
-            auto point_cloud_program = SystemShaderPrograms::load_program(
-                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
-                    "programs/point_cloud/point_cloud_vs.glsl",
-                    std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
-                    "programs/point_cloud/point_cloud_fs.glsl");
-            auto name = "point_cloud";
-            point_cloud_program.name = name;
+        void LoadProgram(const std::string &name, std::string vs_filepath, std::string fs_filepath,
+                         std::string gs_filepath = "",
+                         std::string tcs_filepath = "", std::string tes_filepath = "",
+                         std::string cs_filepath = "") {
+            OpenGL::ShaderProgram program;
+
+            if (!cs_filepath.empty()) {
+                program = SystemShaderPrograms::load_program(
+                        "", "", "", "", "",
+                        std::filesystem::path(SystemShaderPrograms::glsl_base_path()) / cs_filepath);
+            } else {
+                program = SystemShaderPrograms::load_program(
+                        std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                        vs_filepath,
+                        std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                        fs_filepath,
+                        !gs_filepath.empty() ? std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                                               gs_filepath : "",
+                        !tcs_filepath.empty() ? std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                                                tcs_filepath : "",
+                        !tes_filepath.empty() ? std::filesystem::path(SystemShaderPrograms::glsl_base_path()) /
+                                                tes_filepath : "");
+            }
+            program.name = name;
 
             auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
-            programs[name] = std::move(point_cloud_program);
+            programs[name] = std::move(program);
             SystemShaderPrograms::add_to_watcher(programs[name]);
+        }
+
+        void on_startup(const Events::Startup<Engine> &event) {
+            Log::Info(SystemShaderPrograms::name(), "Startup").enqueue();;
+            LoadProgram("point_cloud",
+                        "programs/point_cloud/point_cloud_vs.glsl",
+                        "programs/point_cloud/point_cloud_fs.glsl");
+            LoadProgram("simple_shading",
+                        "programs/simple_shading/vertex_shader.glsl",
+                        "programs/simple_shading/fragment_shader.glsl");
 
             Engine::Dispatcher().sink<Events::Begin<Frame>>().connect<&SystemShaderProgramsInternal::on_begin_frame>();
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
@@ -91,7 +116,7 @@ namespace Bcg {
         void on_shutdown(const Events::Shutdown<Engine> &event) {
             Engine::Dispatcher().sink<Events::Begin<Frame>>().disconnect<&SystemShaderProgramsInternal::on_begin_frame>();
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemShaderProgramsInternal::on_update_gui_menu>();
-            Log::Info(SystemShaderPrograms::name() , "Shutdown").enqueue();
+            Log::Info(SystemShaderPrograms::name(), "Shutdown").enqueue();
         }
     }
 }

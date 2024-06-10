@@ -4,6 +4,7 @@ target_sources(Engine23Lib PRIVATE
         ClickPoint.cpp
         Engine.cpp
         Entity.cpp
+        EntityGui.cpp
         FilePath.cpp
         StringUtils.cpp
         ImGuiUtils.cpp

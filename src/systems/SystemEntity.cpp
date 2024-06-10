@@ -8,13 +8,11 @@
 #include "imgui.h"
 #include "fmt/core.h"
 #include "Commands.h"
-#include "AABBGui.h"
 #include "Transform/Transform.h"
 #include "Picker.h"
 #include "Asset.h"
 #include "Input.h"
-#include "AssetGui.h"
-#include "GLFW/glfw3.h"
+#include "EntityGui.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -60,82 +58,6 @@ namespace Bcg {
             Log::Info(fmt::format("Entity {} destroyed", static_cast<size_t>(*event.value))).enqueue();
         }
 
-        void show_gui_entity(entt::entity entity) {
-            if (ImGui::BeginTabBar("Entity")) {
-                if (ImGui::BeginTabItem("Info")) {
-                    ImGui::Text("ID: %zu", static_cast<size_t>(entity));
-                    if(Engine::State().all_of<std::string>(entity)){
-                        ImGui::Text("Name: %s", Engine::State().get<std::string>(entity).c_str());
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Components")) {
-                    if(Engine::State().all_of<Asset>(entity)){
-                        if(ImGui::CollapsingHeader("Asset")){
-                            ComponentGui<Asset>::Show(entity);
-                        }
-                    }
-                    if(Engine::State().all_of<AABB3>(entity)){
-                        if(ImGui::CollapsingHeader("AABB")){
-                            ComponentGui<AABB3>::Show(entity);
-                        }
-                    }
-                    if(Engine::State().all_of<Transform<float>>(entity)){
-                        if(ImGui::CollapsingHeader("Transform")){
-                            ComponentGui<Transform<float>>::Show(entity);
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Hierarchy")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Transform")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Geometry")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Topology")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Material")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Texture")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Animation")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Light")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Camera")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Render")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Simulation")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Script")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Audio")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Physics")) {
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Misc")) {
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
-            }
-        }
-
         void on_update_gui(const Events::Update<Gui> &event) {
             if (!show_gui) {
                 Engine::Dispatcher().sink<Events::Update<Gui>>().disconnect<&SystemEntityInternal::on_update_gui>();
@@ -153,7 +75,7 @@ namespace Bcg {
                     picker.id.entity = entt::null;
                 }
                 if (picker.id.entity != entt::null) {
-                    show_gui_entity(picker.id.entity);
+                    ComponentGui<Entity>::Show(picker.id.entity);
                 }
             }
             ImGui::End();

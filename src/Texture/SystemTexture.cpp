@@ -60,8 +60,6 @@ namespace Bcg {
                 //Check if file can be loaded by SOIL
                 if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga") {
                     load_texture(file_path);
-                } else {
-                    Log::Error("Unsupported file format: " + ext).enqueue();
                 }
             }
         }

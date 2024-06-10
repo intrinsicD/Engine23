@@ -170,31 +170,14 @@ namespace Bcg {
                           opengl_config.glsl_version).enqueue();
             }
 
-            auto &bg = Engine::Context().get<Window>().background_color;
-            //glClearColor(bg[0], bg[1], bg[2], bg[3]);
-
-            auto &programs = Engine::Context().get<OpenGL::ShaderPrograms>();
-            OpenGL::ShaderProgram program;
-            program.v_shader.filepath = "../backend/glsl/programs/simple_shading/vertex_shader.glsl";
-            program.f_shader.filepath = "../backend/glsl/programs/simple_shading/fragment_shader.glsl";
-            program.name = "simple_shading";
-            program.load_shaders();
-            program.compile_from_sources();
-            program.link();
-            if (program.check_link_status()) {
-                programs[program.name] = program;
-            } else {
-                auto m_name = SystemRendererOpenGL::name();
-                Log::Error(m_name + ": " + program.name + " Error: " + program.error_message).enqueue();
-            }
-
-            auto &state = Engine::Context().emplace<OpenGL::State>();
-
             auto new_state = OpenGL::State();
             new_state.depth_test.enabled = true;
             new_state.depth_test.func = GL_LESS;
+
+            auto &bg = Engine::Context().get<Window>().background_color;
             new_state.clear_color = {bg[0], bg[1], bg[2], bg[3]};
 
+            auto &state = Engine::Context().emplace<OpenGL::State>();
             state.change_to_new_state(new_state);
 
             Log::Info(SystemRendererOpenGL::name(), "Startup").enqueue();

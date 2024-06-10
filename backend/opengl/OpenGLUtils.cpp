@@ -934,7 +934,7 @@ namespace Bcg::OpenGL {
 
     void Renderable::draw() {
         vao.bind();
-        glDrawElements(mode, count, type, (void *) offset);
+        glDrawElements(mode, count, type, (const void *) offset);
         OpenGL::AssertNoOglError();
         vao.release();
     }
@@ -947,7 +947,7 @@ namespace Bcg::OpenGL {
     }
 
     void RenderableTriangles::draw() {
-        glDrawElements(mode, count, type, (void *) offset);
+        glDrawElements(mode, count, type, (const void *) offset);
         OpenGL::AssertNoOglError();
     }
 
@@ -959,7 +959,7 @@ namespace Bcg::OpenGL {
     }
 
     void RenderableLines::draw() {
-        glDrawElements(mode, count, type, (void *) offset);
+        glDrawElements(mode, count, type, (const void *) offset);
         OpenGL::AssertNoOglError();
     }
 
