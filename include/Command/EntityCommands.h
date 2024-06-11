@@ -8,6 +8,7 @@
 #include "Commands.h"
 
 namespace Bcg::Command::Entity{
+    //TODO think about using Commands more thoroughly, events are things that happend (broadcast) commands are requests
     struct Create : public AbstractCommand {
         Create();
 
