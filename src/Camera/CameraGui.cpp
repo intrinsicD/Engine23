@@ -68,7 +68,7 @@ namespace Bcg{
         if (ImGui::CollapsingHeader("View Parameters")) {
             auto parameters = camera.view;
             auto position = parameters.position;
-            auto front = parameters.front;
+            auto front = parameters.get_front();
             auto up = parameters.up;
             auto world_up = parameters.world_up;
             auto right = parameters.right;
@@ -80,26 +80,26 @@ namespace Bcg{
                 ImGui::Text("World Up: %f %f %f", world_up[0], world_up[1], world_up[2]);
             } else {
                 if (ImGui::InputFloat3("Position", position.data())) {
-                    camera.set_position(position);
+                    camera.view.set_position(position);
                 }
                 if (ImGui::InputFloat3("Front", front.data())) {
-                    camera.set_front(front);
+                    camera.view.set_front(front);
                 }
                 ImGui::Text("Right: %f %f %f", right[0], right[1], right[2]);
                 if (ImGui::InputFloat3("World Up", up.data())) {
-                    camera.set_worldup(up);
+                    camera.view.set_worldup(up);
                 }
             }
             if (ImGui::Button("Reset##View")) {
-                camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
-                camera.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
-                camera.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
+                camera.view.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
+                camera.view.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
+                camera.view.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
             }
         }
         if (ImGui::CollapsingHeader("Projection Parameters")) {
             bool is_orthographic = camera.is_orthographic;
             if (is_orthographic) {
-                Camera<float>::Projection::Orthographic orthographic = camera.projection.orthographic_parameters;
+                OrthographicProjection orthographic = camera.projection.orthographic_parameters;
                 if (!edit) {
                     ImGui::Text("Left: %f", orthographic.left);
                     ImGui::Text("Right: %f", orthographic.right);
@@ -109,7 +109,7 @@ namespace Bcg{
                     ImGui::Text("Far##Orthographic: %f", orthographic.far);
                 } else {
                     static bool changed_ortho = false;
-                    static Camera<float>::Projection::Orthographic orthographic_new = orthographic;
+                    static OrthographicProjection orthographic_new = orthographic;
                     changed_ortho |= ImGui::InputFloat("Left", &orthographic_new.left);
                     changed_ortho |= ImGui::InputFloat("Right", &orthographic_new.right);
                     changed_ortho |= ImGui::InputFloat("Bottom", &orthographic_new.bottom);
@@ -127,7 +127,7 @@ namespace Bcg{
                     camera.set_orthographic_parameters({-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f});
                 }
             } else {
-                Camera<float>::Projection::Perspective perspective = camera.projection.perspective_parameters;
+                PerspectiveProjection perspective = camera.projection.perspective_parameters;
                 if (!edit) {
                     ImGui::Text("Fovy: %f", perspective.fovy_degrees);
                     ImGui::Text("Aspect: %f", perspective.aspect);
@@ -135,7 +135,7 @@ namespace Bcg{
                     ImGui::Text("Far##Orthographic: %f", perspective.far);
                 } else {
                     static bool changed_perspective = false;
-                    static Camera<float>::Projection::Perspective perspective_new = perspective;
+                    static PerspectiveProjection perspective_new = perspective;
                     changed_perspective |= ImGui::InputFloat("Fovy", &perspective_new.fovy_degrees);
                     changed_perspective |= ImGui::InputFloat("Aspect", &perspective_new.aspect);
                     changed_perspective |= ImGui::InputFloat("Near##Perspective", &perspective_new.near);
@@ -164,8 +164,9 @@ namespace Bcg{
         ImGui::Text("last_point_3d: %f %f %f", camera.arc_ball_parameters.last_point_3d[0],
                     camera.arc_ball_parameters.last_point_3d[1],
                     camera.arc_ball_parameters.last_point_3d[2]);
-        if (ImGui::InputFloat3("target", camera.arc_ball_parameters.target.data())) {
-            camera.set_target(camera.arc_ball_parameters.target);
+        static Eigen::Vector<float, 3> target = camera.view.target;
+        if (ImGui::InputFloat3("target", target.data())) {
+            camera.view.set_target(target);
         }
 
     }

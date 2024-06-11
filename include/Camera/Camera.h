@@ -9,51 +9,20 @@
 #include "OrthoRH_NO.h"
 #include "PerspectiveRH_NO.h"
 #include "DegreesToRadians.h"
+#include "PerspectiveProjection.h"
+#include "OrthographicProjection.h"
+#include "ViewParameters.h"
 
 namespace Bcg {
     template<typename T>
     class Camera {
     public:
         struct Projection {
-            struct Perspective {
-                T fovy_degrees = 45.0;
-                T aspect = 4.0 / 3.0;
-                T near;
-                T far;
-                bool dirty = false;
-
-                Eigen::Matrix<T, 4, 4> get_matrix() const {
-                    return PerspectiveRH_NO(DegreesToRadians(fovy_degrees), aspect, near, far);
-                }
-            } perspective_parameters;
-
-            struct Orthographic {
-                T left;
-                T right;
-                T bottom;
-                T top;
-                T near;
-                T far;
-                bool dirty = false;
-
-                Eigen::Matrix<T, 4, 4> get_matrix() const {
-                    return OrthoRH_NO(left, right, bottom, top, near, far);
-                }
-            } orthographic_parameters;
+            PerspectiveProjection<T> perspective_parameters;
+            OrthographicProjection<T> orthographic_parameters;
         } projection;
 
-        struct ViewParameters {
-            Eigen::Vector<T, 3> position = Eigen::Vector<T, 3>(0.0, 0.0, 3.0);
-            Eigen::Vector<T, 3> front = Eigen::Vector<T, 3>(0.0, 0.0, -1.0);
-            Eigen::Vector<T, 3> up = Eigen::Vector<T, 3>(0.0, 1.0, 0.0);
-            Eigen::Vector<T, 3> right = Eigen::Vector<T, 3>(1.0, 0.0, 0.0);
-            Eigen::Vector<T, 3> world_up = Eigen::Vector<T, 3>(0.0, 1.0, 0.0);
-            bool dirty;
-
-            Eigen::Matrix<T, 4, 4> get_matrix() const {
-                return LookAtRH<T>(position, position + front, up);
-            }
-        } view;
+        ViewParameters<T> view;
 
         struct Sensitivity {
             T zoom = 5.0;
@@ -64,7 +33,6 @@ namespace Bcg {
 
         struct ArcBallParameters {
             bool last_point_ok = false;
-            Eigen::Vector<T, 3> target = Eigen::Vector<T, 3>(0.0, 0.0, 0.0);
             Eigen::Vector<T, 2> last_point_2d = Eigen::Vector<T, 2>(0.0, 0.0);
             Eigen::Vector<T, 3> last_point_3d = Eigen::Vector<T, 3>(0.0, 0.0, 0.0);
         } arc_ball_parameters;
@@ -72,9 +40,9 @@ namespace Bcg {
         bool is_orthographic = true;
 
         Camera() : is_orthographic(false) {
-            set_worldup({0.0, 1.0, 0.0});
-            set_position({0.0, 0.0, 3.0});
-            set_target({0.0, 0.0, 0.0});
+            view.set_worldup({0.0, 1.0, 0.0});
+            view.set_position({0.0, 0.0, 3.0});
+            view.set_target({0.0, 0.0, 0.0});
             set_perspective_parameters({0.1, 100.0, 800.0 / 600.0, DegreesToRadians<T>(45.0)});
         }
 
@@ -94,38 +62,23 @@ namespace Bcg {
             }
         }
 
-        void set_front(const Eigen::Vector<T, 3> &front) {
-            view.front = front.normalized();
-            view.right = view.front.cross(view.up).normalized();
-            view.up = view.right.cross(view.front);
+        Eigen::Matrix<T, 4, 4> get_view_projection() const {
+            return get_projection() * get_view();
         }
 
-        void set_target(const Eigen::Vector<T, 3> &target) {
-            set_front(target - view.position);
-        }
-
-        void set_position(const Eigen::Vector<T, 3> &position) {
-            view.position = position;
-        }
-
-        void set_worldup(const Eigen::Vector<T, 3> &world_up) {
-            view.world_up = world_up;
-            view.right = view.front.cross(view.world_up).normalized();
-            view.up = view.right.cross(view.front);
-        }
-
-        void set_view_parameters(const ViewParameters &parameters) {
+        void set_view_parameters(const ViewParameters<T> &parameters) {
             view = parameters;
-            view.right = view.front.cross(view.world_up).normalized();
-            view.up = view.right.cross(view.front);
+            Eigen::Vector<T, 3> front = view.get_front();
+            view.right = front.cross(view.world_up).normalized();
+            view.up = view.right.cross(front);
         }
 
-        void set_perspective_parameters(const typename Projection::Perspective &parameters) {
+        void set_perspective_parameters(const PerspectiveProjection<T> &parameters) {
             projection.perspective_parameters = parameters;
             is_orthographic = false;
         }
 
-        void set_orthographic_parameters(const typename Projection::Orthographic &parameters) {
+        void set_orthographic_parameters(const OrthographicProjection<T> &parameters) {
             projection.orthographic_parameters = parameters;
             is_orthographic = true;
         }

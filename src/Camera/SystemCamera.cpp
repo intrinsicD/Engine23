@@ -145,13 +145,14 @@ namespace Bcg {
             auto &time = Engine::Context().get<Time>();
 
             auto delta = float(time.mainloop.duration) * camera.sensitivity.move;
+            Eigen::Vector<float, 3> front = camera.view.get_front();
             if (keyboard.keys[GLFW_KEY_W]) {
                 //move forward
-                camera.view.position += camera.view.front * delta;
+                camera.view.position += front * delta;
             }
             if (keyboard.keys[GLFW_KEY_S]) {
                 //move backward
-                camera.view.position -= camera.view.front * delta;
+                camera.view.position -= front * delta;
             }
             if (keyboard.keys[GLFW_KEY_D]) {
                 //move right
@@ -172,13 +173,14 @@ namespace Bcg {
             auto &time = Engine::Context().get<Time>();
 
             auto delta = float(time.mainloop.duration) * camera.sensitivity.move;
+            Eigen::Vector<float, 3> front = camera.view.get_front();
             if (keyboard.keys[GLFW_KEY_W]) {
                 //move forward
-                camera.view.position += camera.view.front * delta;
+                camera.view.position += front * delta;
             }
             if (keyboard.keys[GLFW_KEY_S]) {
                 //move backward
-                camera.view.position -= camera.view.front * delta;
+                camera.view.position -= front * delta;
             }
             if (keyboard.keys[GLFW_KEY_D]) {
                 //move right
@@ -264,7 +266,7 @@ namespace Bcg {
                     world_delta[2] = 0;
                     if (!picker.point.is_background) {
                         camera.view.position -= world_delta;
-                        camera.arc_ball_parameters.target -= world_delta;
+                        camera.view.target -= world_delta;
                         mouse.position.last_drag_pos = mouse.position.current;
                     }
                 }
@@ -289,12 +291,12 @@ namespace Bcg {
                         rot.m_angle_axis = angle * axis;
 
                         Eigen::Vector<float, 3> position = camera.view.position;
-                        Eigen::Vector<float, 3> direction = position - camera.arc_ball_parameters.target;
+                        Eigen::Vector<float, 3> direction = position - camera.view.target;
                         direction = rot.matrix() * direction;
 
 
-                        camera.set_position(camera.arc_ball_parameters.target + direction);
-                        camera.set_target(camera.arc_ball_parameters.target);
+                        camera.view.set_position(camera.view.target + direction);
+                        camera.view.set_target(camera.view.target);
 
                     }
                 }
@@ -404,6 +406,7 @@ namespace Bcg {
         //register event handlers
         Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemCameraInternal::on_startup>();
         Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemCameraInternal::on_shutdown>();
+
         Components<Camera<float>> cameras(SystemCamera::component_name());
         auto camera_id = cameras.create_instance();
         auto &component_camera = Engine::Context().emplace<Component<Camera<float>>>(camera_id);
@@ -412,9 +415,9 @@ namespace Bcg {
         auto &component_window = Engine::Context().get<Component<Window>>();
         auto &window = windows.get_instance(component_window);
         camera.set_perspective_parameters({45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
-        camera.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
-        camera.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
-        camera.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
+        camera.view.set_position(Eigen::Vector<float, 3>(0.0f, 0.0f, 3.0f));
+        camera.view.set_target(Eigen::Vector<float, 3>(0.0f, 0.0f, 0.0f));
+        camera.view.set_worldup(Eigen::Vector<float, 3>(0.0f, 1.0f, 0.0f));
         Log::Info("Initialized", name()).enqueue();
     }
 
