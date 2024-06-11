@@ -18,8 +18,8 @@ namespace Bcg {
     }
 
     void ComponentGui<Texture>::Show(Component<Texture> &component) {
-        auto components = Components<Texture>(SystemTexture::component_name());
-        Show(components.get_instance(component));
+        Components<Texture> textures;
+        Show(textures.get_instance(component));
     }
 
     void ComponentGui<Texture>::Show(Texture &texture) {

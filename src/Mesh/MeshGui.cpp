@@ -16,7 +16,7 @@ namespace Bcg {
     }
 
     void ComponentGui<Mesh>::Show(Component<Mesh> &component) {
-        Components<Mesh> meshes(SystemMesh::component_name());
+        Components<Mesh> meshes;
         return Show(meshes.get_instance(component));
     }
 

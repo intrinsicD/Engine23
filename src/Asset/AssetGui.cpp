@@ -23,7 +23,7 @@ namespace Bcg {
     }
 
     void ComponentGui<Asset>::Show(Component<Asset> component) {
-        Components<Asset> assets(SystemAsset::component_name());
+        Components<Asset> assets;
         return Show(assets.get_instance(component));
     }
 

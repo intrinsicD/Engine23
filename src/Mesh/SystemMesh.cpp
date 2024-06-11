@@ -21,9 +21,6 @@
 #include "Input.h"
 #include "Picker.h"
 #include "Entity.h"
-#include "SystemTransform.h"
-#include "SystemAABB.h"
-#include "SystemAsset.h"
 #include "Components.h"
 #include "ImGuiUtils.h"
 
@@ -76,7 +73,7 @@ namespace Bcg {
 
         void on_update_gui_menu(const Events::Update<GuiMenu> &event) {
             if (ImGui::BeginMenu("Menu")) {
-                if(ImGui::BeginMenu(SystemMesh::component_name().c_str())){
+                if (ImGui::BeginMenu(SystemMesh::component_name().c_str())) {
                     if (ImGui::MenuItem("Instance", nullptr, &show_gui_instance)) {
                         Engine::Dispatcher().sink<Events::Update<Gui>>().connect<&on_update_gui_instance>();
                     }
@@ -110,8 +107,8 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("MeshComponents", &show_gui_components)) {
-                Components<Mesh> components(SystemMesh::component_name());
-                ImGuiUtils::Show(components);
+                Components<Mesh> meshes;
+                ImGuiUtils::Show(meshes);
             }
             ImGui::End();
         }
@@ -129,8 +126,8 @@ namespace Bcg {
                 Engine::Dispatcher().trigger(Events::Load<Mesh>{entity_id, path});
                 CompositeCommand prepare_entity("prepare_entity");
                 prepare_entity.add_task("compute_vertex_normals", [entity_id]() {
-                    Components<Mesh> components(SystemMesh::component_name());
-                    auto &mesh = components.get_instance(entity_id);
+                    Components<Mesh> meshes;
+                    auto &mesh = meshes.get_instance(entity_id);
 
                     auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
                     if (!normals) {
@@ -146,8 +143,8 @@ namespace Bcg {
 
                 prepare_entity.add_task("upload_to_gpu", [entity_id]() {
                     if (!Engine::State().all_of<OpenGL::RenderableTriangles>(entity_id)) {
-                        Components<Mesh> components(SystemMesh::component_name());
-                        auto &mesh = components.get_instance(entity_id);
+                        Components<Mesh> meshes;
+                        auto &mesh = meshes.get_instance(entity_id);
 
                         auto positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
                         auto normals = mesh.vertices.get<Eigen::Vector<double, 3>>("v_normal");
@@ -231,21 +228,23 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Mesh)
+
     std::string SystemMesh::name() {
         return "System" + component_name();
     }
 
     std::string SystemMesh::component_name() {
-        return "Mesh";
+        return TypeName<Mesh>::name;
     }
 
     bool SystemMesh::load(const std::string &filepath, entt::entity entity_id) {
         MeshIo reader(filepath);
-        Components<Mesh> components(SystemMesh::component_name());
-        auto instance_id = components.create_instance();
-        components.add_to_entity(entity_id, instance_id);
+        Components<Mesh> meshes;
+        auto instance_id = meshes.create_instance();
+        meshes.add_to_entity(entity_id, instance_id);
 
-        auto &mesh = components.get_instance(instance_id);
+        auto &mesh = meshes.get_instance(instance_id);
 
         if (!reader.read(mesh)) {
             Log::Warn(component_name() + ": load from file FAILED: " + filepath).enqueue();
@@ -254,7 +253,7 @@ namespace Bcg {
             Log::Info(component_name() + ": loaded from file: " + filepath).enqueue();
         }
 
-        Components<Asset> assets(SystemAsset::component_name());
+        Components<Asset> assets;
         auto asset_id = assets.create_instance();
         assets.add_to_entity(entity_id, asset_id);
         assets.get_instance(asset_id) = Asset(FilePath::Filename(filepath), filepath, component_name());
@@ -270,11 +269,11 @@ namespace Bcg {
             positions[v] = (positions[v] - center) / scaling;
         }
 
-        Components<Transform<float>> transforms(SystemTransform::component_name());
+        Components<Transform<float>> transforms;
         auto transform_id = transforms.create_instance();
         transforms.add_to_entity(entity_id, transform_id);
 
-        Components<AABB3> aabbs(SystemAABB::component_name());
+        Components<AABB3> aabbs;
         auto aabb_id = aabbs.create_instance();
         aabbs.add_to_entity(entity_id, aabb_id);
         aabbs.get_instance(aabb_id).fit(MapConst(positions));

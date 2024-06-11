@@ -15,6 +15,7 @@
 #include "Input.h"
 #include "imgui.h"
 #include "Components.h"
+#include "TypeStringification.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("Window", &show_gui)) {
-                Components<Window> windows(SystemWindowGLFW::component_name());
+                Components<Window> windows;
                 auto &component_window = Engine::Context().get<Component<Window>>();
                 auto &window = windows.get_instance(component_window);
                 auto size = window.get_size();
@@ -114,7 +115,7 @@ namespace Bcg {
         }
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
             Log::Info(SystemWindowGLFW::name(), "Startup").enqueue();
@@ -179,13 +180,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Window)
+
     std::string SystemWindowGLFW::name() {
         return "System" + component_name();
     }
 
-
     std::string SystemWindowGLFW::component_name() {
-        return "WindowGLFW";
+        return TypeName<Window>::name;
     }
 
     void SystemWindowGLFW::set_window_close(void *window_handle) {
@@ -200,7 +202,7 @@ namespace Bcg {
     void SystemWindowGLFW::set_window_resize(void *window_handle, int width, int height) {
         auto &window_register = Engine::Context().get<WindowRegister>();
         auto &windwo_id = window_register[window_handle];
-        Components<Window> windows(SystemWindowGLFW::component_name());
+        Components<Window> windows;
         auto &window = windows.get_instance(windwo_id);
         window.width = width;
         window.height = height;
@@ -607,13 +609,14 @@ namespace Bcg {
     void SystemWindowGLFW::pre_init() {
         Engine::Context().emplace<Window>();
         Engine::Context().emplace<Input>();
-        Components<Window> windows(component_name());
+        Components<Window> windows;
         auto window_id = windows.create_instance();
         Engine::Context().emplace<Component<Window>>(window_id);
         Engine::Context().emplace<WindowRegister>();
     }
 
     void SystemWindowGLFW::init() {
+        auto _name = TypeName<Window>::name;
         glfwSetErrorCallback([](int error, const char *description) {
             Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).enqueue();
         });

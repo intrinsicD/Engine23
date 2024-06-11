@@ -15,6 +15,7 @@
 #include "SOIL/SOIL.h"
 #include "glad/gl.h"
 #include "FilePath.h"
+#include "TypeStringification.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -86,10 +87,12 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin(SystemTexture::component_name().c_str(), &show_gui_instance, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (ImGui::Begin(SystemTexture::component_name().c_str(), &show_gui_instance,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
                 ImGui::Text("Loaded Textures:");
-                for (const auto &texture_pair : textures) {
-                    if (ImGui::ImageButton(reinterpret_cast<void*>(static_cast<intptr_t>(texture_pair.second)), ImVec2(64, 64))) {
+                for (const auto &texture_pair: textures) {
+                    if (ImGui::ImageButton(reinterpret_cast<void *>(static_cast<intptr_t>(texture_pair.second)),
+                                           ImVec2(64, 64))) {
                         selected_texture_path = texture_pair.first;
                         selected_texture_id = texture_pair.second;
                     }
@@ -100,9 +103,10 @@ namespace Bcg {
             ImGui::End();
 
             if (selected_texture_id != 0) {
-                if (ImGui::Begin((selected_texture_path + "###TextureWindow").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                if (ImGui::Begin((selected_texture_path + "###TextureWindow").c_str(), nullptr,
+                                 ImGuiWindowFlags_AlwaysAutoResize)) {
                     ImVec2 window_size = ImGui::GetContentRegionAvail();
-                    ImGui::Image(reinterpret_cast<void*>(static_cast<intptr_t>(selected_texture_id)), window_size);
+                    ImGui::Image(reinterpret_cast<void *>(static_cast<intptr_t>(selected_texture_id)), window_size);
                 }
                 ImGui::End();
             }
@@ -114,9 +118,9 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin("TransformComponents", &show_gui_components)) {
-                Components<Texture> components(SystemTexture::component_name());
-                ImGuiUtils::Show(components);
+            if (ImGui::Begin("TextureComponents", &show_gui_components)) {
+                Components<Texture> textures;
+                ImGuiUtils::Show(textures);
             }
             ImGui::End();
         }
@@ -127,7 +131,7 @@ namespace Bcg {
         }
 
         void on_shutdown(const Events::Shutdown<Engine> &event) {
-            for (const auto &texture_pair : textures) {
+            for (const auto &texture_pair: textures) {
                 glDeleteTextures(1, &texture_pair.second);
             }
             textures.clear();
@@ -148,26 +152,27 @@ namespace Bcg {
 
 
             int width, height, channels;
-            unsigned char* image_data = SOIL_load_image(file_path.c_str(), &width, &height, &channels, SOIL_LOAD_AUTO);
+            unsigned char *image_data = SOIL_load_image(file_path.c_str(), &width, &height, &channels, SOIL_LOAD_AUTO);
 
             if (!image_data) {
-                Log::Error("SOIL loading error: " +  file_path).enqueue();
+                Log::Error("SOIL loading error: " + file_path).enqueue();
                 return;
             }
 
             GLuint texture_id;
             glGenTextures(1, &texture_id);
             glBindTexture(GL_TEXTURE_2D, texture_id);
-            glTexImage2D(GL_TEXTURE_2D, 0, channels == 4 ? GL_RGBA : GL_RGB, width, height, 0, channels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, image_data);
+            glTexImage2D(GL_TEXTURE_2D, 0, channels == 4 ? GL_RGBA : GL_RGB, width, height, 0,
+                         channels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, image_data);
             glGenerateMipmap(GL_TEXTURE_2D);
 
             SOIL_free_image_data(image_data);
 
 
             if (texture_id == 0) {
-                Log::Error("SOIL loading error: " +  file_path).enqueue();
+                Log::Error("SOIL loading error: " + file_path).enqueue();
             } else {
-                Components<Texture> components(SystemTexture::component_name());
+                Components<Texture> components;
                 auto tex_instance = components.create_instance();
                 auto &texture = components.get_instance(tex_instance);
                 texture.width = width;
@@ -188,12 +193,14 @@ namespace Bcg {
 
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Texture)
+
     std::string SystemTexture::name() {
         return "System" + component_name();
     }
 
     std::string SystemTexture::component_name() {
-        return "Texture";
+        return TypeName<Texture>::name;
     }
 
     void SystemTexture::pre_init() {
@@ -204,13 +211,13 @@ namespace Bcg {
         Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemTextureInternal::on_startup>();
         Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemTextureInternal::on_shutdown>();
         Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemTextureInternal::on_update_gui_menu>();
-        Log::Info("Initialized", name());
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemTexture::remove() {
         Engine::Dispatcher().sink<Events::Startup<Engine>>().disconnect<&SystemTextureInternal::on_startup>();
         Engine::Dispatcher().sink<Events::Shutdown<Engine>>().disconnect<&SystemTextureInternal::on_shutdown>();
         Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemTextureInternal::on_update_gui_menu>();
-        Log::Info("Removed", name());
+        Log::Info("Removed", name()).enqueue();
     }
 }

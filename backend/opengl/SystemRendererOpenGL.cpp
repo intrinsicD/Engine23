@@ -60,7 +60,7 @@ namespace Bcg {
 namespace Bcg {
     namespace SystemRendererOpenGLInternal {
         void on_update_viewport(const Events::Update<Viewport> &event) {
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
 
@@ -113,7 +113,7 @@ namespace Bcg {
         }
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
 
             for (auto window_index: windows.container.used_list) {
@@ -256,7 +256,7 @@ namespace Bcg {
     }
 
     float SystemRendererOpenGL::get_depth_at_screen_position(float x, float y){
-        Components<Window> windows(SystemWindowGLFW::component_name());
+        Components<Window> windows;
         auto &component_window = Engine::Context().get<Component<Window>>();
         auto &window = windows.get_instance(component_window);
         auto size = window.get_size();

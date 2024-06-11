@@ -79,7 +79,7 @@ namespace Bcg{
         }
 
         void on_begin_frame(const Events::Begin<Frame> &event) {
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
 

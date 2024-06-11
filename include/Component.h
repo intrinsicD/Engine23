@@ -8,7 +8,7 @@
 namespace Bcg{
     template<typename T>
     struct Component{
-        unsigned int index;
+        unsigned int index = -1;
     };
 }
 

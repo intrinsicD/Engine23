@@ -18,7 +18,7 @@ namespace Bcg{
     }
 
     void ComponentGui<Camera<float>>::Show(Component<Camera<float>> &component) {
-        Components<Camera<float>> cameras(SystemCamera::component_name());
+        Components<Camera<float>> cameras;
         return Show(cameras.get_instance(component));
     }
 
@@ -148,7 +148,7 @@ namespace Bcg{
                     }
                 }
                 if (ImGui::Button("Reset##Perspective")) {
-                    Components<Window> windows(SystemWindowGLFW::component_name());
+                    Components<Window> windows;
                     auto &component_window = Engine::Context().get<Component<Window>>();
                     auto &window = windows.get_instance(component_window);
                     camera.set_perspective_parameters(

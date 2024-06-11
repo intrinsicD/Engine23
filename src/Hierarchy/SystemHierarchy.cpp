@@ -13,6 +13,7 @@
 #include "imgui.h"
 
 namespace Bcg {
+
     namespace SystemHierarchyInternal {
         static bool show_gui = false;
 

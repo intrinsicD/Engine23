@@ -22,6 +22,10 @@ namespace Bcg {
             OrthographicProjection<T> orthographic_parameters;
         } projection;
 
+        unsigned int transform_id;
+        unsigned int perspective_parameters_id;
+        unsigned int orthographic_parameters_id;
+
         ViewParameters<T> view;
 
         struct Sensitivity {

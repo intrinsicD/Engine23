@@ -90,13 +90,13 @@ namespace Bcg {
         }
         if (show_guizmo) {
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
 ;            EditTransform(cameras.get_instance(component_camera), transform.model.matrix());
         }
     }
 
     void ComponentGui<Transform<float>>::Show(Component<Transform<float>> &component){
-        Components<Transform<float>> transforms(SystemTransform::component_name());
+        Components<Transform<float>> transforms;
         return Show(transforms.get_instance(component));
     }
 

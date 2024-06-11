@@ -10,6 +10,7 @@
 #include "Commands.h"
 #include "imgui.h"
 #include "GLFW/glfw3.h"
+#include "TypeStringification.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -175,12 +176,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Mouse<float>)
+
     std::string SystemMouse::name() {
         return "System" + component_name();
     }
 
     std::string SystemMouse::component_name() {
-        return "Mouse";
+        return TypeName<Mouse<float>>::name;
     }
 
     void SystemMouse::pre_init() {

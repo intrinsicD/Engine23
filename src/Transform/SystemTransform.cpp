@@ -62,8 +62,8 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("TransformComponents", &show_gui_components)) {
-                Components<Transform<float>> components(SystemTransform::component_name());
-                ImGuiUtils::Show(components);
+                Components<Transform<float>> transforms;
+                ImGuiUtils::Show(transforms);
             }
             ImGui::End();
         }
@@ -101,12 +101,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Transform<float>)
+
     std::string SystemTransform::name() {
         return "System" + component_name();
     }
 
     std::string SystemTransform::component_name() {
-        return "Transform";
+        return TypeName<Transform<float>>::name;
     }
 
     void SystemTransform::pre_init() {

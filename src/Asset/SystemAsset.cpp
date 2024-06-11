@@ -73,9 +73,9 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin("MeshComponents", &show_gui_components)) {
-                Components<Asset> components(SystemAsset::component_name());
-                ImGuiUtils::Show(components);
+            if (ImGui::Begin("AssetComponents", &show_gui_components)) {
+                Components<Asset> assets;
+                ImGuiUtils::Show(assets);
             }
             ImGui::End();
         }
@@ -88,12 +88,14 @@ namespace Bcg {
 
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Asset)
+
     std::string SystemAsset::name() {
         return "System" + component_name();
     }
 
     std::string SystemAsset::component_name() {
-        return "Asset";
+        return TypeName<Asset>::name;
     }
 
     void SystemAsset::pre_init() {

@@ -12,9 +12,8 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Components.h"
-#include "SystemWindowGLFW.h"
-#include "SystemCamera.h"
 #include "SystemRendererOpenGL.h"
+#include "TypeStringification.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -101,7 +100,8 @@ namespace Bcg {
         void on_update_mouse_button_press(const Events::Update<Mouse<float>::Button::Press> &event) {
             auto &mouse = Engine::Context().get<Mouse<float>>();
             auto &picker = Engine::Context().get<Picker>();
-            picker.point = SystemPicker::get_picker_point_from_win_coords(mouse.position.current[0], mouse.position.current[1]);
+            picker.point = SystemPicker::get_picker_point_from_win_coords(mouse.position.current[0],
+                                                                          mouse.position.current[1]);
         }
     }
 }
@@ -111,29 +111,31 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Picker)
+
     std::string SystemPicker::name() {
         return "System" + component_name();
     }
 
     std::string SystemPicker::component_name() {
-        return "Picker";
+        return TypeName<Picker>::name;
     }
 
-    Point SystemPicker::get_picker_point_from_win_coords(float x, float y){
-        Components<Window> windows(SystemWindowGLFW::component_name());
+    Point SystemPicker::get_picker_point_from_win_coords(float x, float y) {
+        Components<Window> windows;
         auto &component_window = Engine::Context().get<Component<Window>>();
         auto &window = windows.get_instance(component_window);
         auto win_size = window.get_size();
 
-        Components<Camera<float>> cameras(SystemCamera::component_name());
+        Components<Camera<float>> cameras;
         auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
         auto &camera = cameras.get_instance(component_camera);
         return SystemPickerInternal::GetPickerPointFromWinCoords(x, y,
-                                    win_size[0],
-                                    win_size[1],
-                                    camera.get_view(),
-                                    camera.get_projection(),
-                                    window.dpi);
+                                                                 win_size[0],
+                                                                 win_size[1],
+                                                                 camera.get_view(),
+                                                                 camera.get_projection(),
+                                                                 window.dpi);
     }
 
     void SystemPicker::pre_init() {
@@ -143,12 +145,12 @@ namespace Bcg {
     void SystemPicker::init() {
         Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&SystemPickerInternal::on_update_gui_menu>();
         Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button::Press>>().connect<&SystemPickerInternal::on_update_mouse_button_press>();
-        Log::Info("Initialized", name());
+        Log::Info("Initialized", name()).enqueue();
     }
 
     void SystemPicker::remove() {
         Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&SystemPickerInternal::on_update_gui_menu>();
         Engine::Dispatcher().sink<Events::Update<Mouse<float>::Button::Press>>().disconnect<&SystemPickerInternal::on_update_mouse_button_press>();
-        Log::Info("Removed", name());
+        Log::Info("Removed", name()).enqueue();
     }
 }

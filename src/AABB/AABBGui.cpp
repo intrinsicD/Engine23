@@ -17,7 +17,7 @@ namespace Bcg {
     }
 
     void ComponentGui<AABB3>::Show(Component<AABB3> &component) {
-        Components<AABB3> aabbs(SystemAABB::component_name());
+        Components<AABB3> aabbs;
         return Show(aabbs.get_instance(component));
     }
 

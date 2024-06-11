@@ -10,6 +10,7 @@
 #include "Engine.h"
 #include "Commands.h"
 #include "Entity.h"
+#include "TypeStringification.h"
 #include <string>
 
 namespace Bcg {
@@ -20,6 +21,13 @@ namespace Bcg {
                                                 container(Engine::Context().find<ResourceContainer<T >>()
                                                           ? Engine::Context().get<ResourceContainer<T >>()
                                                           : Engine::Context().emplace<ResourceContainer<T >>()) {
+
+        }
+
+        Components() : name(TypeName<T>::name),
+                       container(Engine::Context().find<ResourceContainer<T >>()
+                                 ? Engine::Context().get<ResourceContainer<T >>()
+                                 : Engine::Context().emplace<ResourceContainer<T >>()) {
 
         }
 
@@ -64,15 +72,16 @@ namespace Bcg {
             return get_instance(Engine::State().get<Component<T>>(entity_id));
         }
 
-        void add_to_entity(entt::entity entity_id, unsigned int instance_id) {
+        Component<T> &add_to_entity(entt::entity entity_id, unsigned int instance_id) {
             if (instance_id >= get_size()) {
                 Log::Error(name + ": add with instance_id: " + std::to_string(instance_id) + " to entity_id: " +
                            AsString(entity_id) +
-                           " failed, because instance_id is larger than the number of instances!").enqueue();
+                           " failed, because instance_id is larger than the number of instances!").execute();
+                throw std::runtime_error("instance_id is larger than the number of instances!");
             } else {
-                Engine::State().emplace_or_replace<Component<T>>(entity_id, instance_id);
                 Log::Info(name + ": add with instance_id: " + std::to_string(instance_id) + " to entity_id: " +
                           AsString(entity_id)).enqueue();
+                return Engine::State().emplace_or_replace<Component<T>>(entity_id, instance_id);
             }
         }
 

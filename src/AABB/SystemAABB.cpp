@@ -99,8 +99,8 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("AABBComponents", &show_gui_components)) {
-                Components<AABB3> components(SystemAABB::component_name());
-                ImGuiUtils::Show(components);
+                Components<AABB3> aabbs;
+                ImGuiUtils::Show(aabbs);
             }
             ImGui::End();
         }
@@ -125,15 +125,15 @@ namespace Bcg {
                 return;
             }
 
-            Components<AABB3> components(SystemAABB::component_name());
+            Components<AABB3> aabbs;
 
             if (!entity.all_of<Component<AABB3>>()) {
-                auto aabb_id = components.create_instance();
-                components.add_to_entity(entity_id, aabb_id);
-                components.get_instance(aabb_id).fit(MapConst(positions));
+                auto aabb_id = aabbs.create_instance();
+                aabbs.add_to_entity(entity_id, aabb_id);
+                aabbs.get_instance(aabb_id).fit(MapConst(positions));
             } else {
                 auto &component = Engine::State().get<Component<AABB3>>(entity_id);
-                components.get_instance(component.index).fit(MapConst(positions));
+                aabbs.get_instance(component.index).fit(MapConst(positions));
             }
         }
     }
@@ -144,12 +144,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(AABB3)
+
     std::string SystemAABB::name() {
-        return "SystemAABB";
+        return "System" + component_name();
     }
 
     std::string SystemAABB::component_name() {
-        return "AABB";
+        return TypeName<AABB3>::name;
     }
 
     void SystemAABB::pre_init() {

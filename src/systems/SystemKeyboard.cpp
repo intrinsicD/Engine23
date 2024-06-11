@@ -10,6 +10,7 @@
 #include "Events.h"
 #include "Keyboard.h"
 #include "Picker.h"
+#include "TypeStringification.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -116,7 +117,7 @@ namespace Bcg {
         }
 
 
-        void on_update_keyboard(const Events::Update<Keyboard> &event){
+        void on_update_keyboard(const Events::Update<Keyboard> &event) {
             auto &keyboard = Engine::Context().get<Keyboard>();
 
             if (keyboard.which.contains(Keyboard::KEY::_DELETE)) {
@@ -131,12 +132,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Keyboard)
+
     std::string SystemKeyboard::name() {
         return "System" + component_name();
     }
 
     std::string SystemKeyboard::component_name() {
-        return "Keyboard";
+        return TypeName<Keyboard>::name;
     }
 
     void SystemKeyboard::pre_init() {

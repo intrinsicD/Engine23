@@ -16,14 +16,13 @@
 #include "SafeAcos.h"
 #include "Rotation3DAngleAxis.h"
 #include "Components.h"
-#include "SystemWindowGLFW.h"
 #include "ImGuiUtils.h"
 #include "Picker.h"
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Input.h"
+#include "Transform.h"
 #include "SystemRendererOpenGL.h"
-#include <iostream>
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -93,8 +92,8 @@ namespace Bcg {
             }
 
             if (ImGui::Begin("CameraComponents", &show_gui_components)) {
-                Components<Camera<float>> components(SystemCamera::component_name());
-                ImGuiUtils::Show(components);
+                Components<Camera<float>> cameras;
+                ImGuiUtils::Show(cameras);
             }
             ImGui::End();
         }
@@ -116,10 +115,10 @@ namespace Bcg {
         }
 
         void on_update_viewport(const Events::Update<Viewport> &event) {
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
             auto &camera = cameras.get_instance(component_camera);
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
             auto size = window.get_size();
@@ -140,7 +139,7 @@ namespace Bcg {
             if (ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Keyboard>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &camera = cameras.get_instance(component_camera);
             auto &time = Engine::Context().get<Time>();
 
@@ -164,11 +163,11 @@ namespace Bcg {
             }
         }
 
-        void on_update_input(const Events::Update<Input> &event){
+        void on_update_input(const Events::Update<Input> &event) {
             if (ImGui::GetIO().WantCaptureKeyboard) return;
             auto &keyboard = Engine::Context().get<Keyboard>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &camera = cameras.get_instance(component_camera);
             auto &time = Engine::Context().get<Time>();
 
@@ -210,7 +209,7 @@ namespace Bcg {
         // Helper function to convert screen coordinates to world coordinates
         void ScreenToWorld(const Eigen::Vector<float, 2> &screen_pos, Camera<float> &camera,
                            Eigen::Vector<float, 3> &world_pos) {
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
             auto size = window.get_size();
@@ -241,7 +240,7 @@ namespace Bcg {
         void on_update_mouse_position(const Events::Update<Mouse<float>::Position> &event) {
             auto &mouse = Engine::Context().get<Mouse<float>>();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &camera = cameras.get_instance(component_camera);
 
             if (mouse.button.middle) {
@@ -251,7 +250,7 @@ namespace Bcg {
                 }
                 //------------------------------------------------------------------------------------------------------
 
-                Components<Window> windows(SystemWindowGLFW::component_name());
+                Components<Window> windows;
                 auto &component_window = Engine::Context().get<Component<Window>>();
                 auto &window = windows.get_instance(component_window);
                 auto size = window.get_size();
@@ -276,7 +275,7 @@ namespace Bcg {
             if (camera.arc_ball_parameters.last_point_ok && mouse.button.right) {
                 auto model = camera.get_model();
                 Eigen::Vector<float, 3> new_point_3d;
-                Components<Window> windows(SystemWindowGLFW::component_name());
+                Components<Window> windows;
                 auto &component_window = Engine::Context().get<Component<Window>>();
                 auto &window = windows.get_instance(component_window);
                 auto size = window.get_size();
@@ -307,7 +306,7 @@ namespace Bcg {
             if (ImGui::GetIO().WantCaptureMouse) return;
 
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &camera = cameras.get_instance(component_camera);
             auto &scroll = Engine::Context().get<Mouse<float>>().scroll;
             auto &time = Engine::Context().get<Time>();
@@ -346,12 +345,12 @@ namespace Bcg {
 
         void on_end_main_loop(const Events::End<MainLoop> &event) {
             auto &mouse = Engine::Context().get<Mouse<float>>();
-            Components<Window> windows(SystemWindowGLFW::component_name());
+            Components<Window> windows;
             auto &component_window = Engine::Context().get<Component<Window>>();
             auto &window = windows.get_instance(component_window);
             auto size = window.get_size();
             auto &component_camera = Engine::Context().get<Component<Camera<float>>>();
-            Components<Camera<float>> cameras(SystemCamera::component_name());
+            Components<Camera<float>> cameras;
             auto &camera = cameras.get_instance(component_camera);
             camera.arc_ball_parameters.last_point_2d = mouse.position.current;
             camera.arc_ball_parameters.last_point_ok = MapToSphere(camera.arc_ball_parameters.last_point_2d,
@@ -390,12 +389,14 @@ namespace Bcg {
 
 
 namespace Bcg {
+    BCG_GENERATE_TYPE_STRING(Camera<float>)
+
     std::string SystemCamera::name() {
         return "System" + component_name();
     }
 
     std::string SystemCamera::component_name() {
-        return "Camera";
+        return TypeName<Camera<float>>::name;
     }
 
     void SystemCamera::pre_init() {
@@ -407,11 +408,17 @@ namespace Bcg {
         Engine::Dispatcher().sink<Events::Startup<Engine>>().connect<&SystemCameraInternal::on_startup>();
         Engine::Dispatcher().sink<Events::Shutdown<Engine>>().connect<&SystemCameraInternal::on_shutdown>();
 
-        Components<Camera<float>> cameras(SystemCamera::component_name());
+        auto camera_entity = Engine::State().create();
+        Components<Transform<float>> transfroms;
+        auto transform_id = transfroms.create_instance();
+        auto &transform_component = transfroms.add_to_entity(camera_entity, transform_id);
+        auto &transform = transfroms.get_instance(transform_component);
+
+        Components<Camera<float>> cameras;
         auto camera_id = cameras.create_instance();
         auto &component_camera = Engine::Context().emplace<Component<Camera<float>>>(camera_id);
         auto &camera = cameras.get_instance(component_camera);
-        Components<Window> windows(SystemWindowGLFW::component_name());
+        Components<Window> windows;
         auto &component_window = Engine::Context().get<Component<Window>>();
         auto &window = windows.get_instance(component_window);
         camera.set_perspective_parameters({45.0f, window.get_aspect<float>(), 0.1f, 100.0f});
