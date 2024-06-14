@@ -1,18 +1,18 @@
 //
-// Created by alex on 03.05.24.
+// Created by alex on 14.06.24.
 //
 
-#ifndef ENGINE23_SYSTEMASSET_H
-#define ENGINE23_SYSTEMASSET_H
+#ifndef ENGINE23_SYSTEMUNIFORM_H
+#define ENGINE23_SYSTEMUNIFORM_H
 
 #include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemAsset {
+    class SystemUniform {
     public:
-        SystemAsset() = default;
+        SystemUniform() = default;
 
-        ~SystemAsset() = default;
+        ~SystemUniform() = default;
 
         static std::string name();
 
@@ -28,5 +28,4 @@ namespace Bcg {
         static void remove();
     };
 }
-
-#endif //ENGINE23_SYSTEMASSET_H
+#endif //ENGINE23_SYSTEMUNIFORM_H

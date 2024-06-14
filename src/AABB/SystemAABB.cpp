@@ -21,6 +21,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+
+
     namespace SystemAABBInternal {
         static bool show_gui_instance = false;
         static bool show_gui_components = false;
@@ -144,14 +146,13 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(AABB3)
 
     std::string SystemAABB::name() {
         return "System" + component_name();
     }
 
     std::string SystemAABB::component_name() {
-        return TypeName<AABB3>::name;
+        return TypeName<AABB3>::name();
     }
 
     void SystemAABB::pre_init() {

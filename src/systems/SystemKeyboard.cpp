@@ -10,7 +10,7 @@
 #include "Events.h"
 #include "Keyboard.h"
 #include "Picker.h"
-#include "TypeStringification.h"
+#include "TypeName.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -132,14 +132,13 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Keyboard)
 
     std::string SystemKeyboard::name() {
         return "System" + component_name();
     }
 
     std::string SystemKeyboard::component_name() {
-        return TypeName<Keyboard>::name;
+        return TypeName<Keyboard>::name();
     }
 
     void SystemKeyboard::pre_init() {

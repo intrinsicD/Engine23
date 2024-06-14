@@ -20,8 +20,6 @@ namespace Bcg {
 
         static unsigned int create_window(int width, int height, const std::string &title);
 
-
-
         static void set_window_close(void *window_handle);
 
         static void set_window_resize(void *window_handle, int width, int height);

@@ -10,7 +10,7 @@
 #include "Engine.h"
 #include "Commands.h"
 #include "Entity.h"
-#include "TypeStringification.h"
+#include "TypeName.h"
 #include <string>
 
 namespace Bcg {
@@ -18,16 +18,13 @@ namespace Bcg {
     class Components {
     public:
         explicit Components(std::string name) : name(std::move(name)),
-                                                container(Engine::Context().find<ResourceContainer<T >>()
-                                                          ? Engine::Context().get<ResourceContainer<T >>()
-                                                          : Engine::Context().emplace<ResourceContainer<T >>()) {
+                                                container(Engine::Context().find<ResourceContainer<T>>()
+                                                          ? Engine::Context().get<ResourceContainer<T>>()
+                                                          : Engine::Context().emplace<ResourceContainer<T>>()) {
 
         }
 
-        Components() : name(TypeName<T>::name),
-                       container(Engine::Context().find<ResourceContainer<T >>()
-                                 ? Engine::Context().get<ResourceContainer<T >>()
-                                 : Engine::Context().emplace<ResourceContainer<T >>()) {
+        Components() : Components(TypeName<T>::name()) {
 
         }
 

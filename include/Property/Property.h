@@ -110,11 +110,11 @@ namespace Bcg {
 
         const Storage_t &storage() const;
 
+        std::shared_ptr<const PropertyVector<T>> get_const_sptr() const;
+
     protected:
 
         std::shared_ptr<PropertyVector<T>> m_sptr;
-
-        std::shared_ptr<const PropertyVector<T>> get_const_sptr() const;
     };
 
     template<typename T>

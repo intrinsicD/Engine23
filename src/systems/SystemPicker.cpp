@@ -13,7 +13,7 @@
 #include "Camera.h"
 #include "Components.h"
 #include "SystemRendererOpenGL.h"
-#include "TypeStringification.h"
+#include "TypeName.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -111,14 +111,14 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Picker)
+
 
     std::string SystemPicker::name() {
         return "System" + component_name();
     }
 
     std::string SystemPicker::component_name() {
-        return TypeName<Picker>::name;
+        return TypeName<Picker>::name();
     }
 
     Point SystemPicker::get_picker_point_from_win_coords(float x, float y) {

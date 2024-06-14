@@ -15,7 +15,7 @@
 #include "Input.h"
 #include "imgui.h"
 #include "Components.h"
-#include "TypeStringification.h"
+#include "TypeName.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23,6 +23,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+
+
     namespace SystemWindowGLFWInternal {
         static bool show_gui = false;
 
@@ -180,14 +182,13 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Window)
 
     std::string SystemWindowGLFW::name() {
         return "System" + component_name();
     }
 
     std::string SystemWindowGLFW::component_name() {
-        return TypeName<Window>::name;
+        return TypeName<Window>::name();
     }
 
     void SystemWindowGLFW::set_window_close(void *window_handle) {
@@ -616,7 +617,7 @@ namespace Bcg {
     }
 
     void SystemWindowGLFW::init() {
-        auto _name = TypeName<Window>::name;
+        auto _name = TypeName<Window>::name();
         glfwSetErrorCallback([](int error, const char *description) {
             Log::Error("GLFW: Error(" + std::to_string(error) + "): " + std::string(description)).enqueue();
         });

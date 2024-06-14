@@ -167,6 +167,22 @@ namespace Bcg {
 
             void enqueue() override;
         };
+
+        struct SystemInit : public Message {
+            explicit SystemInit(std::string message);
+
+            ~SystemInit() override = default;
+
+            void enqueue() override;
+        };
+
+        struct SystemRemove : public Message {
+            explicit SystemRemove(std::string message);
+
+            ~SystemRemove() override = default;
+
+            void enqueue() override;
+        };
     }
 }
 

@@ -1,18 +1,18 @@
 //
-// Created by alex on 03.05.24.
+// Created by alex on 14.06.24.
 //
 
-#ifndef ENGINE23_SYSTEMASSET_H
-#define ENGINE23_SYSTEMASSET_H
+#ifndef ENGINE23_SYSTEMACTIVEMATERIALS_H
+#define ENGINE23_SYSTEMACTIVEMATERIALS_H
 
 #include "EngineFwd.h"
 
 namespace Bcg {
-    class SystemAsset {
+    class SystemActiveMaterials {
     public:
-        SystemAsset() = default;
+        SystemActiveMaterials() = default;
 
-        ~SystemAsset() = default;
+        ~SystemActiveMaterials() = default;
 
         static std::string name();
 
@@ -29,4 +29,4 @@ namespace Bcg {
     };
 }
 
-#endif //ENGINE23_SYSTEMASSET_H
+#endif //ENGINE23_SYSTEMACTIVEMATERIALS_H

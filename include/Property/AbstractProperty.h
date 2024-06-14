@@ -64,6 +64,8 @@ namespace Bcg {
 
         [[nodiscard]] const char *get_cached_string(int idx) const;
 
+        const std::vector<std::string> &as_strings() const;
+
     protected:
         friend PropertyContainer;
 

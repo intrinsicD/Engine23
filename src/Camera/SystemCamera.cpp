@@ -29,6 +29,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+
+
     namespace SystemCameraInternal {
         static bool show_gui_instance = false;
         static bool show_gui_components = false;
@@ -389,14 +391,13 @@ namespace Bcg {
 
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Camera<float>)
 
     std::string SystemCamera::name() {
         return "System" + component_name();
     }
 
     std::string SystemCamera::component_name() {
-        return TypeName<Camera<float>>::name;
+        return TypeName<Camera<float>>::name();
     }
 
     void SystemCamera::pre_init() {

@@ -22,6 +22,10 @@ namespace Bcg{
         }
     }
 
+    const std::vector<std::string> &AbstractProperty::as_strings() const{
+        return string_cache;
+    }
+
     const char *AbstractProperty::get_cached_string(int idx) const {
         return string_cache[idx].c_str();
     }

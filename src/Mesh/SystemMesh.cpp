@@ -29,6 +29,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+
+
     namespace SystemMeshInternal {
         static bool show_gui_instance = false;
         static bool show_gui_components = false;
@@ -93,9 +95,8 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin(SystemMesh::component_name().c_str(), &show_gui_instance)) {
-                auto &picker = Engine::Context().get<Picker>();
-                ComponentGui<Mesh>::Show(picker.id.entity);
+            if (ImGui::Begin(SystemMesh::component_name().c_str(), &show_gui_instance, ImGuiChildFlags_AlwaysAutoResize)) {
+                ComponentGui<Mesh>::Show(Engine::Context().get<Picker>().id.entity);
             }
             ImGui::End();
         }
@@ -228,14 +229,13 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Mesh)
 
     std::string SystemMesh::name() {
         return "System" + component_name();
     }
 
     std::string SystemMesh::component_name() {
-        return TypeName<Mesh>::name;
+        return TypeName<Mesh>::name();
     }
 
     bool SystemMesh::load(const std::string &filepath, entt::entity entity_id) {

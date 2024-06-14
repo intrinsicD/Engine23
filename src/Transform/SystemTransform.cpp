@@ -19,6 +19,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
+
+
     namespace SystemTransformInternal {
         static bool show_gui_instance = false;
         static bool show_gui_components = false;
@@ -101,14 +103,12 @@ namespace Bcg {
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Transform<float>)
-
     std::string SystemTransform::name() {
         return "System" + component_name();
     }
 
     std::string SystemTransform::component_name() {
-        return TypeName<Transform<float>>::name;
+        return TypeName<Transform<float>>::name();
     }
 
     void SystemTransform::pre_init() {

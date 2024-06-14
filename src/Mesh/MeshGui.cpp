@@ -4,9 +4,8 @@
 
 #include "MeshGui.h"
 #include "Engine.h"
-#include "imgui.h"
-#include "SystemMesh.h"
 #include "Components.h"
+#include "PropertyGui.h"
 
 namespace Bcg {
     void ComponentGui<Mesh>::Show(entt::entity entity_id) {
@@ -21,6 +20,9 @@ namespace Bcg {
     }
 
     void ComponentGui<Mesh>::Show(Mesh &mesh) {
-        ImGui::Text("TODO implement Mesh Gui");
+        ComponentGui<PropertyContainer>::Show(mesh.vertices);
+        ComponentGui<PropertyContainer>::Show(mesh.halfedges);
+        ComponentGui<PropertyContainer>::Show(mesh.edges);
+        ComponentGui<PropertyContainer>::Show(mesh.faces);
     }
 }

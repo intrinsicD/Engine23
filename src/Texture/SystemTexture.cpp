@@ -15,7 +15,7 @@
 #include "SOIL/SOIL.h"
 #include "glad/gl.h"
 #include "FilePath.h"
-#include "TypeStringification.h"
+#include "TypeName.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -193,14 +193,13 @@ namespace Bcg {
 
 
 namespace Bcg {
-    BCG_GENERATE_TYPE_STRING(Texture)
 
     std::string SystemTexture::name() {
         return "System" + component_name();
     }
 
     std::string SystemTexture::component_name() {
-        return TypeName<Texture>::name;
+        return TypeName<Texture>::name();
     }
 
     void SystemTexture::pre_init() {

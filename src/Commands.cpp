@@ -170,6 +170,28 @@ namespace Bcg {
         void TODO::enqueue() {
             Message::enqueue();
         }
+
+        SystemInit::SystemInit(std::string message) : Message("Info", "\033[1;32m", "Initialized: " + message,
+                                                              Time::Point::Now().duration<Time::Unit::seconds>(
+                                                                      Engine::State().ctx().get<Time>().engine_constructor_start)) {
+
+        }
+
+        void SystemInit::enqueue() {
+            if (Engine::State().ctx().get<LogLevel>() < LogLevel::Info) return;
+            Message::enqueue();
+        }
+
+        SystemRemove::SystemRemove(std::string message) : Message("Info", "\033[1;32m", "Removed: " + message,
+                                                              Time::Point::Now().duration<Time::Unit::seconds>(
+                                                                      Engine::State().ctx().get<Time>().engine_constructor_start)) {
+
+        }
+
+        void SystemRemove::enqueue() {
+            if (Engine::State().ctx().get<LogLevel>() < LogLevel::Info) return;
+            Message::enqueue();
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------

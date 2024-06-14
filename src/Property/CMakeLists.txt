@@ -5,4 +5,5 @@ target_sources(Engine23Lib PRIVATE
         HalfedgeContainer.cpp
         EdgeContainer.cpp
         FaceContainer.cpp
+        PropertyGui.cpp
 )

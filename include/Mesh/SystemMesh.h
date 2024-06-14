@@ -6,8 +6,6 @@
 #define ENGINE23_SYSTEMMESH_H
 
 #include "EngineFwd.h"
-#include "ComponentGui.h"
-#include "Component.h"
 
 namespace Bcg {
     class SystemMesh {
