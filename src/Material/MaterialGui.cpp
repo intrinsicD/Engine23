@@ -4,6 +4,8 @@
 
 #include "MaterialGui.h"
 #include "AttributeGui.h"
+#include "UniformGui.h"
+#include "TextureGui.h"
 #include "Components.h"
 #include "imgui.h"
 
@@ -22,13 +24,23 @@ namespace Bcg{
             }
         }
         if (ImGui::CollapsingHeader("Uniforms")) {
-            for (const auto &uniform: material.uniforms) {
-                ImGui::Text("%u", uniform);
+            Components<Uniform> uniforms;
+            for (const auto &uniform_id: material.uniforms) {
+                auto &uniform = uniforms.get_instance(uniform_id);
+                if(ImGui::TreeNode(uniform.name.c_str())){
+                    ComponentGui<Uniform>::Show(uniform);
+                    ImGui::TreePop();
+                }
             }
         }
         if (ImGui::CollapsingHeader("Textures")) {
-            for (const auto &texture: material.textures) {
-                ImGui::Text("%u", texture);
+            Components<Texture> textures;
+            for (const auto &texture_id: material.textures) {
+                auto &texture = textures.get_instance(texture_id);
+                if(ImGui::TreeNode(texture.name.c_str())){
+                    ComponentGui<Texture>::Show(texture);
+                    ImGui::TreePop();
+                }
             }
         }
     }

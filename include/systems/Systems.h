@@ -26,6 +26,9 @@
 #include "SystemPicker.h"
 #include "SystemTexture.h"
 #include "SystemActiveMaterials.h"
+#include "SystemAttribute.h"
+#include "SystemMaterial.h"
+#include "SystemUniform.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview

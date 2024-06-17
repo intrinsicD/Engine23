@@ -38,6 +38,9 @@ namespace Bcg {
         SystemMesh::pre_init();
         SystemAsset::pre_init();
         SystemActiveMaterials::pre_init();
+        SystemAttribute::pre_init();
+        SystemMaterial::pre_init();
+        SystemUniform::pre_init();
 
         auto &time = Engine::Context().get<Time>();
         time.engine_constructor_start = Time::Point::Now();
@@ -63,6 +66,9 @@ namespace Bcg {
         SystemMesh::init();
         SystemAsset::init();
         SystemActiveMaterials::init();
+        SystemAttribute::init();
+        SystemMaterial::init();
+        SystemUniform::init();
 
         time.engine_constructor_end = Time::Point::Now();
         Log::Info(fmt::format("Engine: Constructor took {} seconds",
@@ -71,6 +77,9 @@ namespace Bcg {
     }
 
     Engine::~Engine() {
+        SystemUniform::remove();
+        SystemMaterial::remove();
+        SystemAttribute::remove();
         SystemActiveMaterials::remove();
         SystemAsset::remove();
         SystemMesh::remove();
