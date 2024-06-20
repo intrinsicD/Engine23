@@ -23,6 +23,7 @@ add_subdirectory(backend)
 add_subdirectory(ext)
 add_subdirectory(include)
 add_subdirectory(src)
+add_subdirectory(compute)
 
 add_subdirectory(test)
 

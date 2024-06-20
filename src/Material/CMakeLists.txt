@@ -7,4 +7,5 @@ target_sources(Engine23Lib PRIVATE
         SystemAttribute.cpp
         SystemMaterial.cpp
         SystemUniform.cpp
+        CommandsMaterial.cpp
 )

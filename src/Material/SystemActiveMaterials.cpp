@@ -13,6 +13,7 @@
 #include "Picker.h"
 #include "imgui.h"
 #include "ImGuiUtils.h"
+#include "CommandsMaterial.h"
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -33,6 +34,8 @@ namespace Bcg {
         void on_startup_engine(const Events::Startup<Engine> &event);
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event);
+
+        void on_notify_load_mesh(const Events::Notify<Events::Load<Mesh>> &event);
     }
 }
 
@@ -94,10 +97,17 @@ namespace Bcg {
 
         void on_startup_engine(const Events::Startup<Engine> &event) {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().connect<&on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Notify<Events::Load<Mesh>>>().connect<&on_notify_load_mesh>();
         }
 
         void on_shutdown_engine(const Events::Shutdown<Engine> &event) {
             Engine::Dispatcher().sink<Events::Update<GuiMenu>>().disconnect<&on_update_gui_menu>();
+            Engine::Dispatcher().sink<Events::Notify<Events::Load<Mesh>>>().disconnect<&on_notify_load_mesh>();
+        }
+
+        void on_notify_load_mesh(const Events::Notify<Events::Load<Mesh>> &event){
+            InitMaterials cmd(event.event->entity_id);
+            cmd.execute();
         }
     }
 }

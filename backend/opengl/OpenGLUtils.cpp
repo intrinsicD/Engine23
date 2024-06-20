@@ -880,7 +880,6 @@ namespace Bcg::OpenGL {
         OpenGL::AssertNoOglError();
     }
 
-
     void
     VertexArrayObject::set_float_attribute(unsigned int index, unsigned int size, bool normalized, unsigned int stride,
                                            const void *pointer) {

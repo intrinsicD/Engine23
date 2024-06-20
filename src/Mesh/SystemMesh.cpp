@@ -17,12 +17,14 @@
 #include "OpenGLUtils.h"
 #include "GLMeshRenderPass.h"
 #include "MeshVertexNormalsAreaAngleHybrid.h"
+#include "FaceNormals.h"
 #include "CommandDoubleBuffer.h"
 #include "Input.h"
 #include "Picker.h"
 #include "Entity.h"
 #include "Components.h"
 #include "ImGuiUtils.h"
+#include "MeshFaceNormals.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 // Predefines for better overview
@@ -95,7 +97,8 @@ namespace Bcg {
                 return;
             }
 
-            if (ImGui::Begin(SystemMesh::component_name().c_str(), &show_gui_instance, ImGuiChildFlags_AlwaysAutoResize)) {
+            if (ImGui::Begin(SystemMesh::component_name().c_str(), &show_gui_instance,
+                             ImGuiChildFlags_AlwaysAutoResize)) {
                 ComponentGui<Mesh>::Show(Engine::Context().get<Picker>().id.entity);
             }
             ImGui::End();
@@ -211,6 +214,7 @@ namespace Bcg {
 
             if (SystemMesh::load(event.filepath, entity_id)) {
                 Engine::State().emplace_or_replace<GLMeshRenderPass>(entity_id);
+                Engine::Dispatcher().trigger(Events::Notify<Events::Load<Mesh>>{&event});
             }
         }
 
@@ -277,6 +281,48 @@ namespace Bcg {
         auto aabb_id = aabbs.create_instance();
         aabbs.add_to_entity(entity_id, aabb_id);
         aabbs.get_instance(aabb_id).fit(MapConst(positions));
+
+        auto triangles = mesh.get_triangles();
+
+        FaceNormals face_normals;
+        face_normals.set_position_data(positions.get_void_ptr(), positions.get_size(), positions.get_dims_bytes());
+
+        std::vector<Eigen::Vector<double, 3>> test_positions(positions.get_size());
+        face_normals.get_result(face_normals.b_positions.id, test_positions.size() * sizeof(Eigen::Vector<double, 3>),
+                                test_positions.data());
+
+
+        face_normals.set_triangle_data(triangles.get_void_ptr(), triangles.get_size(), triangles.get_dims_bytes());
+
+        std::vector<Eigen::Vector<unsigned int, 3>> test_triangles(triangles.get_size());
+        face_normals.get_result(face_normals.b_triangles.id,
+                                test_triangles.size() * sizeof(Eigen::Vector<unsigned int, 3>), test_triangles.data());
+
+        face_normals.compile_program();
+        face_normals.compute();
+
+        // Read back the normals
+        std::vector<Eigen::Vector<double, 3>> result(face_normals.b_normals.size);
+        face_normals.get_result(face_normals.b_normals.id,
+                                face_normals.b_normals.size * face_normals.b_normals.element_bytes,
+                                result.data());
+
+        auto f_ref_normals = MeshFaceNormals(mesh);
+
+        for (size_t i = 0; i < triangles.get_size(); ++i) {
+            std::cout << " ref triangles: (" << triangles[i].transpose() << ")\n";
+            std::cout << "test_triangles: (" << test_triangles[i].transpose() << ")\n";
+        }
+
+        for (size_t i = 0; i < positions.get_size(); ++i) {
+            std::cout << " ref positions: (" << positions[i].transpose() << ")\n";
+            std::cout << "test_positions: (" << test_positions[i].transpose() << ")\n";
+        }
+
+        for (size_t i = 0; i < triangles.get_size(); ++i) {
+            std::cout << "ref Normal: (" << f_ref_normals[i].transpose() << ")\n";
+            std::cout << "compNormal: (" << result[i].transpose() << ")\n";
+        }
 
         return true;
     }

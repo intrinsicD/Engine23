@@ -6,6 +6,8 @@
 #include "imgui.h"
 #include "Engine.h"
 #include "Components.h"
+#include "MaterialGui.h"
+#include "fmt/core.h"
 
 namespace Bcg {
     void ComponentGui<ActiveMaterials>::Show(entt::entity entity_id) {
@@ -20,22 +22,38 @@ namespace Bcg {
     }
 
     void ComponentGui<ActiveMaterials>::Show(Bcg::ActiveMaterials &active_materials) {
-        ImGui::Text("Mesh Material Index: %u", active_materials.mesh_material_idx);
-        ImGui::Text("Graph Material Index: %u", active_materials.graph_material_idx);
-        ImGui::Text("Point Cloud Material Index: %u", active_materials.point_cloud_material_idx);
+        Components<Material> materials;
+        if(ImGui::CollapsingHeader(fmt::format("Mesh Material Index: {}", active_materials.mesh_material_idx).c_str())){
+            ComponentGui<Material>::Show(active_materials.mesh_material_idx);
+        }
+        if(ImGui::CollapsingHeader(fmt::format("Graph Material Index: {}", active_materials.graph_material_idx).c_str())){
+            ComponentGui<Material>::Show(active_materials.graph_material_idx);
+        }
+        if(ImGui::CollapsingHeader(fmt::format("Point Cloud Material Index: {}", active_materials.point_cloud_material_idx).c_str())){
+            ComponentGui<Material>::Show(active_materials.point_cloud_material_idx);
+        }
         if (ImGui::CollapsingHeader("Vertex Vector Field Indices:")) {
             for (const auto &index: active_materials.vertex_vector_field_indices) {
-                ImGui::Text("%u", index);
+                if(ImGui::TreeNode(fmt::format("{}", index).c_str())) {
+                    ComponentGui<Material>::Show(index);
+                    ImGui::TreePop();
+                }
             }
         }
         if (ImGui::CollapsingHeader("Edge Vector Field Indices:")) {
             for (const auto &index: active_materials.edge_vector_field_indices) {
-                ImGui::Text("%u", index);
+                if(ImGui::TreeNode(fmt::format("{}", index).c_str())) {
+                    ComponentGui<Material>::Show(index);
+                    ImGui::TreePop();
+                }
             }
         }
         if (ImGui::CollapsingHeader("Face Vector Field Indices:")) {
             for (const auto &index: active_materials.face_vector_field_indices) {
-                ImGui::Text("%u", index);
+                if(ImGui::TreeNode(fmt::format("{}", index).c_str())) {
+                    ComponentGui<Material>::Show(index);
+                    ImGui::TreePop();
+                }
             }
         }
     }

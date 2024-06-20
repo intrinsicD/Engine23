@@ -19,11 +19,13 @@ namespace Bcg {
 
         static std::string name();
 
+        static std::string component_name();
+
     protected:
         friend Engine;
         friend SystemRendererOpenGL;
 
-        static void pre_init() ;
+        static void pre_init();
 
         static void init();
 

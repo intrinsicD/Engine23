@@ -11,6 +11,8 @@
 namespace Bcg {
     template<>
     struct ComponentGui<Material> {
+        static void Show(unsigned int material_id);
+
         static void Show(Material &material);
     };
 }

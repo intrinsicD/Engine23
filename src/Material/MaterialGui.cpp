@@ -10,6 +10,12 @@
 #include "imgui.h"
 
 namespace Bcg{
+
+    void ComponentGui<Material>::Show(unsigned int material_id){
+        Components<Material> materials;
+        ComponentGui<Material>::Show(materials.get_instance(material_id));
+    }
+
     void ComponentGui<Material>::Show(Material &material) {
         ImGui::Text("Name: %s", material.name.c_str());
         ImGui::Text("Program Index: %u", material.program_idx);

@@ -50,7 +50,7 @@ namespace Bcg::Events{
 
     template<typename T>
     struct Notify{
-
+        const T *event;
     };
 
     template<typename T>
