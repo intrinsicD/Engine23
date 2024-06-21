@@ -7,6 +7,7 @@
 
 #include "glm/glm.hpp"
 #include <vector>
+#include "Mesh.h"
 
 namespace Bcg {
     struct FaceNormals {
@@ -38,7 +39,20 @@ namespace Bcg {
         unsigned int program = -1;
     };
 
-    void test();
+    class ComputeFaceNormals{
+    public:
+        explicit ComputeFaceNormals(Mesh &mesh) {
+            positions = mesh.vertices.get<Eigen::Vector<double, 3>>("v_position");
+            triangles = mesh.get_triangles();
+            face_normals = mesh.faces.get_or_add<Eigen::Vector<double, 3>>("f_normal_compute");
+        }
+
+        void compute();
+
+        Property<Eigen::Vector<double, 3>> positions;
+        Property<Eigen::Vector<unsigned int, 3>> triangles;
+        Property<Eigen::Vector<double, 3>> face_normals;
+    };
 }
 
 #endif //ENGINE23_FACENORMALS_H

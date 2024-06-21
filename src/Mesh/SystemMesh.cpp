@@ -284,45 +284,13 @@ namespace Bcg {
 
         auto triangles = mesh.get_triangles();
 
-        FaceNormals face_normals;
-        face_normals.set_position_data(positions.get_void_ptr(), positions.get_size(), positions.get_dims_bytes());
+        auto P = MapConst(positions).transpose();
+        auto T = MapConst(triangles).transpose();
 
-        std::vector<Eigen::Vector<double, 3>> test_positions(positions.get_size());
-        face_normals.get_result(face_normals.b_positions.id, test_positions.size() * sizeof(Eigen::Vector<double, 3>),
-                                test_positions.data());
+        ComputeFaceNormals computeFaceNormals(mesh);
+        computeFaceNormals.compute();
 
-
-        face_normals.set_triangle_data(triangles.get_void_ptr(), triangles.get_size(), triangles.get_dims_bytes());
-
-        std::vector<Eigen::Vector<unsigned int, 3>> test_triangles(triangles.get_size());
-        face_normals.get_result(face_normals.b_triangles.id,
-                                test_triangles.size() * sizeof(Eigen::Vector<unsigned int, 3>), test_triangles.data());
-
-        face_normals.compile_program();
-        face_normals.compute();
-
-        // Read back the normals
-        std::vector<Eigen::Vector<double, 3>> result(face_normals.b_normals.size);
-        face_normals.get_result(face_normals.b_normals.id,
-                                face_normals.b_normals.size * face_normals.b_normals.element_bytes,
-                                result.data());
-
-        auto f_ref_normals = MeshFaceNormals(mesh);
-
-        for (size_t i = 0; i < triangles.get_size(); ++i) {
-            std::cout << " ref triangles: (" << triangles[i].transpose() << ")\n";
-            std::cout << "test_triangles: (" << test_triangles[i].transpose() << ")\n";
-        }
-
-        for (size_t i = 0; i < positions.get_size(); ++i) {
-            std::cout << " ref positions: (" << positions[i].transpose() << ")\n";
-            std::cout << "test_positions: (" << test_positions[i].transpose() << ")\n";
-        }
-
-        for (size_t i = 0; i < triangles.get_size(); ++i) {
-            std::cout << "ref Normal: (" << f_ref_normals[i].transpose() << ")\n";
-            std::cout << "compNormal: (" << result[i].transpose() << ")\n";
-        }
+        std::cout << MapConst(computeFaceNormals.face_normals) << "\n";
 
         return true;
     }
